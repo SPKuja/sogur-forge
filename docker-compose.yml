@@ -3,6 +3,13 @@ services:
     build: .
     container_name: sogur-forge
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://sogur_forge:${POSTGRES_PASSWORD:-change-me}@db:5432/sogur_forge
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env}
+      APP_URL: ${APP_URL:-http://localhost:3000}
     ports:
       - "${APP_PORT:-3000}:3000"
 
