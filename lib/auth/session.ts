@@ -8,6 +8,12 @@ import { requestIpHash } from "./request";
 
 export type AuthUser = { id: string; username: string; email: string; emailVerifiedAt: Date | null; sessionGeneration: number };
 
+function requestIsSecure(request: NextRequest): boolean {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  if (forwardedProto) return forwardedProto === "https";
+  return request.nextUrl.protocol === "https:";
+}
+
 export async function createSession(user: AuthUser, request: NextRequest, response: NextResponse): Promise<void> {
   const token = createOpaqueToken();
   const now = Date.now();
@@ -17,7 +23,7 @@ export async function createSession(user: AuthUser, request: NextRequest, respon
     VALUES ($1,$2,$3,$4,NOW(),$5,$6,$7,$8)`, [randomUUID(), hashToken(token), user.id, user.sessionGeneration, idle, absolute, requestIpHash(request), request.headers.get("user-agent")?.slice(0, 500) ?? null]);
   response.cookies.set(AUTH_POLICY.session.cookieName, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: requestIsSecure(request),
     sameSite: "strict",
     path: "/",
     expires: absolute,
@@ -27,7 +33,7 @@ export async function createSession(user: AuthUser, request: NextRequest, respon
 export async function destroySession(request: NextRequest, response: NextResponse): Promise<void> {
   const token = request.cookies.get(AUTH_POLICY.session.cookieName)?.value;
   if (token) await query(`DELETE FROM "Session" WHERE "tokenHash" = $1`, [hashToken(token)]);
-  response.cookies.set(AUTH_POLICY.session.cookieName, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/", maxAge: 0 });
+  response.cookies.set(AUTH_POLICY.session.cookieName, "", { httpOnly: true, secure: requestIsSecure(request), sameSite: "strict", path: "/", maxAge: 0 });
 }
 
 export async function currentUser(): Promise<AuthUser | null> {
