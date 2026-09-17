@@ -3,13 +3,13 @@ import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { AUTH_POLICY } from "./policy";
-import { generateOpaqueToken, hashToken } from "./tokens";
+import { createOpaqueToken, hashToken } from "./tokens";
 import { requestIpHash } from "./request";
 
 export type AuthUser = { id: string; username: string; email: string; emailVerifiedAt: Date | null; sessionGeneration: number };
 
 export async function createSession(user: AuthUser, request: NextRequest, response: NextResponse): Promise<void> {
-  const token = generateOpaqueToken();
+  const token = createOpaqueToken();
   const now = Date.now();
   const idle = new Date(now + AUTH_POLICY.session.idleTtlMs);
   const absolute = new Date(now + AUTH_POLICY.session.absoluteTtlMs);
