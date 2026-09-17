@@ -93,6 +93,7 @@ model Novel {
   chapters Chapter[]
   assets Asset[]
   stickyNotes StickyNote[]
+  corkBoards CorkBoard[]
   @@index([userId, updatedAt])
 }
 
@@ -149,18 +150,35 @@ model Asset {
   @@index([novelId, createdAt])
 }
 
+model CorkBoard {
+  id String @id @default(cuid())
+  novelId String
+  title String @default("Main Board")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  stickyNotes StickyNote[]
+  @@index([novelId, position])
+}
+
 model StickyNote {
   id String @id @default(cuid())
   novelId String
+  boardId String?
   chapterId String?
   body String @default("")
   color String @default("yellow")
   positionX Int @default(40)
   positionY Int @default(40)
+  width Int @default(220)
+  height Int @default(180)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  board CorkBoard? @relation(fields: [boardId], references: [id], onDelete: Cascade)
   chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
   @@index([novelId, updatedAt])
+  @@index([boardId])
   @@index([chapterId])
 }
