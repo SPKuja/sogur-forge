@@ -1,49 +1,20 @@
 services:
   init:
     image: alpine:3.22
-    container_name: sogur-forge-init
     restart: "no"
-    environment:
-      POSTGRES_PASSWORD_OVERRIDE: ${POSTGRES_PASSWORD:-}
-      AUTH_SECRET_OVERRIDE: ${AUTH_SECRET:-}
     volumes:
-      - sogur_forge_secrets:/secrets
-      - sogur_forge_recovery:/recovery
-    command:
-      - /bin/sh
-      - -ec
-      - |
-        umask 077
-        mkdir -p /secrets /recovery
-
-        if [ ! -s /secrets/postgres_password ]; then
-          if [ -n "$$POSTGRES_PASSWORD_OVERRIDE" ]; then
-            printf '%s' "$$POSTGRES_PASSWORD_OVERRIDE" > /secrets/postgres_password
-          else
-            head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' > /secrets/postgres_password
-          fi
-        fi
-
-        if [ ! -s /secrets/auth_secret ]; then
-          if [ -n "$$AUTH_SECRET_OVERRIDE" ]; then
-            printf '%s' "$$AUTH_SECRET_OVERRIDE" > /secrets/auth_secret
-          else
-            head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' > /secrets/auth_secret
-          fi
-        fi
-
-        chmod 0400 /secrets/postgres_password /secrets/auth_secret
-
-        {
-          echo '# Sögur Forge recovery secrets - keep this file private and offline.'
-          printf 'POSTGRES_PASSWORD=%s\n' "$$(cat /secrets/postgres_password)"
-          printf 'AUTH_SECRET=%s\n' "$$(cat /secrets/auth_secret)"
-        } > /recovery/sogur-forge-recovery.env
-        chmod 0400 /recovery/sogur-forge-recovery.env
+      - secrets:/secrets
+      - recovery:/recovery
+    command: >-
+      sh -ec 'umask 077;
+      [ -s /secrets/postgres ] || head -c 48 /dev/urandom | od -An -tx1 | tr -d " \n" > /secrets/postgres;
+      [ -s /secrets/auth ] || head -c 48 /dev/urandom | od -An -tx1 | tr -d " \n" > /secrets/auth;
+      chmod 0400 /secrets/postgres /secrets/auth;
+      printf "# Sögur Forge recovery secrets - keep private and offline.\nPOSTGRES_PASSWORD=%s\nAUTH_SECRET=%s\n" "$$(cat /secrets/postgres)" "$$(cat /secrets/auth)" > /recovery/sogur-forge-recovery.env;
+      chmod 0400 /recovery/sogur-forge-recovery.env'
 
   db:
     image: postgres:17-alpine
-    container_name: sogur-forge-db
     restart: unless-stopped
     depends_on:
       init:
@@ -51,42 +22,35 @@ services:
     environment:
       POSTGRES_DB: sogur_forge
       POSTGRES_USER: sogur_forge
-      POSTGRES_PASSWORD_FILE: /run/sogur-secrets/postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres
     volumes:
-      - sogur_forge_postgres:/var/lib/postgresql/data
-      - sogur_forge_secrets:/run/sogur-secrets:ro
+      - data:/var/lib/postgresql/data
+      - secrets:/run/secrets:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sogur_forge -d sogur_forge"]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
 
   app:
-    image: ${SOGUR_FORGE_IMAGE:-ghcr.io/spkuja/sogur-forge:latest}
-    container_name: sogur-forge
+    image: ghcr.io/spkuja/sogur-forge:latest
     restart: unless-stopped
     depends_on:
       init:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    environment:
-      APP_URL: ${APP_URL:-http://localhost:3000}
     volumes:
-      - sogur_forge_secrets:/run/sogur-secrets:ro
-    command:
-      - /bin/sh
-      - -ec
-      - |
-        export DATABASE_URL="postgresql://sogur_forge:$$(cat /run/sogur-secrets/postgres_password)@db:5432/sogur_forge"
-        export AUTH_SECRET="$$(cat /run/sogur-secrets/auth_secret)"
-        ./node_modules/.bin/prisma migrate deploy
-        exec node server.js
+      - secrets:/run/secrets:ro
+    command: >-
+      sh -ec 'export DATABASE_URL="postgresql://sogur_forge:$$(cat /run/secrets/postgres)@db:5432/sogur_forge";
+      export AUTH_SECRET="$$(cat /run/secrets/auth)";
+      ./node_modules/.bin/prisma migrate deploy;
+      exec node server.js'
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "3000:3000"
 
 volumes:
-  sogur_forge_postgres:
-  sogur_forge_secrets:
-  sogur_forge_recovery:
+  data:
+  secrets:
+  recovery:
