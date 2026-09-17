@@ -42,6 +42,7 @@ services:
         condition: service_healthy
     volumes:
       - secrets:/run/secrets:ro
+      - assets:/app/data/assets
     command: >-
       sh -ec 'export DATABASE_URL="postgresql://sogur_forge:$$(cat /run/secrets/postgres)@db:5432/sogur_forge";
       export AUTH_SECRET="$$(cat /run/secrets/auth)";
@@ -54,3 +55,4 @@ volumes:
   data:
   secrets:
   recovery:
+  assets:

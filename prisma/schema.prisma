@@ -91,6 +91,8 @@ model Novel {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   parts Part[]
   chapters Chapter[]
+  assets Asset[]
+  stickyNotes StickyNote[]
   @@index([userId, updatedAt])
 }
 
@@ -120,6 +122,7 @@ model Chapter {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   part Part? @relation(fields: [partId], references: [id], onDelete: SetNull)
   revisions ChapterRevision[]
+  stickyNotes StickyNote[]
   @@unique([novelId, position])
   @@index([partId])
 }
@@ -132,4 +135,32 @@ model ChapterRevision {
   createdAt DateTime @default(now())
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   @@index([chapterId, createdAt])
+}
+
+model Asset {
+  id String @id @default(cuid())
+  novelId String
+  originalName String
+  storedName String @unique
+  mimeType String
+  size Int
+  createdAt DateTime @default(now())
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  @@index([novelId, createdAt])
+}
+
+model StickyNote {
+  id String @id @default(cuid())
+  novelId String
+  chapterId String?
+  body String @default("")
+  color String @default("yellow")
+  positionX Int @default(40)
+  positionY Int @default(40)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  @@index([novelId, updatedAt])
+  @@index([chapterId])
 }
