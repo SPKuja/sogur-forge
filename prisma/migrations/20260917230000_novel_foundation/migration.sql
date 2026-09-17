@@ -1,0 +1,14 @@
+CREATE TABLE "Novel" ("id" TEXT NOT NULL, "userId" TEXT NOT NULL, "title" TEXT NOT NULL, "description" TEXT NOT NULL DEFAULT '', "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Novel_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Part" ("id" TEXT NOT NULL, "novelId" TEXT NOT NULL, "title" TEXT NOT NULL, "position" INTEGER NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Part_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Chapter" ("id" TEXT NOT NULL, "novelId" TEXT NOT NULL, "partId" TEXT, "title" TEXT NOT NULL, "content" TEXT NOT NULL DEFAULT '', "summary" TEXT NOT NULL DEFAULT '', "status" TEXT NOT NULL DEFAULT 'DRAFT', "position" INTEGER NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Chapter_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ChapterRevision" ("id" TEXT NOT NULL, "chapterId" TEXT NOT NULL, "title" TEXT NOT NULL, "content" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ChapterRevision_pkey" PRIMARY KEY ("id"));
+CREATE INDEX "Novel_userId_updatedAt_idx" ON "Novel"("userId","updatedAt");
+CREATE UNIQUE INDEX "Part_novelId_position_key" ON "Part"("novelId","position");
+CREATE UNIQUE INDEX "Chapter_novelId_position_key" ON "Chapter"("novelId","position");
+CREATE INDEX "Chapter_partId_idx" ON "Chapter"("partId");
+CREATE INDEX "ChapterRevision_chapterId_createdAt_idx" ON "ChapterRevision"("chapterId","createdAt");
+ALTER TABLE "Novel" ADD CONSTRAINT "Novel_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Part" ADD CONSTRAINT "Part_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Chapter" ADD CONSTRAINT "Chapter_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Chapter" ADD CONSTRAINT "Chapter_partId_fkey" FOREIGN KEY ("partId") REFERENCES "Part"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ChapterRevision" ADD CONSTRAINT "ChapterRevision_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter"("id") ON DELETE CASCADE ON UPDATE CASCADE;
