@@ -1,28 +1,60 @@
 services:
-  app:
-    image: ${SOGUR_FORGE_IMAGE:-ghcr.io/spkuja/sogur-forge:latest}
-    container_name: sogur-forge
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
+  init:
+    image: alpine:3.22
+    container_name: sogur-forge-init
+    restart: "no"
     environment:
-      DATABASE_URL: postgresql://sogur_forge:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/sogur_forge
-      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
-      APP_URL: ${APP_URL:-http://localhost:3000}
-    ports:
-      - "${APP_PORT:-3000}:3000"
+      POSTGRES_PASSWORD_OVERRIDE: ${POSTGRES_PASSWORD:-}
+      AUTH_SECRET_OVERRIDE: ${AUTH_SECRET:-}
+    volumes:
+      - sogur_forge_secrets:/secrets
+      - sogur_forge_recovery:/recovery
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        umask 077
+        mkdir -p /secrets /recovery
+
+        if [ ! -s /secrets/postgres_password ]; then
+          if [ -n "$$POSTGRES_PASSWORD_OVERRIDE" ]; then
+            printf '%s' "$$POSTGRES_PASSWORD_OVERRIDE" > /secrets/postgres_password
+          else
+            head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' > /secrets/postgres_password
+          fi
+        fi
+
+        if [ ! -s /secrets/auth_secret ]; then
+          if [ -n "$$AUTH_SECRET_OVERRIDE" ]; then
+            printf '%s' "$$AUTH_SECRET_OVERRIDE" > /secrets/auth_secret
+          else
+            head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' > /secrets/auth_secret
+          fi
+        fi
+
+        chmod 0400 /secrets/postgres_password /secrets/auth_secret
+
+        {
+          echo '# Sögur Forge recovery secrets - keep this file private and offline.'
+          printf 'POSTGRES_PASSWORD=%s\n' "$$(cat /secrets/postgres_password)"
+          printf 'AUTH_SECRET=%s\n' "$$(cat /secrets/auth_secret)"
+        } > /recovery/sogur-forge-recovery.env
+        chmod 0400 /recovery/sogur-forge-recovery.env
 
   db:
     image: postgres:17-alpine
     container_name: sogur-forge-db
     restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB: sogur_forge
       POSTGRES_USER: sogur_forge
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/sogur-secrets/postgres_password
     volumes:
       - sogur_forge_postgres:/var/lib/postgresql/data
+      - sogur_forge_secrets:/run/sogur-secrets:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sogur_forge -d sogur_forge"]
       interval: 5s
@@ -30,5 +62,31 @@ services:
       retries: 10
       start_period: 10s
 
+  app:
+    image: ${SOGUR_FORGE_IMAGE:-ghcr.io/spkuja/sogur-forge:latest}
+    container_name: sogur-forge
+    restart: unless-stopped
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3000}
+    volumes:
+      - sogur_forge_secrets:/run/sogur-secrets:ro
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        export DATABASE_URL="postgresql://sogur_forge:$$(cat /run/sogur-secrets/postgres_password)@db:5432/sogur_forge"
+        export AUTH_SECRET="$$(cat /run/sogur-secrets/auth_secret)"
+        ./node_modules/.bin/prisma migrate deploy
+        exec node server.js
+    ports:
+      - "${APP_PORT:-3000}:3000"
+
 volumes:
   sogur_forge_postgres:
+  sogur_forge_secrets:
+  sogur_forge_recovery:
