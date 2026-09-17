@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    container_name: sogur-forge
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+
+  db:
+    image: postgres:17-alpine
+    container_name: sogur-forge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sogur_forge
+      POSTGRES_USER: sogur_forge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - sogur_forge_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sogur_forge -d sogur_forge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sogur_forge_postgres:
