@@ -13,6 +13,18 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.3",
+    date:"18 September 2026",
+    title:"A little more room to write",
+    added:[],
+    changed:[
+      "The manuscript chapter list now uses its own scroll area so navigation and writing goals remain accessible on shorter displays."
+    ],
+    fixed:[
+      "Long chapter lists no longer disappear behind the sidebar footer."
+    ]
+  },
+  {
     version:"0.0.2",
     date:"18 September 2026",
     title:"Choose what leaves the forge",
