@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.5",
+    date:"18 September 2026",
+    title:"Safer manuscript organisation",
+    added:[
+      "Permanent chapter deletion now uses an explicit warning dialog and requires typing DELETE.",
+      "Empty Parts can now be deleted directly from the manuscript tree."
+    ],
+    changed:[
+      "Parts containing chapters cannot be deleted until those chapters are moved or removed.",
+      "Move up and Move down now reorder chapters within their current Part or unassigned chapter group."
+    ],
+    fixed:[
+      "Chapter move controls no longer appear to do nothing when neighbouring chapters belong to different Parts.",
+      "Server-side safeguards now prevent deleting the final chapter in a novel."
+    ]
+  },
+  {
     version:"0.0.4",
     date:"18 September 2026",
     title:"Short screens, full sidebar",
