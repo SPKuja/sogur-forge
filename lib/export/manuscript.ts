@@ -5,10 +5,8 @@ export type ExportChapter={id:string;title:string;position:number;partId:string|
 export type ManuscriptExport={novel:{id:string;title:string};options:ExportOptions;chapters:ExportChapter[]};
 
 function cleanInternalMarkup(html:string){
-  let out=html;
-  const anchor=/<span\\b[^>]*data-note-anchor=(?:"[^"]*"|'[^']*')[^>]*>([\\s\\S]*?)<\\/span>/gi;
-  while(anchor.test(out)){anchor.lastIndex=0;out=out.replace(anchor,"$1")}
-  return out.replace(/\\sclass=(?:""|''|(?:"[^"]*\\bnote-anchor(?:-active)?\\b[^"]*"|'[^']*\\bnote-anchor(?:-active)?\\b[^']*'))/gi,"");
+  const anchor=/<span\b[^>]*data-note-anchor=(?:"[^"]*"|'[^']*')[^>]*>([\s\S]*?)<\/span>/gi;
+  return html.replace(anchor,"$1");
 }
 
 export async function buildManuscriptExport(userId:string,novelId:string,chapterIds:string[],options:ExportOptions):Promise<ManuscriptExport|null>{
