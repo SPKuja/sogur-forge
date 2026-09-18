@@ -4,6 +4,7 @@ import { query } from "@/lib/db";
 import { hashPassword, validatePassword } from "@/lib/auth/password";
 import { createSession, type AuthUser } from "@/lib/auth/session";
 import { requireSameOrigin, requestIpHash } from "@/lib/auth/request";
+import { CURRENT_VERSION } from "@/lib/releases";
 
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
   const passwordHash = await hashPassword(password);
   const user: AuthUser = { id: randomUUID(), username, email, passwordHash: undefined, emailVerifiedAt: null, sessionGeneration: 1 } as unknown as AuthUser;
   try {
-    await query(`INSERT INTO "User" ("id","username","email","passwordHash","sessionGeneration","createdAt","updatedAt") VALUES ($1,$2,$3,$4,1,NOW(),NOW())`, [user.id, username, email, passwordHash]);
+    await query(`INSERT INTO "User" ("id","username","email","passwordHash","sessionGeneration","lastSeenVersion","createdAt","updatedAt") VALUES ($1,$2,$3,$4,1,$5,NOW(),NOW())`, [user.id, username, email, passwordHash, CURRENT_VERSION]);
   } catch (error: unknown) {
     const code = typeof error === "object" && error && "code" in error ? String((error as { code?: string }).code) : "";
     if (code === "23505") return NextResponse.json({ error: "That username or email is already in use." }, { status: 409 });

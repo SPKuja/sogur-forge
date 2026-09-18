@@ -15,6 +15,7 @@ model User {
   sessionGeneration Int @default(1)
   totpEnabled Boolean @default(false)
   totpSecret String?
+  lastSeenVersion String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sessions Session[]
