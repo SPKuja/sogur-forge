@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.4",
+    date:"18 September 2026",
+    title:"Short screens, full sidebar",
+    added:[],
+    changed:[
+      "The entire manuscript sidebar now scrolls on shorter displays instead of limiting scrolling to the chapter list.",
+      "The sidebar scrollbar stays deliberately subtle and only becomes visible on hover where supported."
+    ],
+    fixed:[
+      "Chapter navigation, writing goals and theme controls can now all be reached comfortably on short-height screens."
+    ]
+  },
+  {
     version:"0.0.3",
     date:"18 September 2026",
     title:"A little more room to write",
