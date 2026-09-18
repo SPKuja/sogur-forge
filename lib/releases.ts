@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.2",
+    date:"18 September 2026",
+    title:"Choose what leaves the forge",
+    added:[
+      "A reusable manuscript Content Picker for selecting whole novels, Parts or individual Chapters.",
+      "An export-manifest foundation that validates ownership, preserves manuscript order and strips internal linked-note markers from export content."
+    ],
+    changed:[
+      "The manuscript header now includes an Export entry point ready for the upcoming DOCX exporter."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.1",
     date:"18 September 2026",
     title:"The forge is lit",
