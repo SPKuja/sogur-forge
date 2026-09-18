@@ -167,6 +167,8 @@ model StickyNote {
   novelId String
   boardId String?
   chapterId String?
+  anchorId String?
+  anchorQuote String?
   body String @default("")
   color String @default("yellow")
   positionX Int @default(40)
@@ -181,4 +183,5 @@ model StickyNote {
   @@index([novelId, updatedAt])
   @@index([boardId])
   @@index([chapterId])
+  @@index([anchorId])
 }
