@@ -97,6 +97,7 @@ model Novel {
   corkBoards CorkBoard[]
   characters Character[]
   characterRelationships CharacterRelationship[]
+  chapterTemplates ChapterTemplate[]
   @@index([userId, updatedAt])
 }
 
@@ -120,15 +121,21 @@ model Chapter {
   content String @default("")
   summary String @default("")
   status String @default("DRAFT")
+  templateId String?
+  headerImageAssetId String?
   position Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   part Part? @relation(fields: [partId], references: [id], onDelete: SetNull)
+  template ChapterTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  headerImageAsset Asset? @relation("ChapterHeaderAsset", fields: [headerImageAssetId], references: [id], onDelete: SetNull)
   revisions ChapterRevision[]
   stickyNotes StickyNote[]
   @@unique([novelId, position])
   @@index([partId])
+  @@index([templateId])
+  @@index([headerImageAssetId])
 }
 
 model ChapterRevision {
@@ -153,6 +160,8 @@ model Asset {
   createdAt DateTime @default(now())
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   characterImages CharacterImage[]
+  chapterTemplateHeaders ChapterTemplate[] @relation("TemplateHeaderAsset")
+  chapterHeaderOverrides Chapter[] @relation("ChapterHeaderAsset")
   @@index([novelId, createdAt])
 }
 
@@ -253,4 +262,25 @@ model CharacterRelationship {
   @@index([novelId])
   @@index([sourceId])
   @@index([targetId])
+}
+
+
+model ChapterTemplate {
+  id String @id @default(cuid())
+  novelId String
+  name String
+  isDefault Boolean @default(false)
+  eyebrowPattern String @default("CHAPTER {{chapter_number}}")
+  titlePattern String @default("{{chapter_title}}")
+  showImage Boolean @default(false)
+  headerImageAssetId String?
+  imageWidth Int @default(100)
+  imageAlign String @default("CENTER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  headerImageAsset Asset? @relation("TemplateHeaderAsset", fields: [headerImageAssetId], references: [id], onDelete: SetNull)
+  chapters Chapter[]
+  @@index([novelId, updatedAt])
+  @@index([headerImageAssetId])
 }

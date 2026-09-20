@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.11",
+    date:"20 September 2026",
+    title:"Shape every chapter",
+    added:[
+      "A dedicated Chapter Manager for renaming, organising, reordering and opening chapters from one place.",
+      "Reusable chapter templates with dynamic tags for chapter number, padded number, Roman numerals, chapter title, Part title and novel title.",
+      "Template header images with adjustable width and alignment, plus optional per-chapter image overrides.",
+      "A live template preview and one-click option to apply a template to chapters that do not yet have one."
+    ],
+    changed:[
+      "New chapters automatically inherit the novel's default chapter template when one exists.",
+      "Templated chapter openings are rendered separately from manuscript prose, so renaming or reordering a chapter updates the displayed heading automatically."
+    ],
+    fixed:[
+      "Partial chapter metadata updates now preserve existing summary and status values instead of resetting omitted fields."
+    ]
+  },
+  {
     version:"0.0.10",
     date:"20 September 2026",
     title:"Connect the cast",
