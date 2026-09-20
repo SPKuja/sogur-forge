@@ -1,6 +1,6 @@
 "use client";
 import {PointerEvent,useRef,useState} from "react";
-import WorkspaceSectionSidebar from "../../../WorkspaceSectionSidebar";
+import WorkspaceSectionSidebar from "../../WorkspaceSectionSidebar";
 
 type Board={id:string;title:string;position:number};
 type Note={id:string;boardId:string;body:string;color:string;positionX:number;positionY:number;width:number;height:number};

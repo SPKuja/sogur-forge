@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.9",
+    date:"20 September 2026",
+    title:"Put a face to the name",
+    added:[
+      "Character profiles can now hold multiple reference images, uploaded by file picker or drag and drop.",
+      "The first character image becomes the portrait used in the profile and cast list, and any reference image can be promoted to portrait.",
+      "Character images can carry short captions or reference notes and can be removed from a bio without deleting the underlying project asset."
+    ],
+    changed:[
+      "Character portraits now appear throughout the cast list when available."
+    ],
+    fixed:[
+      "Corrected the shared workspace-sidebar imports that caused the previous persistent-sidebar build to fail."
+    ]
+  },
+  {
     version:"0.0.8",
     date:"20 September 2026",
     title:"Stay in the forge",
