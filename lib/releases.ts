@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.16",
+    date:"20 September 2026",
+    title:"Shape the manuscript",
+    added:[
+      "Manuscript Manager now has a dedicated Sections tab for creating, renaming, deleting and reviewing manuscript sections.",
+      "Sections support direct drag-and-drop reordering with before/after indicators, plus up/down controls as a fallback.",
+      "Each section shows its manuscript-item count and combined word count."
+    ],
+    changed:[
+      "Reordering sections immediately changes manuscript grouping and dynamic chapter numbering because chapter numbers follow the resulting manuscript order.",
+      "The writing interface now refers to these structural groups as Sections while retaining the existing underlying Part data for compatibility.",
+      "Sections containing manuscript items must be emptied before deletion to prevent accidental content moves."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.15",
     date:"20 September 2026",
     title:"Beyond the chapters",

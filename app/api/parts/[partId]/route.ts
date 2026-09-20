@@ -16,7 +16,8 @@ export async function PATCH(r:NextRequest,{params}:{params:Promise<{partId:strin
   const b=await r.json(),title=String(b.title||"").trim().slice(0,160);
   if(!title)return NextResponse.json({error:"Title required"},{status:400});
   await query(`UPDATE "Part" SET "title"=$2,"updatedAt"=NOW() WHERE "id"=$1`,[partId,title]);
-  return NextResponse.json({ok:true});
+  const part=await own(partId,u.id);if(part)await query(`UPDATE "Novel" SET "updatedAt"=NOW() WHERE "id"=$1`,[part.novelId]);
+  return NextResponse.json({ok:true,title});
 }
 
 export async function DELETE(r:NextRequest,{params}:{params:Promise<{partId:string}>}){
@@ -26,8 +27,8 @@ export async function DELETE(r:NextRequest,{params}:{params:Promise<{partId:stri
   const {partId}=await params,part=await own(partId,u.id);
   if(!part)return NextResponse.json({error:"Not found"},{status:404});
   const count=await query<{count:string}>(`SELECT COUNT(*)::text AS count FROM "Chapter" WHERE "partId"=$1`,[partId]);
-  const chapters=Number(count.rows[0]?.count||0);
-  if(chapters>0)return NextResponse.json({error:`This Part still contains ${chapters} ${chapters===1?"chapter":"chapters"}. Move or delete them first.`},{status:409});
+  const items=Number(count.rows[0]?.count||0);
+  if(items>0)return NextResponse.json({error:`This section still contains ${items} manuscript ${items===1?"item":"items"}. Move them first.`},{status:409});
   await query(`DELETE FROM "Part" WHERE "id"=$1`,[partId]);
   await query(`UPDATE "Novel" SET "updatedAt"=NOW() WHERE "id"=$1`,[part.novelId]);
   return NextResponse.json({ok:true});
