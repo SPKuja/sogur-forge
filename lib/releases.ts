@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.8",
+    date:"20 September 2026",
+    title:"Stay in the forge",
+    added:[
+      "A persistent project sidebar for the Characters and Cork Board workspaces, with the same novel navigation and theme controls used by the manuscript."
+    ],
+    changed:[
+      "Moving between Manuscript, Characters and Cork Board now feels like navigating one workspace instead of opening separate mini-apps.",
+      "Secondary workspaces use the same responsive sidebar drawer pattern on smaller screens."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.7",
     date:"20 September 2026",
     title:"Meet the cast",
