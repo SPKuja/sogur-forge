@@ -49,7 +49,7 @@ export default function CharacterBible({username,novel,initialCharacters}:{usern
     }
     setUploading(false);if(files.current)files.current.value="";
   }
-  function dropped(event:DragEvent<HTMLDivElement>){event.preventDefault();const incoming=Array.from(event.dataTransfer.files).filter(file=>file.type.startsWith("image/"));upload(incoming)}
+  function dropped(event:DragEvent<HTMLElement>){event.preventDefault();const incoming=Array.from(event.dataTransfer.files).filter(file=>file.type.startsWith("image/"));upload(incoming)}
   async function saveCaption(image:CharacterImage,caption:string){if(!active)return;updateImages(active.id,images=>images.map(item=>item.id===image.id?{...item,caption}:item));await fetch(`/api/characters/${active.id}/images/${image.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({caption})})}
   async function makePortrait(image:CharacterImage){if(!active)return;const r=await fetch(`/api/characters/${active.id}/images/${image.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({caption:image.caption,makePrimary:true})});if(!r.ok)return;updateImages(active.id,images=>{const rest=images.filter(item=>item.id!==image.id).sort((a,b)=>a.position-b.position).map((item,index)=>({...item,position:index+1}));return [{...image,position:0},...rest]})}
   async function removeImage(image:CharacterImage){if(!active||!confirm("Remove this image from the character bio? The uploaded project asset itself will be kept."))return;const r=await fetch(`/api/characters/${active.id}/images/${image.id}`,{method:"DELETE"});if(r.ok)updateImages(active.id,images=>images.filter(item=>item.id!==image.id).map((item,index)=>({...item,position:index})))}
