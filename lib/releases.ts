@@ -27,7 +27,8 @@ export const RELEASES:ReleaseNote[]=[
       "Templated chapter openings are rendered separately from manuscript prose, so renaming or reordering a chapter updates the displayed heading automatically."
     ],
     fixed:[
-      "Partial chapter metadata updates now preserve existing summary and status values instead of resetting omitted fields."
+      "Partial chapter metadata updates now preserve existing summary and status values instead of resetting omitted fields.",
+      "Pressing Enter in manuscript prose now starts the next paragraph without adding an extra paragraph-sized gap; deliberate blank paragraphs still remain possible."
     ]
   },
   {
