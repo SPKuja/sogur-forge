@@ -45,7 +45,9 @@ export const RELEASES:ReleaseNote[]=[
       "Template edits remain drafts until Save Template is pressed, with unsaved-change protection when switching templates.",
       "The live manuscript and template designer now share one rendering component so saved designs match what authors see while writing."
     ],
-    fixed:[]
+    fixed:[
+      "Template deletion now explicitly detaches existing chapters before removing the template, avoiding foreign-key edge cases and providing clear failure feedback."
+    ]
   },
   {
     version:"0.0.11",

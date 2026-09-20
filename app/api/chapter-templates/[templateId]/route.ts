@@ -38,19 +38,25 @@ export async function DELETE(request:NextRequest,{params}:{params:Promise<{templ
   if(!requireSameOrigin(request))return NextResponse.json({error:"Invalid origin"},{status:403});
   const user=await currentUser();if(!user)return NextResponse.json({error:"Unauthorized"},{status:401});
   const {templateId}=await params;
-  const current=await query<{novelId:string;isDefault:boolean}>(`SELECT t."novelId",t."isDefault" FROM "ChapterTemplate" t JOIN "Novel" n ON n."id"=t."novelId" WHERE t."id"=$1 AND n."userId"=$2`,[templateId,user.id]);
-  if(!current.rows[0])return NextResponse.json({error:"Not found"},{status:404});
-  const connection=await db.connect();let nextDefaultId:string|null=null;
+  const connection=await db.connect();let nextDefaultId:string|null=null,novelId:string|null=null;
   try{
     await connection.query("BEGIN");
+    const current=await connection.query<{novelId:string;isDefault:boolean}>(`SELECT t."novelId",t."isDefault" FROM "ChapterTemplate" t JOIN "Novel" n ON n."id"=t."novelId" WHERE t."id"=$1 AND n."userId"=$2 FOR UPDATE`,[templateId,user.id]);
+    if(!current.rows[0]){await connection.query("ROLLBACK");return NextResponse.json({error:"Not found"},{status:404})}
+    novelId=current.rows[0].novelId;
+    await connection.query(`UPDATE "Chapter" SET "templateId"=NULL,"updatedAt"=NOW() WHERE "templateId"=$1`,[templateId]);
     await connection.query(`DELETE FROM "ChapterTemplate" WHERE "id"=$1`,[templateId]);
     if(current.rows[0].isDefault){
-      const next=await connection.query<{id:string}>(`SELECT "id" FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "createdAt" LIMIT 1`,[current.rows[0].novelId]);
+      const next=await connection.query<{id:string}>(`SELECT "id" FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "createdAt","id" LIMIT 1`,[novelId]);
       nextDefaultId=next.rows[0]?.id??null;
       if(nextDefaultId)await connection.query(`UPDATE "ChapterTemplate" SET "isDefault"=true,"updatedAt"=NOW() WHERE "id"=$1`,[nextDefaultId]);
     }
-    await connection.query(`UPDATE "Novel" SET "updatedAt"=NOW() WHERE "id"=$1`,[current.rows[0].novelId]);
+    await connection.query(`UPDATE "Novel" SET "updatedAt"=NOW() WHERE "id"=$1`,[novelId]);
     await connection.query("COMMIT");
-  }catch(error){await connection.query("ROLLBACK");throw error}finally{connection.release()}
+  }catch(error){
+    await connection.query("ROLLBACK");
+    console.error("Chapter template deletion failed",error);
+    return NextResponse.json({error:"Template could not be deleted."},{status:500});
+  }finally{connection.release()}
   return NextResponse.json({ok:true,nextDefaultId});
 }
