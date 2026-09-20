@@ -47,7 +47,8 @@ export const RELEASES:ReleaseNote[]=[
     ],
     fixed:[
       "Template deletion now explicitly detaches existing chapters before removing the template, avoiding foreign-key edge cases and providing clear failure feedback.",
-      "Existing templates now retain their database IDs when the Chapter Manager loads, so templates created before v0.0.13 can be edited and deleted normally."
+      "Existing templates now retain their database IDs when the Chapter Manager loads, so templates created before v0.0.13 can be edited and deleted normally.",
+      "Chapter numbers now follow the visible manuscript order across Parts instead of sticking to their earlier global position; moving a chapter automatically renumbers the manuscript."
     ]
   },
   {
