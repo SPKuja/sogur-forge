@@ -95,6 +95,7 @@ model Novel {
   assets Asset[]
   stickyNotes StickyNote[]
   corkBoards CorkBoard[]
+  characters Character[]
   @@index([userId, updatedAt])
 }
 
@@ -187,4 +188,29 @@ model StickyNote {
   @@index([boardId])
   @@index([chapterId])
   @@index([anchorId])
+}
+
+
+model Character {
+  id String @id @default(cuid())
+  novelId String
+  name String @default("New Character")
+  aliases String @default("")
+  role String @default("")
+  pronouns String @default("")
+  age String @default("")
+  description String @default("")
+  appearance String @default("")
+  personality String @default("")
+  background String @default("")
+  goals String @default("")
+  conflict String @default("")
+  arc String @default("")
+  notes String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  @@index([novelId, position])
+  @@index([novelId, updatedAt])
 }

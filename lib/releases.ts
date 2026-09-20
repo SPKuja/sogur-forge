@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.7",
+    date:"20 September 2026",
+    title:"Meet the cast",
+    added:[
+      "A dedicated Characters story-bible workspace linked directly from the manuscript sidebar.",
+      "Structured character profiles for aliases, role, pronouns, age, description, appearance, personality, background, motivations, conflict, arc and private notes.",
+      "Character search, autosave, quick creation and protected permanent deletion."
+    ],
+    changed:[
+      "Character profiles save independently from manuscript chapters so world-building work can happen without touching chapter content."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.6",
     date:"20 September 2026",
     title:"Write without fear",
