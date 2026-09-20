@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.13",
+    date:"20 September 2026",
+    title:"Choose the chapter",
+    added:[
+      "Creating a new chapter now opens a template chooser so the author deliberately chooses its layout before writing.",
+      "Chapter templates now support a spelled-out number tag with {{chapter_number_word}}, alongside numeric, padded and Roman numeral formats.",
+      "Chapter-label and chapter-title text can each use normal, UPPERCASE or lowercase styling and their own custom text colour.",
+      "Templates can now be deleted, including the suggested template; another template is promoted automatically when appropriate."
+    ],
+    changed:[
+      "Templates are no longer bulk-applied to existing chapters. Saving a template only saves its design.",
+      "The suggested template is simply preselected when creating a new chapter rather than being silently assigned by the server."
+    ],
+    fixed:[
+      "Newly created templates now return their template ID correctly to the designer."
+    ]
+  },
+  {
     version:"0.0.12",
     date:"20 September 2026",
     title:"Design the opening",
