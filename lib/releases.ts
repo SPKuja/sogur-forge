@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.6",
+    date:"20 September 2026",
+    title:"Write without fear",
+    added:[
+      "A chapter Revision History showing automatic writing snapshots with timestamps and read-only previews.",
+      "One-click restoration of older chapter versions while automatically saving the current version first.",
+      "Revision snapshots now retain chapter summary and status as well as title and manuscript content."
+    ],
+    changed:[
+      "Chapter history can be opened directly from the manuscript header.",
+      "Revision previews show word-count differences between the selected snapshot and the current chapter."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.5",
     date:"18 September 2026",
     title:"Safer manuscript organisation",

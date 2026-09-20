@@ -134,6 +134,8 @@ model ChapterRevision {
   chapterId String
   title String
   content String
+  summary String @default("")
+  status String @default("DRAFT")
   createdAt DateTime @default(now())
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   @@index([chapterId, createdAt])
