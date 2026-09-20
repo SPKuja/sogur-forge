@@ -46,7 +46,8 @@ export const RELEASES:ReleaseNote[]=[
       "The live manuscript and template designer now share one rendering component so saved designs match what authors see while writing."
     ],
     fixed:[
-      "Template deletion now explicitly detaches existing chapters before removing the template, avoiding foreign-key edge cases and providing clear failure feedback."
+      "Template deletion now explicitly detaches existing chapters before removing the template, avoiding foreign-key edge cases and providing clear failure feedback.",
+      "Existing templates now retain their database IDs when the Chapter Manager loads, so templates created before v0.0.13 can be edited and deleted normally."
     ]
   },
   {
