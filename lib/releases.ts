@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.10",
+    date:"20 September 2026",
+    title:"Connect the cast",
+    added:[
+      "Character profiles can now link directly to other characters using family, romantic, social, rivalry and mentor relationships.",
+      "Relationship cards support optional custom labels and private notes, with one-click navigation to the connected character.",
+      "A family-tree-style Relationship Map shows parents, grandparents, siblings, partners, children and grandchildren around any selected character.",
+      "The Relationship Map also surfaces friendships, allies, rivals, enemies, mentors and other direct connections."
+    ],
+    changed:[
+      "Deleting a character now also removes relationship links involving that character while leaving the remaining character profiles untouched."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.9",
     date:"20 September 2026",
     title:"Put a face to the name",

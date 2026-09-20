@@ -96,6 +96,7 @@ model Novel {
   stickyNotes StickyNote[]
   corkBoards CorkBoard[]
   characters Character[]
+  characterRelationships CharacterRelationship[]
   @@index([userId, updatedAt])
 }
 
@@ -213,6 +214,8 @@ model Character {
   updatedAt DateTime @updatedAt
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   images CharacterImage[]
+  relationshipsFrom CharacterRelationship[] @relation("RelationshipSource")
+  relationshipsTo CharacterRelationship[] @relation("RelationshipTarget")
   @@index([novelId, position])
   @@index([novelId, updatedAt])
 }
@@ -230,4 +233,24 @@ model CharacterImage {
   @@unique([characterId, assetId])
   @@index([characterId, position])
   @@index([assetId])
+}
+
+
+model CharacterRelationship {
+  id String @id @default(cuid())
+  novelId String
+  sourceId String
+  targetId String
+  type String
+  label String @default("")
+  notes String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  source Character @relation("RelationshipSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target Character @relation("RelationshipTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  @@unique([novelId, sourceId, targetId, type])
+  @@index([novelId])
+  @@index([sourceId])
+  @@index([targetId])
 }

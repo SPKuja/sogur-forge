@@ -6,6 +6,7 @@ export const dynamic="force-dynamic";
 
 type CharacterRow={id:string;name:string;aliases:string;role:string;pronouns:string;age:string;description:string;appearance:string;personality:string;background:string;goals:string;conflict:string;arc:string;notes:string;position:number};
 type ImageRow={id:string;characterId:string;assetId:string;caption:string;position:number};
+type RelationshipRow={id:string;sourceId:string;targetId:string;type:string;label:string;notes:string};
 
 export default async function Page({params}:{params:Promise<{novelId:string}>}){
   const user=await currentUser();
@@ -13,10 +14,11 @@ export default async function Page({params}:{params:Promise<{novelId:string}>}){
   const {novelId}=await params;
   const novel=await query<{id:string;title:string}>(`SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id]);
   if(!novel.rows[0])notFound();
-  const [characters,images]=await Promise.all([
+  const [characters,images,relationships]=await Promise.all([
     query<CharacterRow>(`SELECT "id","name","aliases","role","pronouns","age","description","appearance","personality","background","goals","conflict","arc","notes","position" FROM "Character" WHERE "novelId"=$1 ORDER BY "position","createdAt"`,[novelId]),
-    query<ImageRow>(`SELECT ci."id",ci."characterId",ci."assetId",ci."caption",ci."position" FROM "CharacterImage" ci JOIN "Character" c ON c."id"=ci."characterId" WHERE c."novelId"=$1 ORDER BY ci."position",ci."createdAt"`,[novelId])
+    query<ImageRow>(`SELECT ci."id",ci."characterId",ci."assetId",ci."caption",ci."position" FROM "CharacterImage" ci JOIN "Character" c ON c."id"=ci."characterId" WHERE c."novelId"=$1 ORDER BY ci."position",ci."createdAt"`,[novelId]),
+    query<RelationshipRow>(`SELECT "id","sourceId","targetId","type","label","notes" FROM "CharacterRelationship" WHERE "novelId"=$1 ORDER BY "createdAt"`,[novelId])
   ]);
   const cast=characters.rows.map(character=>({...character,images:images.rows.filter(image=>image.characterId===character.id).map(image=>({...image,url:`/api/assets/${image.assetId}`}))}));
-  return <CharacterBible username={user.username} novel={novel.rows[0]} initialCharacters={cast}/>;
+  return <CharacterBible username={user.username} novel={novel.rows[0]} initialCharacters={cast} initialRelationships={relationships.rows}/>;
 }
