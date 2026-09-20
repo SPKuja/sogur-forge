@@ -118,6 +118,8 @@ model Chapter {
   novelId String
   partId String?
   title String
+  kind String @default("CHAPTER")
+  pageType String?
   content String @default("")
   summary String @default("")
   status String @default("DRAFT")
@@ -134,6 +136,7 @@ model Chapter {
   stickyNotes StickyNote[]
   @@unique([novelId, position])
   @@index([partId])
+  @@index([novelId, kind, position])
   @@index([templateId])
   @@index([headerImageAssetId])
 }

@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.15",
+    date:"20 September 2026",
+    title:"Beyond the chapters",
+    added:[
+      "Manuscripts can now contain non-chapter pages alongside chapters without those pages consuming chapter numbers.",
+      "New Page includes presets for title pages, copyright, dedication, epigraph, foreword, preface, afterword, acknowledgements, thank-you pages, About the Author and custom pages.",
+      "Non-chapter pages can be placed inside or outside Parts and participate in the same manuscript drag-and-drop ordering as chapters.",
+      "Page type can be changed later from the manuscript notes panel or Manuscript Manager."
+    ],
+    changed:[
+      "Chapter Manager is now Manuscript Manager and treats chapters and non-chapter pages as one ordered manuscript.",
+      "Chapter numbering now ignores non-chapter pages while remaining dynamic after manuscript reordering.",
+      "Export selection metadata now carries page type information so future exporters can preserve front and back matter correctly."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.14",
     date:"20 September 2026",
     title:"Put chapters in place",

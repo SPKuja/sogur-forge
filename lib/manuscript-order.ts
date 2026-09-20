@@ -11,11 +11,11 @@ export function manuscriptChapterOrder<T extends {partId:string|null}>(
   return result;
 }
 
-export function chapterNumberMap<T extends {id:string;partId:string|null}>(
+export function chapterNumberMap<T extends {id:string;partId:string|null;kind?:string}>(
   chapters:T[],
   parts:{id:string;position:number}[]
 ){
-  return new Map(manuscriptChapterOrder(chapters,parts).map((chapter,index)=>[chapter.id,index+1]));
+  return new Map(manuscriptChapterOrder(chapters,parts).filter(item=>item.kind!=="PAGE").map((chapter,index)=>[chapter.id,index+1]));
 }
 
 
