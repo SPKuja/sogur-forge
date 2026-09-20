@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.14",
+    date:"20 September 2026",
+    title:"Put chapters in place",
+    added:[
+      "The Chapter Manager now supports direct drag-and-drop reordering with clear before/after drop indicators.",
+      "Dragging a chapter onto a chapter in another Part moves it into that Part and immediately recalculates chapter numbering."
+    ],
+    changed:[
+      "The Chapter Template designer now uses normal page scrolling instead of separate scrollable panes for the template list, preview and inspector.",
+      "Manuscript sidebar dragging now uses cursor position to place chapters before or after the target rather than always inserting in one direction."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.13",
     date:"20 September 2026",
     title:"Choose the chapter",
