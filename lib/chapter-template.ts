@@ -5,6 +5,36 @@ export type ChapterTemplateContext={
   novelTitle:string;
 };
 
+export type ChapterTemplateDesign={
+  id:string;
+  name:string;
+  isDefault:boolean;
+  eyebrowPattern:string;
+  titlePattern:string;
+  showImage:boolean;
+  headerImageAssetId:string|null;
+  headerImageUrl?:string|null;
+  imageWidth:number;
+  imageAlign:string;
+  imagePosition:string;
+  imageSpacing:number;
+  labelAlign:string;
+  labelSize:number;
+  labelWeight:number;
+  labelFont:string;
+  labelSpacing:number;
+  titleAlign:string;
+  titleSize:number;
+  titleWeight:number;
+  titleFont:string;
+  titleSpacing:number;
+  showDivider:boolean;
+  dividerWidth:number;
+  dividerThickness:number;
+  headerPaddingTop:number;
+  headerPaddingBottom:number;
+};
+
 export function toRoman(value:number){
   if(!Number.isFinite(value)||value<=0)return String(value||"");
   const table:[number,string][]=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];

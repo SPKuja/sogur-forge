@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.12",
+    date:"20 September 2026",
+    title:"Design the opening",
+    added:[
+      "The Chapter Template editor is now a live chapter designer using the same header renderer as the real manuscript.",
+      "Templates can preview against any real chapter so authors can judge the opening beside actual manuscript text before saving.",
+      "Chapter labels and titles now have independent alignment, font family, size, weight and spacing controls.",
+      "Header images can be positioned before the label, between label and title, after the title or after the divider.",
+      "Divider width and thickness, image spacing, and top/bottom header spacing are now configurable."
+    ],
+    changed:[
+      "Template edits remain drafts until Save Template is pressed, with unsaved-change protection when switching templates.",
+      "The live manuscript and template designer now share one rendering component so saved designs match what authors see while writing."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.11",
     date:"20 September 2026",
     title:"Shape every chapter",
