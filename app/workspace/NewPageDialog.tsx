@@ -5,7 +5,7 @@ import {PAGE_TYPE_OPTIONS,pageTypeDefaultTitle,type PageType} from "@/lib/manusc
 export type NewPageChoice={title:string;pageType:PageType;partId:string|null};
 
 export default function NewPageDialog({parts,onClose,onCreate}:{parts:{id:string;title:string;position:number}[];onClose:()=>void;onCreate:(choice:NewPageChoice)=>Promise<void>|void}){
-  const [pageType,setPageType]=useState<PageType>("FOREWORD"),[title,setTitle]=useState(pageTypeDefaultTitle("FOREWORD")),[partId,setPartId]=useState<string|null>(null),[creating,setCreating]=useState(false),[titleEdited,setTitleEdited]=useState(false);
+  const [pageType,setPageType]=useState<PageType>("FOREWORD"),[title,setTitle]=useState<string>(pageTypeDefaultTitle("FOREWORD")),[partId,setPartId]=useState<string|null>(null),[creating,setCreating]=useState(false),[titleEdited,setTitleEdited]=useState(false);
   const selected=useMemo(()=>PAGE_TYPE_OPTIONS.find(option=>option.value===pageType)??PAGE_TYPE_OPTIONS[PAGE_TYPE_OPTIONS.length-1],[pageType]);
   function choose(next:PageType){setPageType(next);if(!titleEdited)setTitle(pageTypeDefaultTitle(next))}
   async function submit(){if(creating)return;setCreating(true);try{await onCreate({title:title.trim()||pageTypeDefaultTitle(pageType),pageType,partId})}finally{setCreating(false)}}
