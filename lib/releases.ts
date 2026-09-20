@@ -20,7 +20,8 @@ export const RELEASES:ReleaseNote[]=[
       "A dedicated Chapter Manager for renaming, organising, reordering and opening chapters from one place.",
       "Reusable chapter templates with dynamic tags for chapter number, padded number, Roman numerals, chapter title, Part title and novel title.",
       "Template header images with adjustable width and alignment, plus optional per-chapter image overrides.",
-      "A live template preview and one-click option to apply a template to chapters that do not yet have one."
+      "A live template preview and one-click option to apply a template to chapters that do not yet have one.",
+      "A project-wide image library lets manuscript and chapter-template images be reused instead of uploaded repeatedly."
     ],
     changed:[
       "New chapters automatically inherit the novel's default chapter template when one exists.",
@@ -28,7 +29,8 @@ export const RELEASES:ReleaseNote[]=[
     ],
     fixed:[
       "Partial chapter metadata updates now preserve existing summary and status values instead of resetting omitted fields.",
-      "Pressing Enter in manuscript prose now starts the next paragraph without adding an extra paragraph-sized gap; deliberate blank paragraphs still remain possible."
+      "Pressing Enter in manuscript prose now starts the next paragraph without adding an extra paragraph-sized gap; deliberate blank paragraphs still remain possible.",
+      "The manuscript alignment controls now use distinct left, centre and right icons instead of three identical symbols."
     ]
   },
   {
