@@ -43,6 +43,14 @@ services:
     volumes:
       - secrets:/run/secrets:ro
       - assets:/app/data/assets
+    environment:
+      APP_BASE_URL: ${APP_BASE_URL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     command: >-
       sh -ec 'export DATABASE_URL="postgresql://sogur_forge:$$(cat /run/secrets/postgres)@db:5432/sogur_forge";
       export AUTH_SECRET="$$(cat /run/secrets/auth)";

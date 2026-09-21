@@ -12,6 +12,7 @@ model User {
   email String @unique
   passwordHash String
   emailVerifiedAt DateTime?
+  role String @default("USER")
   sessionGeneration Int @default(1)
   totpEnabled Boolean @default(false)
   totpSecret String?
@@ -21,6 +22,7 @@ model User {
   sessions Session[]
   recoveryCodes RecoveryCode[]
   securityEvents SecurityEvent[]
+  verificationTokens VerificationToken[]
   novels Novel[]
 }
 
@@ -78,8 +80,18 @@ model VerificationToken {
   expiresAt DateTime
   usedAt DateTime?
   createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId, purpose])
   @@index([expiresAt])
+}
+
+
+model AppSetting {
+  id String @id
+  registrationsEnabled Boolean @default(true)
+  emailVerificationRequired Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Novel {

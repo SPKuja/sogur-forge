@@ -13,6 +13,26 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.19",
+    date:"21 September 2026",
+    title:"Your forge, your data",
+    added:[
+      "A user Settings page now brings account security, data export and backup controls into one place.",
+      "Administrators now have server controls for opening or closing registrations, requiring email verification, reviewing accounts, manually verifying an address and revoking user sessions.",
+      "New accounts support email verification through SMTP with expiring one-time links and a resend flow.",
+      "Users can download a clean ZIP export of their account data, manuscripts, scenes, Story Bible records, planning data and uploaded assets.",
+      "Users can also download a provider-neutral backup ZIP designed to become the payload for future Dropbox, Google Drive and OneDrive backups."
+    ],
+    changed:[
+      "The first account on a fresh server becomes the administrator automatically; existing installations promote the oldest account and mark existing accounts verified during migration so nobody is unexpectedly locked out.",
+      "Registration honours the administrator switch and refuses additional verified-account sign-ups when SMTP is required but not configured.",
+      "Changing a password now revokes every active session for that account."
+    ],
+    fixed:[
+      "Story Bible reference highlighting now builds cleanly after moving the browser-only Highlight API styling out of the server CSS pipeline."
+    ]
+  },
+  {
     version:"0.0.18",
     date:"21 September 2026",
     title:"Story Bible at hand",

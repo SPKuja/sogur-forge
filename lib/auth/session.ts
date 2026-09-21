@@ -6,7 +6,7 @@ import { AUTH_POLICY } from "./policy";
 import { createOpaqueToken, hashToken } from "./tokens";
 import { requestIpHash } from "./request";
 
-export type AuthUser = { id: string; username: string; email: string; emailVerifiedAt: Date | null; sessionGeneration: number };
+export type AuthUser = { id: string; username: string; email: string; emailVerifiedAt: Date | null; role: string; sessionGeneration: number };
 
 function requestIsSecure(request: NextRequest): boolean {
   const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
@@ -41,7 +41,7 @@ export async function currentUser(): Promise<AuthUser | null> {
   const token = store.get(AUTH_POLICY.session.cookieName)?.value;
   if (!token) return null;
   const result = await query<AuthUser & { sessionId: string; expiresAt: Date; absoluteExpiresAt: Date; storedGeneration: number }>(
-    `SELECT u."id",u."username",u."email",u."emailVerifiedAt",u."sessionGeneration",s."id" AS "sessionId",s."expiresAt",s."absoluteExpiresAt",s."sessionGeneration" AS "storedGeneration"
+    `SELECT u."id",u."username",u."email",u."emailVerifiedAt",u."role",u."sessionGeneration",s."id" AS "sessionId",s."expiresAt",s."absoluteExpiresAt",s."sessionGeneration" AS "storedGeneration"
      FROM "Session" s JOIN "User" u ON u."id"=s."userId" WHERE s."tokenHash"=$1 LIMIT 1`, [hashToken(token)]
   );
   const row = result.rows[0];
@@ -52,5 +52,5 @@ export async function currentUser(): Promise<AuthUser | null> {
   }
   const nextIdle = new Date(Math.min(Date.now() + AUTH_POLICY.session.idleTtlMs, row.absoluteExpiresAt.getTime()));
   await query(`UPDATE "Session" SET "lastSeenAt"=NOW(), "expiresAt"=$2 WHERE "id"=$1`, [row.sessionId, nextIdle]);
-  return { id: row.id, username: row.username, email: row.email, emailVerifiedAt: row.emailVerifiedAt, sessionGeneration: row.sessionGeneration };
+  return { id: row.id, username: row.username, email: row.email, emailVerifiedAt: row.emailVerifiedAt, role: row.role, sessionGeneration: row.sessionGeneration };
 }

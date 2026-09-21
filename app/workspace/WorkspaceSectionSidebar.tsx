@@ -22,6 +22,6 @@ export default function WorkspaceSectionSidebar({username,novel,active,open,onCl
       {item("ideas","◌","Ideas")}
       {item("world-notes","◇","World notes")}
     </nav>
-    <div className="sidebar-foot"><div className="theme-switch">{(["system","light","dark"] as Theme[]).map(value=><button key={value} className={theme===value?"active":""} onClick={()=>setTheme(value)}>{value==="system"?"Auto":value[0].toUpperCase()+value.slice(1)}</button>)}</div></div>
+    <div className="sidebar-foot"><button className="sidebar-settings" onClick={()=>go("/settings")}>⚙ <span>Settings</span></button><div className="theme-switch">{(["system","light","dark"] as Theme[]).map(value=><button key={value} className={theme===value?"active":""} onClick={()=>setTheme(value)}>{value==="system"?"Auto":value[0].toUpperCase()+value.slice(1)}</button>)}</div></div>
   </aside>
 }
