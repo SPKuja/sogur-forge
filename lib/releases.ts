@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.18",
+    date:"21 September 2026",
+    title:"Story Bible at hand",
+    added:[
+      "The manuscript editor can now highlight stored Character names and aliases as a display-only Story Bible layer.",
+      "Hovering a recognised Character reference shows a compact profile card with portrait, role, age, pronouns, description and aliases when available.",
+      "A References toolbar toggle enables or disables the overlay and remembers the preference in the browser."
+    ],
+    changed:[
+      "Reference highlighting uses the browser's visual highlight layer rather than inserting markup into manuscript HTML, so prose, revisions, copying and future exports remain clean.",
+      "Character matching is case-insensitive and whole-word aware, and ambiguous names shared by multiple Story Bible entries are deliberately left unhighlighted.",
+      "The reference model is category-aware so Locations and other Story Bible entries can join the same editor layer later."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.17",
     date:"21 September 2026",
     title:"Inside the chapter",
