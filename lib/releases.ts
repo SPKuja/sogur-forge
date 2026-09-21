@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.24",
+    date:"21 September 2026",
+    title:"Write-only secrets",
+    added:[
+      "Admin forms now explicitly identify OAuth client secrets as write-only and explain that saved secret values can only be replaced, never viewed.",
+      "SMTP password handling now follows the same write-only presentation, showing only whether a password is configured."
+    ],
+    changed:[
+      "Sensitive OAuth access tokens, refresh tokens, client secrets and SMTP passwords remain excluded from Admin responses, user interfaces and data exports.",
+      "OAuth Client IDs remain visible because they are public application identifiers used in provider authorization URLs, not secrets.",
+      "Backup setup documentation now reflects the in-app Admin configuration flow instead of obsolete Docker environment variables."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.23",
     date:"21 September 2026",
     title:"Set it up in the Forge",

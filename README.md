@@ -29,14 +29,7 @@ The administrator can disable new registrations or email-verification enforcemen
 
 The administrator chooses which backup destinations users can see. The clean account-data export is always available; backup destinations are policy controlled.
 
-The browser-download backup requires no provider credentials. Cloud destinations require OAuth application credentials to be configured on the Sögur Forge server before the administrator can enable them:
-
-- Dropbox: `DROPBOX_CLIENT_ID`, `DROPBOX_CLIENT_SECRET`
-- Google Drive: `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`
-- OneDrive: `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET`
-
-These are application credentials owned by the server administrator. When cloud upload support is connected, each user will authorise their own storage account separately; one user's access token will never be shared with another user.
-
+Google Drive and OneDrive OAuth application credentials are configured in the in-app Admin panel when a provider is first enabled. They do not need to be placed in the Docker stack. Users then connect their own cloud accounts from User Settings.
 
 ## Admin email configuration
 
@@ -51,24 +44,11 @@ The administrator only decides which backup methods are permitted. Dropbox, Goog
 
 ## Google Drive and OneDrive OAuth backups
 
-Google Drive and OneDrive are connected by each user from Settings -> Cloud backups. The administrator only enables or disables each provider. The Sögur Forge server still needs an OAuth application registration for each provider so Google or Microsoft knows which application is asking for access.
+Google Drive and OneDrive are connected by each user from Settings -> Cloud backups. The administrator only enables or disables each provider and configures the server's OAuth application registration from the Admin panel.
 
-Configure these variables on the app service:
-
-- `GOOGLE_DRIVE_CLIENT_ID`
-- `GOOGLE_DRIVE_CLIENT_SECRET`
-- `ONEDRIVE_CLIENT_ID`
-- `ONEDRIVE_CLIENT_SECRET`
-
-Register these exact callback URLs, replacing the host with the public Sögur Forge URL configured under Admin -> Email delivery:
-
-- Google: `https://forge.example.com/api/account/cloud-backups/googleDrive/callback`
-- Microsoft: `https://forge.example.com/api/account/cloud-backups/oneDrive/callback`
-
-For Google, enable the Drive API and request the `drive.file` scope. For Microsoft, register a web application that supports the account types you want to allow and grant delegated `Files.ReadWrite.AppFolder`, plus OpenID profile/email and offline access. User refresh tokens are encrypted with AUTH_SECRET before being stored.
+Register the callback URL shown by Sögur Forge in the provider's developer console. For Google, enable the Drive API and request the `drive.file` scope. For Microsoft, register a web application and grant delegated `Files.ReadWrite.AppFolder`, plus OpenID profile/email and offline access.
 
 Google backups are placed in an app-created Sögur Forge folder. OneDrive backups use the application's OneDrive App Folder. Any folder entered by the user is created beneath that provider-owned Sögur Forge area.
-
 
 ## Cloud OAuth application setup in Admin
 
@@ -77,3 +57,10 @@ Google Drive and OneDrive application credentials are configured in the Sögur F
 Cloud application secrets are encrypted with AUTH_SECRET before they are stored. The public Sögur Forge URL configured under Admin -> Email delivery is used to generate the callback URL.
 
 Changing an already configured OAuth Client ID or secret deliberately clears existing user connections for that provider because refresh tokens belong to the OAuth application that issued them. Users can reconnect with one click afterwards.
+
+
+## Credential display policy
+
+Secrets are write-only in the Sögur Forge administration UI. SMTP passwords and OAuth client secrets can be entered or replaced, but the stored value is never returned to or displayed by the Admin panel. User OAuth access and refresh tokens are never exposed through the UI or data exports.
+
+OAuth Client IDs are intentionally still visible because they are public identifiers rather than secrets and are included in provider authorization URLs. Sensitive values are encrypted at rest with a key derived from AUTH_SECRET and are only decrypted internally when Sögur Forge needs to authenticate to the relevant service.
