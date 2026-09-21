@@ -1,4 +1,4 @@
-import archiver from "archiver";
+import {ZipArchive} from "archiver";
 import {PassThrough,Readable} from "node:stream";
 import {existsSync} from "node:fs";
 import {join} from "node:path";
@@ -47,7 +47,7 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
     })),
     accountActivity:{securityEvents:events.rows,sessions:sessions.rows}
   };
-  const pass=new PassThrough(),archive=archiver("zip",{zlib:{level:9}});archive.on("error",error=>pass.destroy(error));archive.pipe(pass);
+  const pass=new PassThrough(),archive=new ZipArchive({zlib:{level:9}});archive.on("error",error=>pass.destroy(error));archive.pipe(pass);
   const root=mode==="backup"?"sogur-forge-backup":"sogur-forge-data";
   archive.append(JSON.stringify(data,null,2),{name:`${root}/${mode==="backup"?"backup.json":"data.json"}`});
   archive.append(mode==="backup"?"Sögur Forge backup archive. Keep this file private. It contains your writing data and uploaded assets. Authentication secrets are deliberately excluded.\n":"Sögur Forge data export. This archive contains your account profile, manuscripts, Story Bible data, planning data and uploaded assets in open, readable formats. Authentication secrets are deliberately excluded.\n",{name:`${root}/README.txt`});
