@@ -90,6 +90,10 @@ model AppSetting {
   id String @id
   registrationsEnabled Boolean @default(true)
   emailVerificationRequired Boolean @default(true)
+  backupDownloadEnabled Boolean @default(true)
+  backupDropboxEnabled Boolean @default(false)
+  backupGoogleDriveEnabled Boolean @default(false)
+  backupOneDriveEnabled Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

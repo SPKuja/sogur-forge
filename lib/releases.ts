@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.20",
+    date:"21 September 2026",
+    title:"Choose the safety net",
+    added:[
+      "Administrators can now decide which backup destinations are available to users: browser download, Dropbox, Google Drive and OneDrive.",
+      "Cloud backup methods report whether the server has the required OAuth application credentials before the administrator can enable them.",
+      "User Settings now only surfaces backup destinations enabled by the administrator."
+    ],
+    changed:[
+      "The clean Download all my data export remains available regardless of backup-destination policy so users retain direct control of their information.",
+      "Cloud backup credentials are separated into server-owned OAuth application credentials and future per-user cloud authorisation tokens.",
+      "The local backup endpoint now enforces the administrator's backup-download policy server-side rather than only hiding the button."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.19",
     date:"21 September 2026",
     title:"Your forge, your data",
