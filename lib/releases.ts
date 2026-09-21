@@ -13,6 +13,25 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.17",
+    date:"21 September 2026",
+    title:"Inside the chapter",
+    added:[
+      "Chapters can now opt into scene structure without changing chapters that prefer one continuous manuscript.",
+      "Existing chapter prose can become Scene 1 in one click, then the editor can split the scene exactly at the current cursor position.",
+      "Scene tabs support navigation, direct drag-and-drop ordering, adding and deleting scenes, and live per-scene word counts.",
+      "Each scene can keep a private working title, POV character, location, status, summary, goal, conflict and outcome."
+    ],
+    changed:[
+      "Scene-enabled chapters keep a combined chapter manuscript behind the scenes, separated by explicit scene breaks, so existing export and chapter word-count foundations continue to work.",
+      "Removing scene structure safely rejoins every scene into the chapter with visible scene breaks.",
+      "Duplicating a chapter now duplicates its scene structure and scene metadata as well as its manuscript."
+    ],
+    fixed:[
+      "Whole-chapter revision restoration is now blocked while a chapter uses scenes, preventing an old revision from silently desynchronising scene content."
+    ]
+  },
+  {
     version:"0.0.16",
     date:"20 September 2026",
     title:"Shape the manuscript",

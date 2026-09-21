@@ -28,6 +28,7 @@ export async function POST(request:NextRequest,{params}:{params:Promise<{chapter
     await connection.query("BEGIN");
     const chapter=(await connection.query<{novelId:string;title:string;content:string;summary:string;status:string}>(`SELECT c."novelId",c."title",c."content",c."summary",c."status" FROM "Chapter" c JOIN "Novel" n ON n."id"=c."novelId" WHERE c."id"=$1 AND n."userId"=$2 FOR UPDATE`,[chapterId,user.id])).rows[0];
     if(!chapter){await connection.query("ROLLBACK");return NextResponse.json({error:"Not found"},{status:404})}
+    const sceneCount=Number((await connection.query<{count:string}>(`SELECT COUNT(*)::text AS count FROM "Scene" WHERE "chapterId"=$1`,[chapterId])).rows[0]?.count||0);if(sceneCount>0){await connection.query("ROLLBACK");return NextResponse.json({error:"This chapter currently uses scenes. Remove scene structure before restoring a whole-chapter revision."},{status:409})}
     const revision=(await connection.query<Revision>(`SELECT "id","title","content","summary","status","createdAt" FROM "ChapterRevision" WHERE "id"=$1 AND "chapterId"=$2`,[revisionId,chapterId])).rows[0];
     if(!revision){await connection.query("ROLLBACK");return NextResponse.json({error:"Revision not found"},{status:404})}
     await connection.query(`INSERT INTO "ChapterRevision" ("id","chapterId","title","content","summary","status","createdAt") VALUES ($1,$2,$3,$4,$5,$6,NOW())`,[randomUUID(),chapterId,chapter.title,chapter.content,chapter.summary,chapter.status]);
