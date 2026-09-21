@@ -36,3 +36,14 @@ The browser-download backup requires no provider credentials. Cloud destinations
 - OneDrive: `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET`
 
 These are application credentials owned by the server administrator. When cloud upload support is connected, each user will authorise their own storage account separately; one user's access token will never be shared with another user.
+
+
+## Admin email configuration
+
+Application email is configured from Admin -> Server controls. SMTP host, port, TLS, username, password, sender and the public Sögur Forge URL are stored as application settings; the SMTP password is encrypted with a key derived from AUTH_SECRET. Existing SMTP environment variables remain supported as a recovery/fallback path, but in-app admin settings take priority.
+
+The same email configuration is used for account verification, password-reset links and future account notifications.
+
+## Personal backup destinations
+
+The administrator only decides which backup methods are permitted. Dropbox, Google Drive and OneDrive destination choices belong to each user and are configured in that user's Settings page. Per-user provider and folder preferences are stored separately. Provider OAuth connection and scheduled cloud uploads will use those saved personal destinations rather than a shared administrator storage account.

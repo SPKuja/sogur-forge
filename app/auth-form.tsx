@@ -30,7 +30,7 @@ export default function AuthForm({registrationEnabled,bootstrap,verificationRequ
       {notice&&<p className={verified==="invalid"&&!notice.startsWith("Account")?"auth-error":"auth-notice"}>{notice}</p>}
       {error&&<p className="auth-error" role="alert">{error}</p>}
       {mode==="login"&&verificationLogin&&error.includes("Verify your email")&&<button type="button" className="auth-secondary" disabled={busy} onClick={resend}>Resend verification email</button>}
-      <button className="auth-submit" disabled={busy||(!registrationEnabled&&mode==="register")}>{busy?"Please wait…":mode==="login"?"Sign in":bootstrap?"Create administrator":"Create account"}</button>
+      {mode==="login"&&<button type="button" className="auth-link" onClick={()=>router.push("/forgot-password")}>Forgot password?</button>}<button className="auth-submit" disabled={busy||(!registrationEnabled&&mode==="register")}>{busy?"Please wait…":mode==="login"?"Sign in":bootstrap?"Create administrator":"Create account"}</button>
     </form>
     <p className="auth-foot">Private by design. Your manuscript stays tied to your account.</p>
   </div>;

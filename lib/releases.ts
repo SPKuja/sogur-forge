@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.21",
+    date:"21 September 2026",
+    title:"Own the connection",
+    added:[
+      "Administrators can configure the application SMTP server directly in the Admin panel, including public URL, host, port, TLS, username, password and sender address.",
+      "SMTP passwords stored through Admin are encrypted with a key derived from AUTH_SECRET, and administrators can send a test email before relying on the configuration.",
+      "Password reset is now available from the sign-in screen using expiring one-time email links and automatic session revocation after a successful reset.",
+      "Each user can now save their own Dropbox, Google Drive and OneDrive backup preference and target folder in User Settings."
+    ],
+    changed:[
+      "Backup policy and backup ownership are now separated: administrators only enable or disable provider types, while individual users configure their own destinations.",
+      "Cloud provider availability no longer depends on administrator-owned storage credentials.",
+      "Application email settings in the Admin panel take priority over SMTP environment-variable fallbacks.",
+      "User data exports now include the user's non-secret backup destination preferences."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.20",
     date:"21 September 2026",
     title:"Choose the safety net",

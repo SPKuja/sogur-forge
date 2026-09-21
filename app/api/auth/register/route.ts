@@ -26,7 +26,7 @@ export async function POST(request:NextRequest){
     const count=Number((await connection.query<{count:string}>(`SELECT COUNT(*)::text AS count FROM "User"`)).rows[0]?.count||0);
     bootstrap=count===0;
     if(!bootstrap&&!settings.registrationsEnabled){await connection.query("ROLLBACK");return NextResponse.json({error:"New registrations are currently disabled."},{status:403})}
-    if(!bootstrap&&settings.emailVerificationRequired&&!emailConfigured()){await connection.query("ROLLBACK");return NextResponse.json({error:"Registrations are temporarily unavailable because email verification has not been configured by the administrator."},{status:503})}
+    if(!bootstrap&&settings.emailVerificationRequired&&!await emailConfigured()){await connection.query("ROLLBACK");return NextResponse.json({error:"Registrations are temporarily unavailable because email verification has not been configured by the administrator."},{status:503})}
     user={id:randomUUID(),username,email,emailVerifiedAt:bootstrap||!settings.emailVerificationRequired?new Date():null,role:bootstrap?"ADMIN":"USER",sessionGeneration:1};
     await connection.query(`INSERT INTO "User" ("id","username","email","passwordHash","emailVerifiedAt","role","sessionGeneration","lastSeenVersion","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,1,$7,NOW(),NOW())`,[user.id,username,email,passwordHash,user.emailVerifiedAt,user.role,CURRENT_VERSION]);
     await connection.query("COMMIT");
@@ -40,7 +40,7 @@ export async function POST(request:NextRequest){
   if(!bootstrap&&settings.emailVerificationRequired){
     try{
       const token=await issueEmailVerification(user.id);
-      await sendVerificationEmail({to:user.email,username:user.username,token,baseUrl:publicBaseUrl(request)});
+      await sendVerificationEmail({to:user.email,username:user.username,token,baseUrl:await publicBaseUrl(request)});
     }catch(error){
       await query(`DELETE FROM "User" WHERE "id"=$1`,[user.id]).catch(()=>{});
       console.error("Verification email failed",error);

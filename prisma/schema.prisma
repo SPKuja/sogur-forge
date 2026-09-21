@@ -23,6 +23,7 @@ model User {
   recoveryCodes RecoveryCode[]
   securityEvents SecurityEvent[]
   verificationTokens VerificationToken[]
+  backupDestinations BackupDestination[]
   novels Novel[]
 }
 
@@ -94,8 +95,30 @@ model AppSetting {
   backupDropboxEnabled Boolean @default(false)
   backupGoogleDriveEnabled Boolean @default(false)
   backupOneDriveEnabled Boolean @default(false)
+  appBaseUrl String @default("")
+  smtpHost String @default("")
+  smtpPort Int @default(587)
+  smtpSecure Boolean @default(false)
+  smtpUser String @default("")
+  smtpPasswordEncrypted String @default("")
+  smtpFrom String @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model BackupDestination {
+  id String @id @default(cuid())
+  userId String
+  provider String
+  enabled Boolean @default(false)
+  folder String @default("/Sögur Forge")
+  accountLabel String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, provider])
+  @@index([userId, enabled])
 }
 
 model Novel {
