@@ -3,16 +3,17 @@ import {NextRequest,NextResponse} from "next/server";
 import {currentUser} from "@/lib/auth/session";
 import {requireSameOrigin} from "@/lib/auth/request";
 import {db} from "@/lib/db";
+import type {PoolClient} from "pg";
 import {combineSceneContents,sceneStatus} from "@/lib/scenes";
 
 type SceneRow={id:string;chapterId:string;povCharacterId:string|null;title:string;content:string;summary:string;goal:string;conflict:string;outcome:string;location:string;status:string;position:number};
 
-async function snapshot(connection:Awaited<ReturnType<typeof db.connect>>,chapterId:string){
+async function snapshot(connection:PoolClient,chapterId:string){
   await connection.query(`INSERT INTO "ChapterRevision" ("id","chapterId","title","content","summary","status","createdAt")
     SELECT $1,c."id",c."title",c."content",c."summary",c."status",NOW() FROM "Chapter" c
     WHERE c."id"=$2 AND NOT EXISTS (SELECT 1 FROM "ChapterRevision" r WHERE r."chapterId"=$2 AND r."createdAt">NOW()-INTERVAL '5 minutes')`,[randomUUID(),chapterId]);
 }
-async function aggregate(connection:Awaited<ReturnType<typeof db.connect>>,chapterId:string,novelId:string){
+async function aggregate(connection:PoolClient,chapterId:string,novelId:string){
   const scenes=(await connection.query<SceneRow>(`SELECT "id","chapterId","povCharacterId","title","content","summary","goal","conflict","outcome","location","status","position" FROM "Scene" WHERE "chapterId"=$1 ORDER BY "position"`,[chapterId])).rows;
   const aggregateContent=combineSceneContents(scenes.map(scene=>scene.content));
   await connection.query(`UPDATE "Chapter" SET "content"=$2,"updatedAt"=NOW() WHERE "id"=$1`,[chapterId,aggregateContent]);
