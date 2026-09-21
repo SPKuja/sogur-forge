@@ -5,6 +5,7 @@ import {createOpaqueToken,hashToken} from "@/lib/auth/tokens";
 import {encryptSetting,decryptSetting} from "@/lib/secret-box";
 import {publicBaseUrl} from "@/lib/email";
 import type {BackupProviderId} from "@/lib/backup-providers";
+import {getCloudProviderCredentials,cloudProviderConfigured} from "@/lib/cloud-provider-settings";
 
 export type CloudProvider=Extract<BackupProviderId,"googleDrive"|"oneDrive">;
 type StateRow={id:string;userId:string;provider:string;verifierEncrypted:string;expiresAt:Date};
@@ -13,17 +14,12 @@ const GOOGLE_SCOPE="openid email profile https://www.googleapis.com/auth/drive.f
 const MICROSOFT_SCOPE="openid profile email offline_access Files.ReadWrite.AppFolder";
 
 function pkceChallenge(verifier:string){return createHash("sha256").update(verifier).digest("base64url")}
-export function providerConfigured(provider:CloudProvider){return provider==="googleDrive"?!!process.env.GOOGLE_DRIVE_CLIENT_ID?.trim()&&!!process.env.GOOGLE_DRIVE_CLIENT_SECRET?.trim():!!process.env.ONEDRIVE_CLIENT_ID?.trim()&&!!process.env.ONEDRIVE_CLIENT_SECRET?.trim()}
-function credentials(provider:CloudProvider){
-  const clientId=(provider==="googleDrive"?process.env.GOOGLE_DRIVE_CLIENT_ID:process.env.ONEDRIVE_CLIENT_ID)?.trim()||"";
-  const clientSecret=(provider==="googleDrive"?process.env.GOOGLE_DRIVE_CLIENT_SECRET:process.env.ONEDRIVE_CLIENT_SECRET)?.trim()||"";
-  if(!clientId||!clientSecret)throw new Error(`${provider} OAuth application credentials are not configured.`);
-  return {clientId,clientSecret};
-}
+export function providerConfigured(provider:CloudProvider){return cloudProviderConfigured(provider)}
+async function credentials(provider:CloudProvider){return getCloudProviderCredentials(provider)}
 export async function callbackUrl(request:NextRequest,provider:CloudProvider){return `${await publicBaseUrl(request)}/api/account/cloud-backups/${provider}/callback`}
 
 export async function beginCloudOAuth(userId:string,provider:CloudProvider,request:NextRequest){
-  const {clientId}=credentials(provider),redirectUri=await callbackUrl(request,provider),state=createOpaqueToken(),verifier=createOpaqueToken(48),challenge=pkceChallenge(verifier);
+  const {clientId}=await credentials(provider),redirectUri=await callbackUrl(request,provider),state=createOpaqueToken(),verifier=createOpaqueToken(48),challenge=pkceChallenge(verifier);
   await query(`DELETE FROM "BackupOAuthState" WHERE "expiresAt"<NOW() OR ("userId"=$1 AND "provider"=$2)`,[userId,provider]);
   await query(`INSERT INTO "BackupOAuthState" ("id","stateHash","userId","provider","verifierEncrypted","expiresAt","createdAt") VALUES ($1,$2,$3,$4,$5,NOW()+INTERVAL '10 minutes',NOW())`,[randomUUID(),hashToken(state),userId,provider,encryptSetting(verifier)]);
   const url=new URL(provider==="googleDrive"?"https://accounts.google.com/o/oauth2/v2/auth":"https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
@@ -52,7 +48,7 @@ function jwtLabel(idToken:string|undefined){
 }
 
 export async function exchangeCloudCode(provider:CloudProvider,request:NextRequest,code:string,verifier:string){
-  const {clientId,clientSecret}=credentials(provider),redirectUri=await callbackUrl(request,provider);
+  const {clientId,clientSecret}=await credentials(provider),redirectUri=await callbackUrl(request,provider);
   const params=new URLSearchParams({client_id:clientId,client_secret:clientSecret,code,redirect_uri:redirectUri,grant_type:"authorization_code",code_verifier:verifier});
   if(provider==="googleDrive"){
     const token=await tokenRequest("https://oauth2.googleapis.com/token",params);
@@ -66,7 +62,7 @@ export async function exchangeCloudCode(provider:CloudProvider,request:NextReque
 }
 
 export async function accessTokenFor(provider:CloudProvider,refreshToken:string){
-  const {clientId,clientSecret}=credentials(provider);
+  const {clientId,clientSecret}=await credentials(provider);
   const params=new URLSearchParams({client_id:clientId,client_secret:clientSecret,refresh_token:refreshToken,grant_type:"refresh_token"});
   if(provider==="googleDrive"){
     const token=await tokenRequest("https://oauth2.googleapis.com/token",params);

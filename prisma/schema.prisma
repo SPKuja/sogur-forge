@@ -103,6 +103,10 @@ model AppSetting {
   smtpUser String @default("")
   smtpPasswordEncrypted String @default("")
   smtpFrom String @default("")
+  googleDriveClientId String @default("")
+  googleDriveClientSecretEncrypted String @default("")
+  oneDriveClientId String @default("")
+  oneDriveClientSecretEncrypted String @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

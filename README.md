@@ -68,3 +68,12 @@ Register these exact callback URLs, replacing the host with the public Sögur Fo
 For Google, enable the Drive API and request the `drive.file` scope. For Microsoft, register a web application that supports the account types you want to allow and grant delegated `Files.ReadWrite.AppFolder`, plus OpenID profile/email and offline access. User refresh tokens are encrypted with AUTH_SECRET before being stored.
 
 Google backups are placed in an app-created Sögur Forge folder. OneDrive backups use the application's OneDrive App Folder. Any folder entered by the user is created beneath that provider-owned Sögur Forge area.
+
+
+## Cloud OAuth application setup in Admin
+
+Google Drive and OneDrive application credentials are configured in the Sögur Forge Admin panel, not in the Docker stack. Under Backup policy, enabling an unconfigured provider opens a setup dialog showing the exact callback URL and fields for its Client ID and Client secret.
+
+Cloud application secrets are encrypted with AUTH_SECRET before they are stored. The public Sögur Forge URL configured under Admin -> Email delivery is used to generate the callback URL.
+
+Changing an already configured OAuth Client ID or secret deliberately clears existing user connections for that provider because refresh tokens belong to the OAuth application that issued them. Users can reconnect with one click afterwards.

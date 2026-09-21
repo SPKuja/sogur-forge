@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.23",
+    date:"21 September 2026",
+    title:"Set it up in the Forge",
+    added:[
+      "Enabling Google Drive or OneDrive for the first time now opens an Admin setup dialog for the OAuth Client ID and Client secret.",
+      "The setup dialog shows the exact callback URL to register with Google or Microsoft and includes a one-click Copy action.",
+      "Administrators can reopen provider setup later to replace OAuth application credentials."
+    ],
+    changed:[
+      "Google Drive and OneDrive application credentials are now stored through the Admin panel instead of the Docker stack.",
+      "Cloud OAuth client secrets are encrypted with AUTH_SECRET before being written to the database.",
+      "A provider cannot be enabled through either the UI or API until its OAuth application is configured.",
+      "Changing an OAuth application ID or secret clears existing user refresh tokens for that provider and asks users to reconnect safely.",
+      "Dropbox remains unavailable until its connection flow is implemented."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.22",
     date:"21 September 2026",
     title:"Back it up",
