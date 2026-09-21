@@ -24,7 +24,7 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
     query<any>(`SELECT t.* FROM "ChapterTemplate" t JOIN "Novel" n ON n."id"=t."novelId" WHERE n."userId"=$1 ORDER BY t."novelId",t."createdAt"`,[userId]),
     query<any>(`SELECT "id","type","metadata","createdAt" FROM "SecurityEvent" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
     query<any>(`SELECT "id","lastSeenAt","expiresAt","absoluteExpiresAt","userAgent","createdAt" FROM "Session" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
-    query<any>(`SELECT "provider","enabled","folder","accountLabel","createdAt","updatedAt" FROM "BackupDestination" WHERE "userId"=$1 ORDER BY "provider"`,[userId])
+    query<any>(`SELECT "provider","enabled","folder","accountLabel","connectedAt","lastBackupAt","lastBackupError","createdAt","updatedAt" FROM "BackupDestination" WHERE "userId"=$1 ORDER BY "provider"`,[userId])
   ]);
   const assetRows=assets.rows,generatedAt=new Date().toISOString();
   const data={

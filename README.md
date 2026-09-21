@@ -47,3 +47,24 @@ The same email configuration is used for account verification, password-reset li
 ## Personal backup destinations
 
 The administrator only decides which backup methods are permitted. Dropbox, Google Drive and OneDrive destination choices belong to each user and are configured in that user's Settings page. Per-user provider and folder preferences are stored separately. Provider OAuth connection and scheduled cloud uploads will use those saved personal destinations rather than a shared administrator storage account.
+
+
+## Google Drive and OneDrive OAuth backups
+
+Google Drive and OneDrive are connected by each user from Settings -> Cloud backups. The administrator only enables or disables each provider. The Sögur Forge server still needs an OAuth application registration for each provider so Google or Microsoft knows which application is asking for access.
+
+Configure these variables on the app service:
+
+- `GOOGLE_DRIVE_CLIENT_ID`
+- `GOOGLE_DRIVE_CLIENT_SECRET`
+- `ONEDRIVE_CLIENT_ID`
+- `ONEDRIVE_CLIENT_SECRET`
+
+Register these exact callback URLs, replacing the host with the public Sögur Forge URL configured under Admin -> Email delivery:
+
+- Google: `https://forge.example.com/api/account/cloud-backups/googleDrive/callback`
+- Microsoft: `https://forge.example.com/api/account/cloud-backups/oneDrive/callback`
+
+For Google, enable the Drive API and request the `drive.file` scope. For Microsoft, register a web application that supports the account types you want to allow and grant delegated `Files.ReadWrite.AppFolder`, plus OpenID profile/email and offline access. User refresh tokens are encrypted with AUTH_SECRET before being stored.
+
+Google backups are placed in an app-created Sögur Forge folder. OneDrive backups use the application's OneDrive App Folder. Any folder entered by the user is created beneath that provider-owned Sögur Forge area.

@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.22",
+    date:"21 September 2026",
+    title:"Back it up",
+    added:[
+      "Google Drive and OneDrive now support one-click per-user OAuth connection from User Settings.",
+      "Connected users can choose a personal Sögur Forge backup subfolder and run a cloud backup immediately.",
+      "Cloud backup cards show the connected account, last successful backup and the most recent upload error.",
+      "Google Drive backups use the narrow drive.file permission; OneDrive uses its dedicated application folder permission."
+    ],
+    changed:[
+      "Google Drive and OneDrive refresh tokens are encrypted with AUTH_SECRET and belong only to the user who connected the account.",
+      "Administrator switches remain policy controls only; provider account connections and folders stay in User Settings.",
+      "Google uploads use resumable Drive sessions, while OneDrive automatically switches to an upload session for files above the simple-upload limit.",
+      "Dropbox remains disabled at the connection layer until Google Drive and OneDrive have been exercised first."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.21",
     date:"21 September 2026",
     title:"Own the connection",
