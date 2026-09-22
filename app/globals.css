@@ -120,3 +120,9 @@
 .new-chapter-content-preview small{color:var(--accent);font-size:7px;font-weight:850;letter-spacing:.1em}
 .new-chapter-content-preview p{margin:0;color:var(--ink);font:600 10px/1.5 var(--font-writing);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 @media(max-width:760px){.template-writing-area{padding:14px 10px 60px}.template-writing-area>.rich-editor{padding:28px 18px}.template-bottom-actions{align-items:stretch;flex-direction:column}}
+
+.new-chapter-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(180px,.8fr);gap:10px;padding:0 18px 14px}
+.new-chapter-fields>label{display:grid;gap:5px}
+.new-chapter-fields>label>span{color:var(--muted);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.new-chapter-fields input,.new-chapter-fields select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:9px 10px}
+@media(max-width:620px){.new-chapter-fields{grid-template-columns:1fr;padding:0 12px 12px}}
