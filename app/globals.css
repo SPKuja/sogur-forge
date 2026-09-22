@@ -178,3 +178,19 @@
   .scene-divider{gap:8px;margin:28px 0 22px}
   .scene-divider span{max-width:65vw;overflow:hidden;text-overflow:ellipsis}
 }
+
+
+/* Direct scene reordering in the continuous manuscript */
+.scene-divider{grid-template-columns:minmax(28px,1fr) auto auto minmax(28px,1fr)}
+.scene-divider-drag{border:1px solid transparent;border-radius:7px;background:transparent;color:var(--faint);min-width:30px;min-height:28px;padding:2px 6px;cursor:grab;font-weight:800;letter-spacing:-3px}
+.scene-divider-drag:hover,.scene-divider-drag:focus-visible{border-color:var(--line);background:var(--surface-2);color:var(--accent)}
+.scene-divider-drag:active{cursor:grabbing}
+.scene-first-drag{display:flex;justify-content:flex-end;margin:-4px 0 4px}
+.scene-first-drag .scene-divider-drag{display:flex;align-items:center;gap:7px;letter-spacing:-3px}
+.scene-first-drag .scene-divider-drag span{letter-spacing:0;color:var(--muted);font-size:8px;font-weight:800;text-transform:uppercase}
+.scene-continuous-item{position:relative}
+.scene-continuous-item.dragging{opacity:.42}
+.scene-continuous-item.drop-before::before,.scene-continuous-item.drop-after::after{content:"";position:absolute;left:0;right:0;height:3px;border-radius:99px;background:var(--accent);box-shadow:0 0 12px var(--accent-glow);z-index:4}
+.scene-continuous-item.drop-before::before{top:-10px}
+.scene-continuous-item.drop-after::after{bottom:-10px}
+@media(max-width:760px){.scene-first-drag .scene-divider-drag span{display:none}}

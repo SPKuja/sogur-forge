@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.29",
+    date:"22 September 2026",
+    title:"Move the scene",
+    added:[
+      "Scene dividers now include a drag handle so authors can reorder whole scenes directly inside the continuous chapter.",
+      "The first scene has a matching Move scene handle so every scene can be repositioned without using the scene strip."
+    ],
+    changed:[
+      "Dropping a dragged scene into the upper or lower half of another scene moves it before or after that scene using the existing scene reorder API.",
+      "Direct manuscript dragging shows before/after insertion indicators while leaving normal prose selection and editing untouched."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.28",
     date:"22 September 2026",
     title:"One chapter, every scene",
