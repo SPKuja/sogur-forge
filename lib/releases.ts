@@ -19,12 +19,13 @@ export const RELEASES:ReleaseNote[]=[
     added:[
       "Chapter templates now use the same RichEditor writing area and formatting tools as ordinary manuscript chapters.",
       "The template toolbar can insert dynamic chapter, section and novel tags directly at the writing cursor.",
-      "Any existing chapter can be copied into a new template from its chapter tools."
+      "Any existing chapter can be copied into a new template from its chapter tools.",
+      "New chapters can choose their Section before creation so section-title tags resolve correctly at seed time."
     ],
     changed:[
       "Choosing a template now copies its complete editor content into the new chapter and resolves dynamic tags once at creation time.",
       "After creation, template text, images and formatting are normal chapter content with no live presentation layer or automatic future rewriting.",
-      "Existing legacy template headers are materialised into their chapters on first load so current manuscript openings are preserved while moving to the new model.",
+      "Existing legacy template headers are materialised into their chapters on first load, including scene-based chapters and chapter-specific header images, so current manuscript openings are preserved while moving to the new model.",
       "The Manuscript Manager now shows which template a chapter started from as provenance rather than allowing a live template to be swapped onto an existing chapter."
     ],
     fixed:[
