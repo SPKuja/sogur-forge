@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.30",
+    date:"22 September 2026",
+    title:"See the whole story",
+    added:[
+      "A Full manuscript view now assembles the complete novel in one continuous reading surface, including manuscript sections, chapters, non-chapter pages and scene breaks.",
+      "A sticky manuscript navigator jumps to sections, chapters, pages and individual scenes across long books.",
+      "Every chapter and scene in the full view links back to the editor at that exact location.",
+      "The view exposes Continuous as the current display mode and reserves the same surface for the upcoming Pages mode once page setup is available."
+    ],
+    changed:[
+      "Opening Full manuscript now flushes pending scene edits and the current chapter before navigation; save failures block the view instead of silently showing stale content.",
+      "Scene-enabled chapters in Full manuscript are assembled directly from authoritative Scene records rather than relying on the cached Chapter aggregate.",
+      "Full manuscript and export now share the same manuscript ordering helper and internal-note-markup cleanup."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.29",
     date:"22 September 2026",
     title:"Move the scene",
