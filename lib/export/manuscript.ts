@@ -12,7 +12,7 @@ export async function buildManuscriptExport(userId:string,novelId:string,chapter
   const unique=[...new Set(chapterIds)].filter(Boolean);
   if(!unique.length)return {novel:novel.rows[0],options,chapters:[]};
   const [chapters,parts]=await Promise.all([
-    query<{id:string;title:string;kind:string;pageType:string|null;content:string;position:number;partId:string|null;partTitle:string|null;partPosition:number|null}>(`SELECT c."id",c."title",c."kind",c."pageType",c."content",c."position",c."partId",p."title" AS "partTitle",p."position" AS "partPosition" FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId" WHERE c."novelId"=$1 AND c."id"=ANY($2::text[])`,[novelId,unique]),
+    query<{id:string;title:string;kind:string;pageType:string|null;content:string;position:number;partId:string|null;partTitle:string|null;partPosition:number|null}>(`SELECT c."id",c."title",c."kind",c."pageType",c."content",c."position",c."partId",p."title" AS "partTitle",p."position" AS "partPosition" FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId" WHERE c."novelId"=$1 AND c."id"=ANY($2::text[]) ORDER BY c."position"`,[novelId,unique]),
     query<{id:string;position:number}>(`SELECT "id","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,[novelId])
   ]);
   const ordered=manuscriptChapterOrder(chapters.rows,parts.rows);
