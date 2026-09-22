@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.26",
+    date:"22 September 2026",
+    title:"Corkboard interaction fix",
+    added:[],
+    changed:[
+      "Corkboard double-click creation now only fires on empty board space, never from controls inside an existing sticky note."
+    ],
+    fixed:[
+      "Deleting a corkboard sticky no longer starts a drag or accidentally creates a replacement note.",
+      "A sticky is only removed from the local board after its delete request succeeds."
+    ]
+  },
+  {
     version:"0.0.25",
     date:"22 September 2026",
     title:"Templates become manuscript",
