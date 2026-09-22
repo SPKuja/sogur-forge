@@ -21,7 +21,7 @@ export async function POST(request:NextRequest){
       [String(body.sourceChapterId),novelId]
     );
     if(!source.rows[0]||source.rows[0].kind!=="CHAPTER")return NextResponse.json({error:"Source chapter not found"},{status:400});
-    content=cleanChapterContentForTemplate(source.rows[0].content);
+    content=cleanChapterContentForTemplate(source.rows[0].content).trim()?cleanChapterContentForTemplate(source.rows[0].content):"<p><br></p>";
   }
 
   const existing=await query<{count:number}>(`SELECT COUNT(*)::int AS count FROM "ChapterTemplate" WHERE "novelId"=$1`,[novelId]);
