@@ -13,6 +13,27 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.28",
+    date:"22 September 2026",
+    title:"One chapter, every scene",
+    added:[
+      "Scene-enabled chapters now display every scene in manuscript order on one continuous scrolling writing surface.",
+      "Visible editor-only scene dividers make scene boundaries easy to follow without turning them into chapter or page breaks.",
+      "Scene navigation now scrolls directly to the selected scene while keeping the rest of the chapter visible.",
+      "Each mounted scene receives its own Story Bible highlight layer so References work across the full continuous chapter."
+    ],
+    changed:[
+      "Scene titles and word counts now sit inline with each scene, while the active scene exposes its planning metadata without hiding other prose.",
+      "The shared formatting toolbar follows the active scene instead of rendering a separate permanent toolbar for every scene.",
+      "Scene autosave, reorder and structure-removal operations flush pending scene edits before structural changes to reduce aggregate-content race conditions.",
+      "Scene records remain the authoritative editable content; the Chapter aggregate remains a generated compatibility and export snapshot."
+    ],
+    fixed:[
+      "Multiple simultaneously visible scene editors no longer overwrite each other's Story Bible reference highlights.",
+      "Continuous scene editors no longer inherit the full-screen minimum height and bottom padding used by a standalone chapter editor."
+    ]
+  },
+  {
     version:"0.0.27",
     date:"22 September 2026",
     title:"Type your way",

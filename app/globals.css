@@ -156,3 +156,25 @@
   .formatbar-insert-tools{margin-left:0}
   .rich-editor{font-size:14pt;line-height:1.82}
 }
+
+
+/* Continuous chapter scene editing */
+.scene-workspace-continuous{padding-bottom:34vh}
+.scene-continuous-list{display:grid}
+.scene-continuous-item{min-width:0;scroll-margin-top:88px}
+.scene-continuous-item.active>.scene-heading input{color:var(--accent)}
+.scene-divider{display:grid;grid-template-columns:minmax(28px,1fr) auto minmax(28px,1fr);align-items:center;gap:12px;margin:34px 0 26px;color:var(--faint)}
+.scene-divider i{height:1px;background:linear-gradient(90deg,transparent,var(--line))}
+.scene-divider i:last-child{background:linear-gradient(90deg,var(--line),transparent)}
+.scene-divider span{font:800 8px var(--font-ui);letter-spacing:.11em;text-transform:uppercase;white-space:nowrap}
+.scene-inline-heading{margin-top:0}
+.rich-editor.rich-editor-segment{min-height:8rem;padding-bottom:0}
+.scene-continuous-item:not(.active)>.rich-editor.rich-editor-segment{min-height:5rem}
+.focus-scenes .scene-divider{margin:38px 0 30px}
+.focus-scenes .scene-divider span{font-size:7px;color:var(--faint)}
+@media(max-width:760px){
+  .scene-workspace-continuous{padding-bottom:28vh}
+  .scene-continuous-item{scroll-margin-top:72px}
+  .scene-divider{gap:8px;margin:28px 0 22px}
+  .scene-divider span{max-width:65vw;overflow:hidden;text-overflow:ellipsis}
+}
