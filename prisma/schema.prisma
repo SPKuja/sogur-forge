@@ -188,6 +188,7 @@ model Chapter {
   status String @default("DRAFT")
   templateId String?
   headerImageAssetId String?
+  templateSeededAt DateTime?
   position Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -361,6 +362,7 @@ model ChapterTemplate {
   novelId String
   name String
   isDefault Boolean @default(false)
+  content String @default("")
   eyebrowPattern String @default("CHAPTER {{chapter_number}}")
   titlePattern String @default("{{chapter_title}}")
   showImage Boolean @default(false)
