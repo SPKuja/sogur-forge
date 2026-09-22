@@ -64,3 +64,12 @@ Changing an already configured OAuth Client ID or secret deliberately clears exi
 Secrets are write-only in the Sögur Forge administration UI. SMTP passwords and OAuth client secrets can be entered or replaced, but the stored value is never returned to or displayed by the Admin panel. User OAuth access and refresh tokens are never exposed through the UI or data exports.
 
 OAuth Client IDs are intentionally still visible because they are public identifiers rather than secrets and are included in provider authorization URLs. Sensitive values are encrypted at rest with a key derived from AUTH_SECRET and are only decrypted internally when Sögur Forge needs to authenticate to the relevant service.
+
+
+## Chapter templates
+
+Chapter templates are manuscript seeds, not live presentation layers. A template is edited with the same RichEditor used for chapter prose and can contain formatted text, images and dynamic fields such as `{{chapter_number}}`, `{{chapter_number_word}}`, `{{chapter_title}}`, `{{section_title}}` and `{{novel_title}}`.
+
+When a new chapter is created from a template, Sögur Forge resolves those fields once and copies the resulting editor content into the chapter. From that point onward it is ordinary manuscript content: the author can rewrite, move, format or delete any part of it, and later changes to the source template do not alter existing chapters.
+
+Existing chapters can also be copied into a new template. Chapter-specific values are intentionally not reverse-engineered into tags; the author can open the resulting template and replace any reusable fields with dynamic tags explicitly.
