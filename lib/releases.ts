@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.27",
+    date:"22 September 2026",
+    title:"Type your way",
+    added:[
+      "The manuscript editor now includes shared font-family and point-size controls for chapters, scenes and chapter templates.",
+      "Font and size controls follow the current caret or selection and show when a selection contains mixed typography.",
+      "A central writing-font and size registry now provides one source for editor typography and the upcoming page-layout and export work."
+    ],
+    changed:[
+      "The formatting toolbar now wraps into organised control groups instead of squeezing or horizontally colliding on narrow writing areas.",
+      "Typography controls preserve the active manuscript selection when a dropdown is used, so formatting applies to the selected prose and subsequent typing.",
+      "Image formatting controls now remain in normal document flow so a multi-row formatting toolbar cannot overlap them."
+    ],
+    fixed:[
+      "Formatting controls no longer overlap when the available editor width becomes too narrow."
+    ]
+  },
+  {
     version:"0.0.26",
     date:"22 September 2026",
     title:"Corkboard interaction fix",

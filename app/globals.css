@@ -126,3 +126,33 @@
 .new-chapter-fields>label>span{color:var(--muted);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
 .new-chapter-fields input,.new-chapter-fields select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:9px 10px}
 @media(max-width:620px){.new-chapter-fields{grid-template-columns:1fr;padding:0 12px 12px}}
+
+
+/* Responsive editor typography controls */
+.formatbar{width:100%;max-width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;overflow:visible}
+.formatbar-group{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+.formatbar-typography{flex:1 1 260px}
+.formatbar-writing-tools{flex:1 1 auto}
+.formatbar-insert-tools{margin-left:auto}
+.formatbar select{height:34px;border:0;border-radius:7px;background:var(--surface-2);color:var(--ink);padding:0 28px 0 9px;cursor:pointer}
+.formatbar select:hover{background:var(--surface-3)}
+.formatbar-font{flex:1 1 150px;min-width:132px;max-width:190px}
+.formatbar-size{flex:0 0 88px;width:88px}
+.rich-editor{font-size:14pt}
+.rich-editor font[size="1"]{font-size:10pt}
+.rich-editor font[size="2"]{font-size:11pt}
+.rich-editor font[size="3"]{font-size:12pt}
+.rich-editor font[size="4"]{font-size:14pt}
+.rich-editor font[size="5"]{font-size:16pt}
+.rich-editor font[size="6"]{font-size:18pt}
+.rich-editor font[size="7"]{font-size:24pt}
+.imagebar{position:relative;top:auto}
+.focus .imagebar{top:auto}
+@media(max-width:760px){
+  .formatbar{top:68px;gap:5px;padding:6px}
+  .formatbar-typography{flex:1 1 100%}
+  .formatbar-font{flex:1 1 140px;max-width:none}
+  .formatbar-writing-tools{flex:1 1 100%}
+  .formatbar-insert-tools{margin-left:0}
+  .rich-editor{font-size:14pt;line-height:1.82}
+}
