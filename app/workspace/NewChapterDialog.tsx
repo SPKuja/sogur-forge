@@ -2,30 +2,35 @@
 import {useMemo,useState} from "react";
 import {renderChapterTemplateContent,templatePreviewText,type ChapterTemplateDesign} from "@/lib/chapter-template";
 
-export type NewChapterChoice={title:string;templateId:string|null};
+type SectionOption={id:string;title:string};
+export type NewChapterChoice={title:string;templateId:string|null;partId:string|null};
 
 export default function NewChapterDialog({
   novelTitle,
   nextChapterNumber,
   templates,
+  parts,
   onClose,
   onCreate
 }:{
   novelTitle:string;
   nextChapterNumber:number;
   templates:ChapterTemplateDesign[];
+  parts:SectionOption[];
   onClose:()=>void;
   onCreate:(choice:NewChapterChoice)=>Promise<void>|void;
 }){
-  const suggested=templates.find(t=>t.isDefault)?.id??null;
+  const suggested=templates.find(template=>template.isDefault)?.id??null;
   const [templateId,setTemplateId]=useState<string|null>(suggested);
+  const [partId,setPartId]=useState<string|null>(null);
   const [title,setTitle]=useState("");
   const [creating,setCreating]=useState(false);
 
+  const partTitle=parts.find(part=>part.id===partId)?.title??null;
   const context={
     chapterNumber:nextChapterNumber,
     chapterTitle:title.trim()||"Untitled Chapter",
-    partTitle:null,
+    partTitle,
     novelTitle
   };
   const previews=useMemo(
@@ -33,14 +38,14 @@ export default function NewChapterDialog({
       template.id,
       templatePreviewText(renderChapterTemplateContent(template.content,context))
     ])),
-    [templates,context.chapterNumber,context.chapterTitle,context.novelTitle]
+    [templates,context.chapterNumber,context.chapterTitle,context.partTitle,context.novelTitle]
   );
 
   async function submit(){
     if(creating)return;
     setCreating(true);
     try{
-      await onCreate({title:title.trim()||"Untitled Chapter",templateId});
+      await onCreate({title:title.trim()||"Untitled Chapter",templateId,partId});
     }finally{
       setCreating(false);
     }
@@ -57,10 +62,19 @@ export default function NewChapterDialog({
         <button aria-label="Close" onClick={onClose}>×</button>
       </header>
 
-      <label className="new-chapter-title">
-        <span>Chapter title</span>
-        <input autoFocus value={title} onChange={event=>setTitle(event.target.value)} placeholder="Untitled Chapter"/>
-      </label>
+      <div className="new-chapter-fields">
+        <label className="new-chapter-title">
+          <span>Chapter title</span>
+          <input autoFocus value={title} onChange={event=>setTitle(event.target.value)} placeholder="Untitled Chapter"/>
+        </label>
+        <label className="new-chapter-section">
+          <span>Section</span>
+          <select value={partId??""} onChange={event=>setPartId(event.target.value||null)}>
+            <option value="">No section</option>
+            {parts.map(part=><option key={part.id} value={part.id}>{part.title}</option>)}
+          </select>
+        </label>
+      </div>
 
       <div className="new-chapter-template-grid">
         <button className={templateId===null?"active":""} onClick={()=>setTemplateId(null)}>
