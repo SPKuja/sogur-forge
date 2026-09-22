@@ -22,7 +22,7 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{templa
   const old=current.rows[0];
   const effective=normaliseChapterTemplate(old);
   const name=String(body.name??effective.name).trim().slice(0,120)||effective.name;
-  const content=String(body.content??effective.content);
+  const rawContent=String(body.content??effective.content);const content=rawContent.trim()?rawContent:"<p><br></p>";
 
   const connection=await db.connect();
   try{
