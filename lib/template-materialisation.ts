@@ -11,6 +11,7 @@ type Pending={
   status:string;
   partTitle:string|null;
   novelTitle:string;
+  headerImageAssetId:string|null;
 };
 
 export async function materialiseLegacyTemplateChapters(novelId:string,userId:string){
@@ -19,7 +20,7 @@ export async function materialiseLegacyTemplateChapters(novelId:string,userId:st
     await connection.query("BEGIN");
     const pending=await connection.query<Pending>(
       `SELECT c."id",c."templateId",c."title",c."content",c."summary",c."status",
-              p."title" AS "partTitle",n."title" AS "novelTitle"
+              c."headerImageAssetId",p."title" AS "partTitle",n."title" AS "novelTitle"
        FROM "Chapter" c
        JOIN "Novel" n ON n."id"=c."novelId"
        LEFT JOIN "Part" p ON p."id"=c."partId"
@@ -48,14 +49,19 @@ export async function materialiseLegacyTemplateChapters(novelId:string,userId:st
       `SELECT * FROM "ChapterTemplate" WHERE "novelId"=$1`,
       [novelId]
     )).rows;
-    const byId=new Map(templates.map(template=>[template.id,normaliseChapterTemplate(template)]));
+    const byId=new Map(templates.map(template=>[template.id,template]));
 
     for(const chapter of pending.rows){
-      const template=byId.get(chapter.templateId);
-      if(!template){
+      const rawTemplate=byId.get(chapter.templateId);
+      if(!rawTemplate){
         await connection.query(`UPDATE "Chapter" SET "templateSeededAt"=NOW() WHERE "id"=$1`,[chapter.id]);
         continue;
       }
+
+      const template=normaliseChapterTemplate(chapter.headerImageAssetId
+        ? {...rawTemplate,headerImageAssetId:chapter.headerImageAssetId,showImage:true}
+        : rawTemplate
+      );
       const seed=renderChapterTemplateContent(template.content,{
         chapterNumber:numbers.get(chapter.id)||1,
         chapterTitle:chapter.title,
@@ -63,11 +69,24 @@ export async function materialiseLegacyTemplateChapters(novelId:string,userId:st
         novelTitle:chapter.novelTitle
       });
       const nextContent=seed+chapter.content;
+
       await connection.query(
         `INSERT INTO "ChapterRevision" ("id","chapterId","title","content","summary","status","createdAt")
          VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
         [randomUUID(),chapter.id,chapter.title,chapter.content,chapter.summary,chapter.status]
       );
+
+      const firstScene=(await connection.query<{id:string;content:string}>(
+        `SELECT "id","content" FROM "Scene" WHERE "chapterId"=$1 ORDER BY "position","id" LIMIT 1 FOR UPDATE`,
+        [chapter.id]
+      )).rows[0];
+      if(firstScene){
+        await connection.query(
+          `UPDATE "Scene" SET "content"=$2,"updatedAt"=NOW() WHERE "id"=$1`,
+          [firstScene.id,seed+firstScene.content]
+        );
+      }
+
       await connection.query(
         `UPDATE "Chapter"
          SET "content"=$2,"templateSeededAt"=NOW(),"headerImageAssetId"=NULL,"updatedAt"=NOW()
