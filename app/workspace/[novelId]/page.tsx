@@ -1,3 +1,87 @@
-import {notFound,redirect} from "next/navigation";import {currentUser} from "@/lib/auth/session";import {query} from "@/lib/db";import Workspace from "../Workspace";import {CURRENT_VERSION} from "@/lib/releases";import type {ChapterTemplateDesign} from "@/lib/chapter-template";export const dynamic="force-dynamic";
-type ChapterRow={id:string;partId:string|null;partTitle:string|null;title:string;kind:string;pageType:string|null;content:string;summary:string;status:string;position:number;templateId:string|null;headerImageAssetId:string|null};
-export default async function NovelPage({params,searchParams}:{params:Promise<{novelId:string}>;searchParams:Promise<{chapter?:string}>}){const user=await currentUser();if(!user)redirect("/");const {novelId}=await params,{chapter:requestedChapter}=await searchParams;const n=await query<{id:string;title:string}>(`SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id]);if(!n.rows[0])notFound();const [c,p,notes,templates]=await Promise.all([query<ChapterRow>(`SELECT c."id",c."partId",p."title" AS "partTitle",c."title",c."kind",c."pageType",c."content",c."summary",c."status",c."position",c."templateId",c."headerImageAssetId" FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId" WHERE c."novelId"=$1 ORDER BY c."position"`,[novelId]),query<{id:string;title:string;position:number}>(`SELECT "id","title","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,[novelId]),query<{id:string;chapterId:string;body:string;color:string;anchorId:string|null;anchorQuote:string|null}>(`SELECT "id","chapterId","body","color","anchorId","anchorQuote" FROM "StickyNote" WHERE "novelId"=$1 AND "chapterId" IS NOT NULL ORDER BY "createdAt"`,[novelId]),query<ChapterTemplateDesign>(`SELECT "id","name","isDefault","eyebrowPattern","titlePattern","showImage","headerImageAssetId","imageWidth","imageAlign","imagePosition","imageSpacing","labelAlign","labelSize","labelWeight","labelFont","labelSpacing","titleAlign","titleSize","titleWeight","titleFont","titleSpacing","showDivider","dividerWidth","dividerThickness","headerPaddingTop","headerPaddingBottom","labelColor","labelCase","titleColor","titleCase" FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "isDefault" DESC,"createdAt"`,[novelId])]);const initialActiveId=c.rows.some(x=>x.id===requestedChapter)?requestedChapter:c.rows[0]?.id;const withUrls=templates.rows.map(t=>({...t,headerImageUrl:t.headerImageAssetId?`/api/assets/${t.headerImageAssetId}`:null}));return <Workspace username={user.username} novel={n.rows[0]} initialChapters={c.rows} initialParts={p.rows} initialNotes={notes.rows} initialTemplates={withUrls} initialActiveId={initialActiveId} appVersion={CURRENT_VERSION}/>} 
+import {notFound,redirect} from "next/navigation";
+import {currentUser} from "@/lib/auth/session";
+import {query} from "@/lib/db";
+import Workspace from "../Workspace";
+import {CURRENT_VERSION} from "@/lib/releases";
+import {normaliseChapterTemplate} from "@/lib/chapter-template";
+import {materialiseLegacyTemplateChapters} from "@/lib/template-materialisation";
+
+export const dynamic="force-dynamic";
+
+type ChapterRow={
+  id:string;
+  partId:string|null;
+  partTitle:string|null;
+  title:string;
+  kind:string;
+  pageType:string|null;
+  content:string;
+  summary:string;
+  status:string;
+  position:number;
+  templateId:string|null;
+  headerImageAssetId:string|null;
+};
+
+export default async function NovelPage({
+  params,
+  searchParams
+}:{
+  params:Promise<{novelId:string}>;
+  searchParams:Promise<{chapter?:string}>;
+}){
+  const user=await currentUser();
+  if(!user)redirect("/");
+
+  const {novelId}=await params;
+  const {chapter:requestedChapter}=await searchParams;
+  const novel=await query<{id:string;title:string}>(
+    `SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,
+    [novelId,user.id]
+  );
+  if(!novel.rows[0])notFound();
+
+  await materialiseLegacyTemplateChapters(novelId,user.id);
+
+  const [chapters,parts,notes,templates]=await Promise.all([
+    query<ChapterRow>(
+      `SELECT c."id",c."partId",p."title" AS "partTitle",c."title",c."kind",c."pageType",
+              c."content",c."summary",c."status",c."position",c."templateId",c."headerImageAssetId"
+       FROM "Chapter" c
+       LEFT JOIN "Part" p ON p."id"=c."partId"
+       WHERE c."novelId"=$1
+       ORDER BY c."position"`,
+      [novelId]
+    ),
+    query<{id:string;title:string;position:number}>(
+      `SELECT "id","title","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,
+      [novelId]
+    ),
+    query<{id:string;chapterId:string;body:string;color:string;anchorId:string|null;anchorQuote:string|null}>(
+      `SELECT "id","chapterId","body","color","anchorId","anchorQuote"
+       FROM "StickyNote"
+       WHERE "novelId"=$1 AND "chapterId" IS NOT NULL
+       ORDER BY "createdAt"`,
+      [novelId]
+    ),
+    query<Record<string,unknown>&{id:string;name:string;isDefault:boolean}>(
+      `SELECT * FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "isDefault" DESC,"createdAt"`,
+      [novelId]
+    )
+  ]);
+
+  const initialActiveId=chapters.rows.some(item=>item.id===requestedChapter)
+    ? requestedChapter
+    : chapters.rows[0]?.id;
+
+  return <Workspace
+    username={user.username}
+    novel={novel.rows[0]}
+    initialChapters={chapters.rows}
+    initialParts={parts.rows}
+    initialNotes={notes.rows}
+    initialTemplates={templates.rows.map(normaliseChapterTemplate)}
+    initialActiveId={initialActiveId}
+    appVersion={CURRENT_VERSION}
+  />;
+}
