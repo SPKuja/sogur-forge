@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.35",
+    date:"23 September 2026",
+    title:"Clean page boundaries",
+    added:[],
+    changed:[
+      "Line-level page breaks now use a measured full-width inline spacer that participates in the paragraph’s own layout."
+    ],
+    fixed:[
+      "Text no longer relies on block elements embedded inside editable paragraphs to clear a physical page boundary.",
+      "Continuation lines now account for the actual rendered spacer position before being moved to the next page body, including the next page’s top margin."
+    ]
+  },
+  {
     version:"0.0.34",
     date:"23 September 2026",
     title:"Keep the prose on the page",
