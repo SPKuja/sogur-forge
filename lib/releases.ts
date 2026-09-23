@@ -13,6 +13,27 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.33",
+    date:"23 September 2026",
+    title:"Put the manuscript on paper",
+    added:[
+      "Pages mode now renders manuscript prose on physical Word-style sheets using the novel’s saved paper dimensions and margins.",
+      "The Pages / Continuous preference can be switched from the manuscript editor, manuscript manager/templates, Full Manuscript and Page Setup.",
+      "The same physical-page renderer now serves ordinary chapters, scene-enabled chapters, non-chapter manuscript pages, chapter templates and Full Manuscript.",
+      "Pages mode shows the currently viewed page and total pages for the active writing surface and recalculates as prose, formatting or images change.",
+      "UK B-format (129 × 198 mm) is now available and is the default layout for novels that have not saved a page setup yet."
+    ],
+    changed:[
+      "Continuous-scene chapters paginate as one chapter rather than restarting pagination for every scene; planning controls do not consume manuscript page space.",
+      "Scene boundaries use a clean manuscript scene break in Pages mode while the normal planning divider remains available in Continuous mode.",
+      "Full Manuscript uses the same chapter-start flow/new-page/recto markers as the shared paginator.",
+      "Runtime page-position adjustments are display-only and are stripped before manuscript autosave, so changing view mode never rewrites prose."
+    ],
+    fixed:[
+      "Formatting and image changes now notify the page renderer immediately so page counts can refresh without a reload."
+    ]
+  },
+  {
     version:"0.0.32",
     date:"23 September 2026",
     title:"Page setup stays in frame",
