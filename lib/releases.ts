@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.32",
+    date:"23 September 2026",
+    title:"Page setup stays in frame",
+    added:[],
+    changed:[
+      "Page Setup now keeps its header and action footer fixed while only the settings area scrolls."
+    ],
+    fixed:[
+      "Page Setup no longer clips lower controls behind the sticky footer on shorter browser windows.",
+      "The dialog now stays within the visible viewport on desktop and mobile-height layouts."
+    ]
+  },
+  {
     version:"0.0.31",
     date:"23 September 2026",
     title:"One book, one layout",

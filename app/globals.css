@@ -304,3 +304,15 @@
   .page-setup-grid.three,.page-setup-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
   .page-setup-dialog>header{padding:16px}.page-setup-dialog>footer{padding:11px 14px}
 }
+
+
+/* Page Setup viewport fix */
+.page-setup-dialog{height:min(880px,calc(100dvh - 28px));max-height:calc(100dvh - 28px);display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.page-setup-dialog>header{position:relative;top:auto}
+.page-setup-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.page-setup-preview{top:18px}
+.page-setup-dialog>footer{position:relative;bottom:auto}
+@media(max-width:760px){
+  .page-setup-dialog{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}
+  .page-setup-body{padding-bottom:22px}
+}
