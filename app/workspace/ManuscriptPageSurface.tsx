@@ -38,7 +38,7 @@ function pageBlocks(flow:HTMLElement){
 export default function ManuscriptPageSurface({children,className=""}:{children:ReactNode;className?:string}){
   const {layout,displayMode}=useManuscriptLayout();
   const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null);
-  const [pageCount,setPageCount]=useState(1),[currentPage,setCurrentPage]=useState(1),[canvasHeight,setCanvasHeight]=useState(0);
+  const [pageCount,setPageCount]=useState(1),[currentPage,setCurrentPage]=useState(1),[canvasHeight,setCanvasHeight]=useState(0),[pageStride,setPageStride]=useState(layout.pageHeightMm*MM_TO_PX+28);
 
   const restoreAll=useCallback(()=>{
     const flow=flowRef.current;if(!flow)return;
@@ -110,6 +110,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     }
     const count=Math.max(1,Math.floor(Math.max(0,maxBottom-1)/stride)+1);
     setPageCount(count);
+    setPageStride(stride);
     setCanvasHeight(count*pageHeight+(count-1)*gap);
   },[displayMode,layout,restoreAll]);
 
@@ -142,24 +143,21 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     if(displayMode!=="PAGES")return;
     const update=()=>{
       const surface=surfaceRef.current;if(!surface)return;
-      const pageHeight=layout.pageHeightMm*MM_TO_PX;
-      const gap=parseFloat(getComputedStyle(surface).getPropertyValue("--sogur-page-gap"))||28;
-      const stride=pageHeight+gap;
       const rect=surface.getBoundingClientRect();
       const localY=window.innerHeight*.48-rect.top;
-      setCurrentPage(clamp(Math.floor(Math.max(0,localY)/stride)+1,1,pageCount));
+      setCurrentPage(clamp(Math.floor(Math.max(0,localY)/pageStride)+1,1,pageCount));
     };
     update();
     window.addEventListener("scroll",update,{passive:true});
     window.addEventListener("resize",update);
     return()=>{window.removeEventListener("scroll",update);window.removeEventListener("resize",update)};
-  },[displayMode,layout.pageHeightMm,pageCount]);
+  },[displayMode,pageCount,pageStride]);
 
   if(displayMode!=="PAGES")return <>{children}</>;
 
   return <div className={`manuscript-page-stage ${className}`}>
     <div ref={surfaceRef} className="manuscript-page-surface pages" style={{minHeight:canvasHeight||undefined}}>
-      {Array.from({length:pageCount},(_,index)=><div key={index} className="manuscript-page-sheet" style={{top:`calc(${index} * (var(--manuscript-page-height) + var(--sogur-page-gap)))`}} aria-hidden="true"><span>{index+1}</span></div>)}
+      {Array.from({length:pageCount},(_,index)=><div key={index} className="manuscript-page-sheet" style={{top:`${index*pageStride}px`}} aria-hidden="true"><span>{index+1}</span></div>)}
       <div ref={flowRef} className="manuscript-page-flow">{children}</div>
     </div>
     <div className="manuscript-page-status" aria-live="polite">Page {currentPage} of {pageCount}</div>
