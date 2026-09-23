@@ -123,7 +123,6 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     const gap=parseFloat(getComputedStyle(surface).getPropertyValue("--sogur-page-gap"))||28;
     const stride=pageHeight+gap;
     const surfaceTop=surface.getBoundingClientRect().top;
-    let itemStartsSeen=0;
 
     const metrics=(element:HTMLElement)=>{
       const rect=element.getBoundingClientRect();
@@ -131,6 +130,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     };
 
     const paginate=()=>{
+      let itemStartsSeen=0;
       const blocks=pageBlocks(flow);
       for(const block of blocks){
       let box=metrics(block);
@@ -183,6 +183,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
           boundaryPage++;
         }
       }
+    }
     };
 
     paginate();
