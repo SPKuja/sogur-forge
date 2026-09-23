@@ -376,3 +376,8 @@
   .manuscript-page-status{right:10px;bottom:10px}
   .manuscript-view-toggle.compact button{padding:4px 6px}
 }
+
+
+/* Paperback typography shortcut */
+.page-type-preset{border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--muted);padding:5px 8px;font-size:8px;cursor:pointer}
+.page-type-preset:hover{border-color:color-mix(in srgb,var(--accent) 35%,var(--line));color:var(--accent)}

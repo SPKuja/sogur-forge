@@ -25,6 +25,52 @@ function applyShift(element:HTMLElement,pixels:number){
   element.setAttribute("data-sogur-page-shift",String(Math.round(pixels*100)/100));
 }
 
+function insertLineSpacer(block:HTMLElement,boundaryY:number,nextBodyY:number){
+  const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+  let node=walker.nextNode() as Text|null;
+  while(node){
+    if((node.parentElement?.closest("[data-sogur-page-spacer]"))||!node.data.length){node=walker.nextNode() as Text|null;continue}
+    const range=document.createRange();range.selectNodeContents(node);
+    const rects=Array.from(range.getClientRects()).filter(rect=>rect.height>.5);
+    const target=rects.find(rect=>rect.bottom>boundaryY+.5);
+    if(!target){node=walker.nextNode() as Text|null;continue}
+
+    const rectAt=(offset:number)=>{
+      if(!node||!node.data.length)return null;
+      const at=Math.max(0,Math.min(offset,node.data.length-1));
+      const probe=document.createRange();probe.setStart(node,at);probe.setEnd(node,Math.min(node.data.length,at+1));
+      return Array.from(probe.getClientRects()).find(rect=>rect.height>.5)??probe.getBoundingClientRect();
+    };
+
+    let low=0,high=Math.max(0,node.data.length-1);
+    while(low<high){
+      const mid=Math.floor((low+high)/2),rect=rectAt(mid);
+      if(rect&&rect.top>=target.top-.75)high=mid;else low=mid+1;
+    }
+    let offset=low;
+    while(offset>0){
+      const previous=rectAt(offset-1);
+      if(!previous||previous.top<target.top-.75)break;
+      offset--;
+    }
+
+    const spacer=document.createElement("span");
+    spacer.setAttribute("data-sogur-page-spacer","true");
+    spacer.setAttribute("contenteditable","false");
+    spacer.setAttribute("aria-hidden","true");
+    const height=Math.max(1,nextBodyY-target.top);
+    spacer.style.cssText=`display:block;width:100%;height:${height}px;line-height:0;pointer-events:none;user-select:none`;
+
+    if(offset<=0)node.parentNode?.insertBefore(spacer,node);
+    else{
+      const right=node.splitText(offset);
+      right.parentNode?.insertBefore(spacer,right);
+    }
+    return true;
+  }
+  return false;
+}
+
 function pageBlocks(flow:HTMLElement){
   return Array.from(flow.querySelectorAll<HTMLElement>('[data-sogur-page-block],[data-sogur-page-container] > *'))
     .filter((element,index,array)=>array.indexOf(element)===index)
@@ -37,19 +83,21 @@ function pageBlocks(flow:HTMLElement){
 
 export default function ManuscriptPageSurface({children,className=""}:{children:ReactNode;className?:string}){
   const {layout,displayMode}=useManuscriptLayout();
-  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null);
+  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),runtimeLayoutRef=useRef(false);
   const [pageCount,setPageCount]=useState(1),[currentPage,setCurrentPage]=useState(1),[canvasHeight,setCanvasHeight]=useState(0),[pageStride,setPageStride]=useState(layout.pageHeightMm*MM_TO_PX+28);
 
   const restoreAll=useCallback(()=>{
     const flow=flowRef.current;if(!flow)return;
+    flow.querySelectorAll<HTMLElement>("[data-sogur-page-spacer]").forEach(element=>element.remove());
     flow.querySelectorAll<HTMLElement>("[data-sogur-page-shift]").forEach(restoreShift);
   },[]);
 
   const recalc=useCallback(()=>{
     const surface=surfaceRef.current,flow=flowRef.current;
     if(displayMode!=="PAGES"||!surface||!flow)return;
-    const blocks=pageBlocks(flow);
+    runtimeLayoutRef.current=true;
     restoreAll();
+    const blocks=pageBlocks(flow);
 
     const pageHeight=layout.pageHeightMm*MM_TO_PX;
     const topMargin=layout.marginTopMm*MM_TO_PX;
@@ -91,15 +139,30 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
         bodyEnd=pageIndex*stride+pageHeight-bottomMargin;
       }
 
+      const naturalHeight=box.height;
       const inBottomMarginOrGap=box.top>bodyEnd-1;
       const crossesBottom=box.bottom>bodyEnd+0.5;
-      const canMoveWhole=box.height<=bodyHeight-1;
+      const canMoveWhole=naturalHeight<=bodyHeight-1;
       const alreadyAtPageTop=box.top<=bodyStart+1;
 
       if(inBottomMarginOrGap||(crossesBottom&&canMoveWhole&&!alreadyAtPageTop)){
         const nextPage=pageIndex+1;
         const targetTop=nextPage*stride+topMargin;
         applyShift(block,Math.max(0,targetTop-box.top));
+        box=metrics(block);
+        pageIndex=Math.max(0,Math.floor(Math.max(0,box.top)/stride));
+      }
+
+      if(naturalHeight>bodyHeight-1||metrics(block).bottom>pageIndex*stride+pageHeight-bottomMargin+.5){
+        let boundaryPage=pageIndex,safety=0;
+        while(safety++<80){
+          box=metrics(block);
+          const boundary=boundaryPage*stride+pageHeight-bottomMargin;
+          if(box.bottom<=boundary+.5)break;
+          const nextBody=(boundaryPage+1)*stride+topMargin;
+          if(!insertLineSpacer(block,surfaceTop+boundary,surfaceTop+nextBody))break;
+          boundaryPage++;
+        }
       }
     }
 
@@ -112,6 +175,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     setPageCount(count);
     setPageStride(stride);
     setCanvasHeight(count*pageHeight+(count-1)*gap);
+    window.setTimeout(()=>{runtimeLayoutRef.current=false},0);
   },[displayMode,layout,restoreAll]);
 
   useLayoutEffect(()=>{
@@ -123,6 +187,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       frameRef.current=requestAnimationFrame(()=>{frameRef.current=null;recalc()});
     };
     const observer=new MutationObserver(mutations=>{
+      if(runtimeLayoutRef.current)return;
       if(mutations.some(mutation=>mutation.type==="childList"||mutation.type==="characterData"))schedule();
     });
     observer.observe(flow,{subtree:true,childList:true,characterData:true});

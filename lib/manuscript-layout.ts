@@ -52,10 +52,10 @@ export const DEFAULT_MANUSCRIPT_LAYOUT:ManuscriptLayoutSettings={
   gutterMm:3,
   mirroredMargins:true,
   bodyFontId:"georgia",
-  bodyFontSizePt:14,
-  lineHeight:1.82,
+  bodyFontSizePt:11,
+  lineHeight:1.5,
   paragraphSpacingPt:0,
-  firstLineIndentMm:9.9,
+  firstLineIndentMm:5.5,
   chapterStart:"NEW_PAGE",
   displayUnit:"MM"
 };
