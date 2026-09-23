@@ -58,14 +58,16 @@ function insertLineSpacer(block:HTMLElement,boundaryY:number,nextBodyY:number){
     spacer.setAttribute("data-sogur-page-spacer","true");
     spacer.setAttribute("contenteditable","false");
     spacer.setAttribute("aria-hidden","true");
-    const height=Math.max(1,nextBodyY-target.top);
-    spacer.style.cssText=`display:block;width:100%;height:${height}px;line-height:0;pointer-events:none;user-select:none`;
+    spacer.style.cssText="display:inline-block;width:100%;height:1px;box-sizing:border-box;margin:0;padding:0;border:0;font-size:0;line-height:0;vertical-align:top;overflow:hidden;pointer-events:none;user-select:none";
 
-    if(offset<=0)node.parentNode?.insertBefore(spacer,node);
-    else{
-      const right=node.splitText(offset);
-      right.parentNode?.insertBefore(spacer,right);
-    }
+    const insertion=document.createRange();
+    insertion.setStart(node,offset);
+    insertion.collapse(true);
+    insertion.insertNode(spacer);
+    void spacer.offsetHeight;
+    const spacerTop=spacer.getBoundingClientRect().top;
+    const height=Math.max(1,nextBodyY-spacerTop);
+    spacer.style.height=`${height}px`;
     return true;
   }
   return false;
