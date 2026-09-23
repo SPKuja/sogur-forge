@@ -26,6 +26,7 @@ model User {
   backupDestinations BackupDestination[]
   backupOAuthStates BackupOAuthState[]
   novels Novel[]
+  manuscriptViewPreferences ManuscriptViewPreference[]
 }
 
 model Session {
@@ -161,7 +162,29 @@ model Novel {
   characters Character[]
   characterRelationships CharacterRelationship[]
   chapterTemplates ChapterTemplate[]
+  layout NovelLayout?
+  manuscriptViewPreferences ManuscriptViewPreference[]
   @@index([userId, updatedAt])
+}
+
+model NovelLayout {
+  novelId String @id
+  settings Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+model ManuscriptViewPreference {
+  userId String
+  novelId String
+  displayMode String @default("CONTINUOUS")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  @@id([userId, novelId])
+  @@index([novelId])
 }
 
 model Part {
