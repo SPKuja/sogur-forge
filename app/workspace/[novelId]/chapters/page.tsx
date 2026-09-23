@@ -4,6 +4,8 @@ import {query} from "@/lib/db";
 import ChapterManager from "./ChapterManager";
 import {normaliseChapterTemplate} from "@/lib/chapter-template";
 import {materialiseLegacyTemplateChapters} from "@/lib/template-materialisation";
+import ManuscriptLayoutProvider from "../../ManuscriptLayoutProvider";
+import {getManuscriptLayoutBundle} from "@/lib/manuscript-layout-server";
 
 export const dynamic="force-dynamic";
 
@@ -33,6 +35,8 @@ export default async function Page({params}:{params:Promise<{novelId:string}>}){
   if(!novel.rows[0])notFound();
 
   await materialiseLegacyTemplateChapters(novelId,user.id);
+  const layoutBundle=await getManuscriptLayoutBundle(user.id,novelId);
+  if(!layoutBundle)notFound();
 
   const [chapters,parts,templates]=await Promise.all([
     query<ChapterRow>(
@@ -52,11 +56,11 @@ export default async function Page({params}:{params:Promise<{novelId:string}>}){
     )
   ]);
 
-  return <ChapterManager
+  return <ManuscriptLayoutProvider novelId={novelId} initialLayout={layoutBundle.layout} initialDisplayMode={layoutBundle.displayMode}><ChapterManager
     username={user.username}
     novel={novel.rows[0]}
     initialChapters={chapters.rows}
     parts={parts.rows}
     initialTemplates={templates.rows.map(normaliseChapterTemplate)}
-  />;
+  /></ManuscriptLayoutProvider>;
 }

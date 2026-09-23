@@ -5,6 +5,8 @@ import Workspace from "../Workspace";
 import {CURRENT_VERSION} from "@/lib/releases";
 import {normaliseChapterTemplate} from "@/lib/chapter-template";
 import {materialiseLegacyTemplateChapters} from "@/lib/template-materialisation";
+import ManuscriptLayoutProvider from "../ManuscriptLayoutProvider";
+import {getManuscriptLayoutBundle} from "@/lib/manuscript-layout-server";
 
 export const dynamic="force-dynamic";
 
@@ -42,6 +44,8 @@ export default async function NovelPage({
   if(!novel.rows[0])notFound();
 
   await materialiseLegacyTemplateChapters(novelId,user.id);
+  const layoutBundle=await getManuscriptLayoutBundle(user.id,novelId);
+  if(!layoutBundle)notFound();
 
   const [chapters,parts,notes,templates]=await Promise.all([
     query<ChapterRow>(
@@ -74,7 +78,7 @@ export default async function NovelPage({
     ? requestedChapter
     : chapters.rows[0]?.id;
 
-  return <Workspace
+  return <ManuscriptLayoutProvider novelId={novelId} initialLayout={layoutBundle.layout} initialDisplayMode={layoutBundle.displayMode}><Workspace
     username={user.username}
     novel={novel.rows[0]}
     initialChapters={chapters.rows}
@@ -84,5 +88,5 @@ export default async function NovelPage({
     initialActiveId={initialActiveId}
     initialSceneId={requestedScene}
     appVersion={CURRENT_VERSION}
-  />;
+  /></ManuscriptLayoutProvider>;
 }

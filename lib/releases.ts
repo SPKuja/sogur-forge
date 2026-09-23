@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.31",
+    date:"23 September 2026",
+    title:"One book, one layout",
+    added:[
+      "A shared per-novel Page Setup model now stores paper size, custom dimensions, margins, binding gutter, mirrored margins, default prose typography, paragraph rhythm and chapter-start behaviour.",
+      "Page Setup is available from the chapter editor, manuscript manager/template area and Full Manuscript view.",
+      "Common presets include A4, A5, US Letter, 5 × 8, 5.5 × 8.5 and 6 × 9, with millimetre/inch display and custom dimensions.",
+      "The author’s Pages/Continuous preference now has its own user-and-novel record so it stays separate from the book’s physical layout."
+    ],
+    changed:[
+      "Saved default font, font size, line height, paragraph spacing and first-line indent now flow through the same CSS variables across chapters, scenes, non-chapter pages, templates and Full Manuscript.",
+      "Page-layout data is stored once for the novel rather than separately on individual writing screens.",
+      "The shared layout provider exposes physical page and content dimensions for the next pagination renderer without introducing fake page breaks in this foundation pass."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.30",
     date:"22 September 2026",
     title:"See the whole story",

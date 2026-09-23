@@ -5,6 +5,9 @@ import {query} from "@/lib/db";
 import {chapterNumberMap,manuscriptChapterOrder} from "@/lib/manuscript-order";
 import {cleanManuscriptHtml} from "@/lib/manuscript-content";
 import {pageTypeLabel} from "@/lib/manuscript-item";
+import ManuscriptLayoutProvider from "../../ManuscriptLayoutProvider";
+import PageSetupButton from "../../PageSetupButton";
+import {getManuscriptLayoutBundle} from "@/lib/manuscript-layout-server";
 
 export const dynamic="force-dynamic";
 
@@ -18,6 +21,8 @@ export default async function FullManuscriptPage({params}:{params:Promise<{novel
   const {novelId}=await params;
   const novel=(await query<{id:string;title:string}>(`SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id])).rows[0];
   if(!novel)notFound();
+  const layoutBundle=await getManuscriptLayoutBundle(user.id,novelId);
+  if(!layoutBundle)notFound();
 
   const [partsResult,chaptersResult,scenesResult]=await Promise.all([
     query<PartRow>(`SELECT "id","title","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,[novelId]),
@@ -29,11 +34,11 @@ export default async function FullManuscriptPage({params}:{params:Promise<{novel
   const scenesByChapter=new Map<string,SceneRow[]>();
   for(const scene of scenesResult.rows){const list=scenesByChapter.get(scene.chapterId)??[];list.push(scene);scenesByChapter.set(scene.chapterId,list)}
 
-  return <div className="full-manuscript-shell">
+  return <ManuscriptLayoutProvider novelId={novelId} initialLayout={layoutBundle.layout} initialDisplayMode={layoutBundle.displayMode}><div className="full-manuscript-shell">
     <header className="full-manuscript-top">
       <Link href={`/workspace/${novelId}`}>← Back to editing</Link>
       <div><small>FULL MANUSCRIPT</small><strong>{novel.title}</strong></div>
-      <div className="full-manuscript-modes" aria-label="Manuscript display mode"><span className="active">Continuous</span><span title="Available after page setup is implemented">Pages · soon</span></div>
+      <div className="full-manuscript-modes" aria-label="Manuscript display mode"><span className="active">{layoutBundle.displayMode==="PAGES"?"Pages":"Continuous"}</span><span title="Physical page rendering arrives in the next pagination pass">Pages · next</span><PageSetupButton className="full-page-setup" label="Setup"/></div>
     </header>
     <div className="full-manuscript-layout">
       <aside className="full-manuscript-nav">
@@ -64,5 +69,5 @@ export default async function FullManuscriptPage({params}:{params:Promise<{novel
         </div>
       </main>
     </div>
-  </div>;
+  </div></ManuscriptLayoutProvider>;
 }
