@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.34",
+    date:"23 September 2026",
+    title:"Keep the prose on the page",
+    added:[
+      "Page Setup now includes a Paperback defaults shortcut for 11 pt body text, 1.5 line height and a more typical fiction first-line indent."
+    ],
+    changed:[
+      "New unsaved manuscript layouts now use 11 pt / 1.5 leading instead of the oversized 14 pt draft-style defaults."
+    ],
+    fixed:[
+      "Long paragraphs can now break at a line boundary and continue on the next physical sheet instead of running through the page gap.",
+      "Runtime line-break spacers are removed before autosave, so physical pagination remains display-only and never contaminates manuscript HTML."
+    ]
+  },
+  {
     version:"0.0.33",
     date:"23 September 2026",
     title:"Put the manuscript on paper",
