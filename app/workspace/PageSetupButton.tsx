@@ -7,7 +7,7 @@ import {useManuscriptLayout} from "./ManuscriptLayoutProvider";
 const round=(value:number,places=2)=>Number(value.toFixed(places));
 
 export default function PageSetupButton({className="",label="Page setup"}:{className?:string;label?:string}){
-  const {layout,displayMode,saving,error,saveLayout}=useManuscriptLayout();
+  const {layout,displayMode,saving,error,saveLayout,saveDisplayMode}=useManuscriptLayout();
   const [open,setOpen]=useState(false),[draft,setDraft]=useState(layout);
   useEffect(()=>{if(open)setDraft(layout)},[open,layout]);
   const unit=draft.displayUnit,factor=unit==="IN"?25.4:1;
@@ -37,7 +37,7 @@ export default function PageSetupButton({className="",label="Page setup"}:{class
         </section>
         <section><div className="page-setup-section-head"><div><small>FLOW</small><strong>Manuscript behaviour</strong></div></div>
           <label><span>Chapter starts</span><select value={draft.chapterStart} onChange={event=>patch({chapterStart:event.target.value as ManuscriptLayoutSettings["chapterStart"]})}><option value="FLOW">Continue naturally</option><option value="NEW_PAGE">Start on a new page</option><option value="RECTO">Start on a right-hand page</option></select></label>
-          <div className="page-view-foundation"><div><span>Writing view</span><strong>{displayMode==="PAGES"?"Pages":"Continuous"}</strong></div><button disabled title="Physical page rendering is the next pagination pass">Pages · next</button></div>
+          <div className="page-view-foundation"><div><span>Writing view</span><strong>{displayMode==="PAGES"?"Physical pages":"Continuous scroll"}</strong></div><div className="page-view-buttons"><button className={displayMode==="CONTINUOUS"?"active":""} disabled={saving} onClick={()=>saveDisplayMode("CONTINUOUS")}>Continuous</button><button className={displayMode==="PAGES"?"active":""} disabled={saving} onClick={()=>saveDisplayMode("PAGES")}>Pages</button></div></div>
         </section>
       </div>
     </div>

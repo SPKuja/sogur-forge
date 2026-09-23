@@ -30,6 +30,7 @@ export type ManuscriptLayoutBundle={
 };
 
 export const PAGE_PRESETS=[
+  {id:"UK_B",label:"UK B-format",widthMm:129,heightMm:198,detail:"129 × 198 mm"},
   {id:"A4",label:"A4",widthMm:210,heightMm:297,detail:"210 × 297 mm"},
   {id:"A5",label:"A5",widthMm:148,heightMm:210,detail:"148 × 210 mm"},
   {id:"LETTER",label:"US Letter",widthMm:215.9,heightMm:279.4,detail:"8.5 × 11 in"},
@@ -41,9 +42,9 @@ export const PAGE_PRESETS=[
 
 export const DEFAULT_MANUSCRIPT_LAYOUT:ManuscriptLayoutSettings={
   version:1,
-  pagePreset:"A5",
-  pageWidthMm:148,
-  pageHeightMm:210,
+  pagePreset:"UK_B",
+  pageWidthMm:129,
+  pageHeightMm:198,
   marginTopMm:20,
   marginBottomMm:20,
   marginInsideMm:20,
@@ -121,5 +122,5 @@ export function manuscriptLayoutCssVariables(layout:ManuscriptLayoutSettings){
 }
 
 export function pagePreset(id:string){
-  return PAGE_PRESETS.find(item=>item.id===id)??PAGE_PRESETS[1];
+  return PAGE_PRESETS.find(item=>item.id===id)??PAGE_PRESETS[0];
 }
