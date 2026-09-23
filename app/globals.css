@@ -381,3 +381,7 @@
 /* Paperback typography shortcut */
 .page-type-preset{border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--muted);padding:5px 8px;font-size:8px;cursor:pointer}
 .page-type-preset:hover{border-color:color-mix(in srgb,var(--accent) 35%,var(--line));color:var(--accent)}
+
+
+/* Page-aware scene separators */
+.manuscript-page-surface.pages .scene-manuscript-break[data-sogur-scene-break-hidden="true"]{display:none!important}
