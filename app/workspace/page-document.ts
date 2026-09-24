@@ -107,18 +107,18 @@ function cloneForLogicalHtml(element:HTMLElement){
 export function serialisePagedDocument(root:HTMLElement){
   const blocks=directBlocks(root);
   const output:HTMLElement[]=[];
-  const byId=new Map<string,HTMLElement>();
+  let previousId="",previousOutput:HTMLElement|null=null;
 
   for(const block of blocks){
-    const id=block.getAttribute(BLOCK_ATTR);
+    const id=block.getAttribute(BLOCK_ATTR)??"";
     const clone=cloneForLogicalHtml(block);
-    if(id&&byId.has(id)){
-      const existing=byId.get(id)!;
-      while(clone.firstChild)existing.append(clone.firstChild);
+    if(id&&id===previousId&&previousOutput){
+      while(clone.firstChild)previousOutput.append(clone.firstChild);
       continue;
     }
     output.push(clone);
-    if(id)byId.set(id,clone);
+    previousId=id;
+    previousOutput=clone;
   }
 
   const box=document.createElement("div");
@@ -202,7 +202,7 @@ export function canonicalBlocksFromHtml(html:string){
 function canonicalBlocksFromRoot(root:HTMLElement){
   const blocks=directBlocks(root);
   const merged:HTMLElement[]=[];
-  const byId=new Map<string,HTMLElement>();
+  let previousId="",previousOutput:HTMLElement|null=null;
 
   for(const block of blocks){
     const id=block.getAttribute(BLOCK_ATTR)||nextBlockId();
@@ -210,13 +210,13 @@ function canonicalBlocksFromRoot(root:HTMLElement){
     clone.setAttribute(BLOCK_ATTR,id);
     clone.removeAttribute(FRAGMENT_ATTR);
     clone.removeAttribute(CONTINUATION_ATTR);
-    if(byId.has(id)){
-      const existing=byId.get(id)!;
-      while(clone.firstChild)existing.append(clone.firstChild);
+    if(id===previousId&&previousOutput){
+      while(clone.firstChild)previousOutput.append(clone.firstChild);
       continue;
     }
     merged.push(clone);
-    byId.set(id,clone);
+    previousId=id;
+    previousOutput=clone;
   }
   assignMissingSegmentIds(merged);
   return merged;
