@@ -290,10 +290,17 @@ function prefixFits(element:HTMLElement,body:HTMLElement,offset:number){
   const range=document.createRange();
   range.selectNodeContents(element);
   range.setEnd(point.node,point.offset);
-  const rects=range.getClientRects();
+  const rects=Array.from(range.getClientRects()).filter(rect=>rect.width>.1||rect.height>.1);
   const last=rects.length?rects[rects.length-1]:range.getBoundingClientRect();
   const bodyRect=body.getBoundingClientRect();
   return last.bottom<=bodyRect.bottom+.75;
+}
+
+function visibleContentFits(element:HTMLElement,body:HTMLElement){
+  const total=textLength(element);
+  if(total>0)return prefixFits(element,body,total);
+  const rect=element.getBoundingClientRect(),bodyRect=body.getBoundingClientRect();
+  return rect.bottom<=bodyRect.bottom+.75;
 }
 
 function splittable(element:HTMLElement){
@@ -405,6 +412,12 @@ function appendLogicalBlock(
   while(true){
     state.body.append(block);
     if(bodyFits(state.body))return;
+
+    // A block's trailing margin may extend beyond the printable body even
+    // when its final rendered line is completely inside the page. Page
+    // boundaries collapse that trailing whitespace; never orphan the final
+    // character merely to make paragraph spacing fit.
+    if(splittable(block)&&visibleContentFits(block,state.body))return;
 
     state.body.removeChild(block);
 
