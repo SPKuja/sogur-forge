@@ -37,9 +37,9 @@ function logicalBlockForNode(root:HTMLElement,node:Node){
 
   let candidate:HTMLElement|null=element;
   while(candidate&&candidate!==root){
-    const parent=candidate.parentElement;
-    if(parent?.hasAttribute(BODY_ATTR))return candidate;
-    candidate=parent;
+    const parentElement:HTMLElement|null=candidate.parentElement;
+    if(parentElement?.hasAttribute(BODY_ATTR))return candidate;
+    candidate=parentElement;
   }
   return null;
 }
