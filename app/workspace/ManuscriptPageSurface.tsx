@@ -5,10 +5,10 @@ import {currentPagedPage,paginateDocument} from "./page-document";
 
 function previewHtml(source:HTMLElement,chapterStart:"FLOW"|"NEW_PAGE"|"RECTO"){
   const output=document.createElement("div");
-  let pendingBreak=false;
+  let pendingBreak=false,pendingSectionAnchor="";
 
   const nodes=Array.from(source.querySelectorAll<HTMLElement>(
-    '[data-sogur-item-start],.full-scene-break,[data-sogur-page-container]'
+    '[data-sogur-item-start],.full-section-boundary,.full-scene-break,[data-sogur-page-container]'
   ));
 
   if(!nodes.length)return source.innerHTML;
@@ -16,6 +16,11 @@ function previewHtml(source:HTMLElement,chapterStart:"FLOW"|"NEW_PAGE"|"RECTO"){
   for(const node of nodes){
     if(node.hasAttribute("data-sogur-item-start")){
       pendingBreak=chapterStart!=="FLOW";
+      continue;
+    }
+
+    if(node.classList.contains("full-section-boundary")){
+      pendingSectionAnchor=node.id;
       continue;
     }
 
@@ -40,11 +45,26 @@ function previewHtml(source:HTMLElement,chapterStart:"FLOW"|"NEW_PAGE"|"RECTO"){
       blocks=[p];
     }
 
-    const anchor=node.closest<HTMLElement>(".full-manuscript-scene")?.id
-      ??node.closest<HTMLElement>(".full-manuscript-item")?.id
-      ??"";
+    const sceneAnchor=node.closest<HTMLElement>(".full-manuscript-scene")?.id??"";
+    const itemAnchor=node.closest<HTMLElement>(".full-manuscript-item")?.id??"";
+    const first=blocks[0];
 
-    if(anchor&&!blocks[0].id)blocks[0].id=anchor;
+    if(itemAnchor&&!output.querySelector(`#${CSS.escape(itemAnchor)}`)&&!first.id)first.id=itemAnchor;
+    if(sceneAnchor){
+      const anchor=document.createElement("span");
+      anchor.id=sceneAnchor;
+      anchor.className="sogur-page-anchor";
+      anchor.setAttribute("aria-hidden","true");
+      first.prepend(anchor);
+    }
+    if(pendingSectionAnchor){
+      const anchor=document.createElement("span");
+      anchor.id=pendingSectionAnchor;
+      anchor.className="sogur-page-anchor";
+      anchor.setAttribute("aria-hidden","true");
+      first.prepend(anchor);
+      pendingSectionAnchor="";
+    }
     if(pendingBreak&&blocks.length){
       blocks[0].setAttribute("data-sogur-page-break-before",chapterStart==="RECTO"?"recto":"page");
       pendingBreak=false;
