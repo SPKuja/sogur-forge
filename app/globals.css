@@ -438,3 +438,5 @@
   user-select:none;
 }
 .sogur-paged-preview{user-select:text}
+
+.sogur-page-anchor{display:block;width:0;height:0;overflow:hidden;pointer-events:none}
