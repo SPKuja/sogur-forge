@@ -54,6 +54,29 @@ export function ensurePagedCaretIdentity(root:HTMLElement){
   return block;
 }
 
+export function finalisePagedParagraphBreak(root:HTMLElement,paragraph:HTMLElement){
+  if(!root.contains(paragraph))return;
+  const blocks=directBlocks(root);
+  const index=blocks.indexOf(paragraph);
+  if(index<0){
+    resetPagedBlockIdentity(paragraph);
+    return;
+  }
+
+  const inheritedId=paragraph.getAttribute(BLOCK_ATTR);
+  const freshId=nextBlockId();
+  const segmentId=paragraph.dataset.sogurSegmentId??"";
+
+  for(let i=index;i<blocks.length;i++){
+    const block=blocks[i];
+    if(i>index&&(!inheritedId||block.getAttribute(BLOCK_ATTR)!==inheritedId))break;
+    block.setAttribute(BLOCK_ATTR,freshId);
+    block.removeAttribute(FRAGMENT_ATTR);
+    block.removeAttribute(CONTINUATION_ATTR);
+    if(segmentId&&!block.dataset.sogurSegmentId)block.dataset.sogurSegmentId=segmentId;
+  }
+}
+
 function isElement(node:Node):node is HTMLElement{
   return node.nodeType===Node.ELEMENT_NODE;
 }
