@@ -61,3 +61,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Deploy Sögur Forge to Portainer
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          PORTAINER_SOGUR_WEBHOOK_URL: ${{ secrets.PORTAINER_SOGUR_WEBHOOK_URL }}
+        run: |
+          test -n "$PORTAINER_SOGUR_WEBHOOK_URL"
+          curl --fail --show-error --silent             --retry 3             --retry-all-errors             --connect-timeout 10             --max-time 30             --request POST             "$PORTAINER_SOGUR_WEBHOOK_URL"
+          echo "Portainer redeploy triggered successfully."
