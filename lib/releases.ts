@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.39",
+    date:"24 September 2026",
+    title:"Cross the page cleanly",
+    added:[],
+    changed:[
+      "Live line-level pagination now inserts an explicit temporary line break before its measured page spacer, giving contentEditable paragraphs an unambiguous continuation boundary."
+    ],
+    fixed:[
+      "Scene paragraphs that cross a physical page edge no longer rely on a full-width inline spacer alone to force the continuation onto the next page.",
+      "Temporary line-break and spacer markers are both stripped before autosave, preserving clean manuscript HTML."
+    ]
+  },
+  {
     version:"0.0.38",
     date:"24 September 2026",
     title:"Keep live pages alive",
