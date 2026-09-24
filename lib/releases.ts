@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.44",
+    date:"24 September 2026",
+    title:"Pages polish",
+    added:[],
+    changed:[
+      "The manuscript formatting toolbar now sits in the editor flow and becomes sticky as you scroll, so it remains accessible without covering the top of the physical page."
+    ],
+    fixed:[
+      "Pressing Enter in Pages mode no longer shifts the whole page just to preserve the caret at the exact same screen pixel.",
+      "Caret restoration now scrolls only when the typing position would otherwise fall outside the visible viewport."
+    ]
+  },
+  {
     version:"0.0.43",
     date:"24 September 2026",
     title:"Pages, rebuilt",
