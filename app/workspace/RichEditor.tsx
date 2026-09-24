@@ -121,7 +121,8 @@ function pageMarginMouseDown(event:ReactMouseEvent<HTMLDivElement>){
   const body=page.querySelector<HTMLElement>("[data-sogur-page-body]");
   if(!body)return;
   const insideBody=body.contains(target);
-  if(insideBody&&target.closest("p,h1,h2,h3,h4,h5,h6,blockquote,li,[contenteditable=true]"))return;
+  const textBlock=target.closest("p,h1,h2,h3,h4,h5,h6,blockquote,li");
+  if(insideBody&&textBlock&&body.contains(textBlock))return;
   event.preventDefault();
   const lastImage=Array.from(body.querySelectorAll<HTMLElement>("figure.manuscript-image")).at(-1);
   const belowImage=Boolean(lastImage&&event.clientY>=lastImage.getBoundingClientRect().bottom-4);
