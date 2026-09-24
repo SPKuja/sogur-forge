@@ -13,6 +13,18 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.40",
+    date:"24 September 2026",
+    title:"Keep typing",
+    added:[],
+    changed:[
+      "Character profile text fields now use a stable shared field component rather than recreating the textarea component on every character-state update."
+    ],
+    fixed:[
+      "Autosave/state updates on the Characters page no longer unmount the active biography textarea and steal focus after each keystroke."
+    ]
+  },
+  {
     version:"0.0.39",
     date:"24 September 2026",
     title:"Cross the page cleanly",
