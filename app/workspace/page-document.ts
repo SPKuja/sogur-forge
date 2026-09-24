@@ -596,7 +596,18 @@ export function paginateDocument(
 ):PaginateResult{
   const captured=caret===undefined?capturePagedCaret(root):caret;
   const viewport=typeof window!=="undefined"?{x:window.scrollX,y:window.scrollY}:null;
+  const previousBlocks=html===undefined?null:canonicalBlocksFromRoot(root);
   const blocks=html===undefined?canonicalBlocksFromRoot(root):canonicalBlocksFromHtml(html);
+  // Saved HTML deliberately omits runtime IDs. When React echoes the editor's
+  // current content back, retain those IDs so the captured caret can survive
+  // this second page rebuild as well.
+  if(html!==undefined&&captured&&previousBlocks){
+    const previous=previousBlocks.find(block=>block.getAttribute(BLOCK_ATTR)===captured.blockId);
+    const index=previous?previousBlocks.indexOf(previous):-1;
+    if(previous&&index>=0&&blocks[index]&&previous.textContent===blocks[index].textContent){
+      blocks[index].setAttribute(BLOCK_ATTR,captured.blockId);
+    }
+  }
 
   root.classList.add("sogur-paged-document");
   root.dataset.sogurPagination="v2";
