@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.36",
+    date:"23 September 2026",
+    title:"Let scenes flow",
+    added:[],
+    changed:[
+      "Scene separators in Pages mode are now treated as optional decoration rather than pagination blocks.",
+      "A scene continues naturally on the current page whenever there is usable space."
+    ],
+    fixed:[
+      "Scene breaks no longer force the following scene onto a new physical page.",
+      "The * * * ornament is suppressed when the next scene already begins on a new page or when showing the ornament would itself create the page break."
+    ]
+  },
+  {
     version:"0.0.35",
     date:"23 September 2026",
     title:"Clean page boundaries",

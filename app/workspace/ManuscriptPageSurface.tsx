@@ -83,6 +83,20 @@ function pageBlocks(flow:HTMLElement){
     });
 }
 
+function orderedPageTokens(flow:HTMLElement){
+  return Array.from(flow.querySelectorAll<HTMLElement>('[data-sogur-scene-break],[data-sogur-page-block],[data-sogur-page-container] > *'))
+    .filter((element,index,array)=>array.indexOf(element)===index);
+}
+
+function sceneBreakNeighbours(flow:HTMLElement,sceneBreak:HTMLElement){
+  const tokens=orderedPageTokens(flow),index=tokens.indexOf(sceneBreak);
+  let previous:HTMLElement|null=null,next:HTMLElement|null=null;
+  for(let i=index-1;i>=0;i--){if(!tokens[i].hasAttribute("data-sogur-scene-break")){previous=tokens[i];break}}
+  for(let i=index+1;i<tokens.length;i++){if(!tokens[i].hasAttribute("data-sogur-scene-break")){next=tokens[i];break}}
+  return {previous,next};
+}
+
+
 export default function ManuscriptPageSurface({children,className=""}:{children:ReactNode;className?:string}){
   const {layout,displayMode}=useManuscriptLayout();
   const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),runtimeLayoutRef=useRef(false);
@@ -99,7 +113,8 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     if(displayMode!=="PAGES"||!surface||!flow)return;
     runtimeLayoutRef.current=true;
     restoreAll();
-    const blocks=pageBlocks(flow);
+    const sceneBreaks=Array.from(flow.querySelectorAll<HTMLElement>("[data-sogur-scene-break]"));
+    sceneBreaks.forEach(element=>element.setAttribute("data-sogur-scene-break-hidden","true"));
 
     const pageHeight=layout.pageHeightMm*MM_TO_PX;
     const topMargin=layout.marginTopMm*MM_TO_PX;
@@ -108,14 +123,16 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     const gap=parseFloat(getComputedStyle(surface).getPropertyValue("--sogur-page-gap"))||28;
     const stride=pageHeight+gap;
     const surfaceTop=surface.getBoundingClientRect().top;
-    let itemStartsSeen=0;
 
     const metrics=(element:HTMLElement)=>{
       const rect=element.getBoundingClientRect();
       return {top:rect.top-surfaceTop,bottom:rect.bottom-surfaceTop,height:rect.height};
     };
 
-    for(const block of blocks){
+    const paginate=()=>{
+      let itemStartsSeen=0;
+      const blocks=pageBlocks(flow);
+      for(const block of blocks){
       let box=metrics(block);
       let pageIndex=Math.max(0,Math.floor(Math.max(0,box.top)/stride));
       let bodyStart=pageIndex*stride+topMargin;
@@ -167,9 +184,52 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
         }
       }
     }
+    };
+
+    paginate();
+
+    for(const sceneBreak of sceneBreaks){
+      const {previous,next}=sceneBreakNeighbours(flow,sceneBreak);
+      if(!previous||!next)continue;
+      const previousBox=metrics(previous),nextBox=metrics(next);
+      const previousPage=Math.max(0,Math.floor(Math.max(0,previousBox.bottom-1)/stride));
+      const nextPage=Math.max(0,Math.floor(Math.max(0,nextBox.top)/stride));
+      if(previousPage!==nextPage)continue;
+
+      sceneBreak.removeAttribute("data-sogur-scene-break-hidden");
+      const breakBox=metrics(sceneBreak),updatedNext=metrics(next);
+      const bodyStart=previousPage*stride+topMargin;
+      const bodyEnd=previousPage*stride+pageHeight-bottomMargin;
+      const fitsBreak=breakBox.top>=bodyStart-1&&breakBox.bottom<=bodyEnd+1;
+      const keepsNextOnPage=updatedNext.top<bodyEnd-1;
+      if(!fitsBreak||!keepsNextOnPage)sceneBreak.setAttribute("data-sogur-scene-break-hidden","true");
+    }
+
+    restoreAll();
+    paginate();
+
+    let breakVisibilityChanged=false;
+    for(const sceneBreak of sceneBreaks){
+      if(sceneBreak.hasAttribute("data-sogur-scene-break-hidden"))continue;
+      const {previous,next}=sceneBreakNeighbours(flow,sceneBreak);
+      if(!previous||!next)continue;
+      const previousBox=metrics(previous),nextBox=metrics(next),breakBox=metrics(sceneBreak);
+      const previousPage=Math.max(0,Math.floor(Math.max(0,previousBox.bottom-1)/stride));
+      const nextPage=Math.max(0,Math.floor(Math.max(0,nextBox.top)/stride));
+      const bodyStart=previousPage*stride+topMargin;
+      const bodyEnd=previousPage*stride+pageHeight-bottomMargin;
+      if(previousPage!==nextPage||breakBox.top<bodyStart-1||breakBox.bottom>bodyEnd+1){
+        sceneBreak.setAttribute("data-sogur-scene-break-hidden","true");
+        breakVisibilityChanged=true;
+      }
+    }
+    if(breakVisibilityChanged){
+      restoreAll();
+      paginate();
+    }
 
     let maxBottom=topMargin;
-    for(const block of blocks){
+    for(const block of pageBlocks(flow)){
       const rect=block.getBoundingClientRect();
       maxBottom=Math.max(maxBottom,rect.bottom-surfaceTop);
     }
