@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.46",
+    date:"24 September 2026",
+    title:"Keep the last character",
+    added:[],
+    changed:[
+      "Pages mode now distinguishes visible text overflow from trailing paragraph spacing at the bottom of a physical page."
+    ],
+    fixed:[
+      "A paragraph is no longer split just because its bottom margin crosses the page boundary when the final rendered line itself still fits.",
+      "Closing quotation marks and other final punctuation are no longer orphaned onto a new page when there is room on the preceding line.",
+      "Previously stranded punctuation-only blocks at the top of a page can be deleted without throwing the caret back to the chapter start."
+    ]
+  },
+  {
     version:"0.0.45",
     date:"24 September 2026",
     title:"Delete across the page",
