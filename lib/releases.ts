@@ -13,6 +13,26 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.43",
+    date:"24 September 2026",
+    title:"Pages, rebuilt",
+    added:[
+      "Pages mode now uses real fixed-size page containers with the selected physical dimensions and real top, bottom, inside, outside and gutter margins.",
+      "A browser-independent pagination engine splits logical manuscript blocks into rendered page fragments and recombines them unchanged when saving.",
+      "Mirrored margins and true recto chapter starts are handled by physical pages, including genuine blank verso pages when required."
+    ],
+    changed:[
+      "Live chapter editing, scene-enabled chapters, chapter templates and Full Manuscript now share the same Pages v2 pagination model.",
+      "Scene-enabled chapters are edited as one paged manuscript flow while each block still belongs to its original scene record.",
+      "Full Manuscript chapter, scene and section navigation anchors are preserved inside the paginated page stack."
+    ],
+    fixed:[
+      "Page margins can no longer drift between pages because margins are padding on each page itself rather than simulated spacing in a continuous flow.",
+      "Text can no longer render through grey page gaps or depend on Chromium-only column-height and column-wrap behaviour.",
+      "Paragraphs crossing a page boundary remain one logical paragraph even though they are rendered as fragments on separate physical pages."
+    ]
+  },
+  {
     version:"0.0.42",
     date:"24 September 2026",
     title:"Margins that stay put",
