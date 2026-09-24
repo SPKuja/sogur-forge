@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.51",
+    date:"24 September 2026",
+    title:"Copy images between chapters",
+    added:[],
+    changed:[],
+    fixed:[
+      "Copying a selected image or a text selection containing images now puts those figures on the clipboard.",
+      "Pasting manuscript figures and clipboard image files works in both Pages and continuous editor modes."
+    ]
+  },
+  {
     version:"0.0.50",
     date:"24 September 2026",
     title:"Clean chapter-to-chapter paste",
