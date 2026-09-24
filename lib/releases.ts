@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.47",
+    date:"24 September 2026",
+    title:"Images behave like images",
+    added:[
+      "Selected manuscript images now have an explicit Remove action alongside alignment and size controls."
+    ],
+    changed:[
+      "Images are now atomic editor objects: they can be selected, resized, aligned and removed, but manuscript text cannot be typed into the image frame."
+    ],
+    fixed:[
+      "Deleting an image no longer leaves an editable empty figure that can swallow surrounding manuscript text.",
+      "Broken image figures from earlier editing are repaired automatically: any prose trapped inside an empty image frame is recovered into normal manuscript paragraphs.",
+      "Editor-only contenteditable and draggable image attributes are stripped before manuscript HTML is saved."
+    ]
+  },
+  {
     version:"0.0.46",
     date:"24 September 2026",
     title:"Keep the last character",
