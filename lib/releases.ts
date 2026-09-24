@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.48",
+    date:"24 September 2026",
+    title:"Keep the caret where you put it",
+    added:[],
+    changed:[
+      "Pages mode now preserves the viewport itself during repagination instead of relying on browser scroll anchoring.",
+      "New paragraphs receive a stable logical block identity before the page document is rebuilt."
+    ],
+    fixed:[
+      "Pressing Enter near a page boundary no longer leaves the new paragraph temporarily anonymous, which could lose the selection and send the caret to the top of the chapter.",
+      "Browser scroll anchoring no longer competes with Sögur Forge while physical pages are rebuilt.",
+      "After a reflow, the caret is restored to the same logical character and the viewport only moves if that position would otherwise be off-screen."
+    ]
+  },
+  {
     version:"0.0.47",
     date:"24 September 2026",
     title:"Images behave like images",
