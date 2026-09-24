@@ -290,10 +290,17 @@ function prefixFits(element:HTMLElement,body:HTMLElement,offset:number){
   const range=document.createRange();
   range.selectNodeContents(element);
   range.setEnd(point.node,point.offset);
-  const rects=range.getClientRects();
+  const rects=Array.from(range.getClientRects()).filter(rect=>rect.width>.1||rect.height>.1);
   const last=rects.length?rects[rects.length-1]:range.getBoundingClientRect();
   const bodyRect=body.getBoundingClientRect();
   return last.bottom<=bodyRect.bottom+.75;
+}
+
+function visibleContentFits(element:HTMLElement,body:HTMLElement){
+  const total=textLength(element);
+  if(total>0)return prefixFits(element,body,total);
+  const rect=element.getBoundingClientRect(),bodyRect=body.getBoundingClientRect();
+  return rect.bottom<=bodyRect.bottom+.75;
 }
 
 function splittable(element:HTMLElement){
@@ -405,6 +412,12 @@ function appendLogicalBlock(
   while(true){
     state.body.append(block);
     if(bodyFits(state.body))return;
+
+    // A block's trailing margin may extend beyond the printable body even
+    // when its final rendered line is completely inside the page. Page
+    // boundaries collapse that trailing whitespace; never orphan the final
+    // character merely to make paragraph spacing fit.
+    if(splittable(block)&&visibleContentFits(block,state.body))return;
 
     state.body.removeChild(block);
 
@@ -611,33 +624,71 @@ export function deletePagedFragmentCharacter(root:HTMLElement,direction:"backwar
   if(!block||!blockId)return false;
 
   const fragments=Array.from(root.querySelectorAll<HTMLElement>(`[${BLOCK_ATTR}="${CSS.escape(blockId)}"]`));
-  if(fragments.length<2)return false;
-
   const caret=capturePagedCaret(root);
   if(!caret||caret.blockId!==blockId)return false;
-  const total=fragments.reduce((sum,fragment)=>sum+textLength(fragment),0);
-  const targetOffset=direction==="backward"?caret.textOffset-1:caret.textOffset;
-  if(targetOffset<0||targetOffset>=total)return false;
 
-  let remaining=targetOffset,targetNode:Text|null=null,targetNodeOffset=0;
-  outer:for(const fragment of fragments){
-    for(const text of allTextNodes(fragment)){
-      if(remaining<text.data.length){
-        targetNode=text;
-        targetNodeOffset=remaining;
-        break outer;
+  if(fragments.length>=2){
+    const total=fragments.reduce((sum,fragment)=>sum+textLength(fragment),0);
+    const targetOffset=direction==="backward"?caret.textOffset-1:caret.textOffset;
+    if(targetOffset<0||targetOffset>=total)return false;
+
+    let remaining=targetOffset,targetNode:Text|null=null,targetNodeOffset=0;
+    outer:for(const fragment of fragments){
+      for(const text of allTextNodes(fragment)){
+        if(remaining<text.data.length){
+          targetNode=text;
+          targetNodeOffset=remaining;
+          break outer;
+        }
+        remaining-=text.data.length;
       }
-      remaining-=text.data.length;
     }
-  }
-  if(!targetNode)return false;
+    if(!targetNode)return false;
 
-  targetNode.deleteData(targetNodeOffset,1);
-  restorePagedCaret(root,{
-    blockId,
-    textOffset:direction==="backward"?Math.max(0,caret.textOffset-1):caret.textOffset,
-    viewportTop:null
-  });
+    targetNode.deleteData(targetNodeOffset,1);
+    restorePagedCaret(root,{
+      blockId,
+      textOffset:direction==="backward"?Math.max(0,caret.textOffset-1):caret.textOffset,
+      viewportTop:null
+    });
+    return true;
+  }
+
+  // Recovery for punctuation that an earlier paginator may already have
+  // persisted as a tiny standalone block at the top of the next page.
+  const text=block.textContent??"";
+  const punctuationOnly=text.length>0&&text.length<=4&&/^[\p{P}\p{S}\s]+$/u.test(text);
+  const body=block.closest<HTMLElement>(`[${BODY_ATTR}]`);
+  const isFirstBlock=body?.firstElementChild===block;
+  if(!punctuationOnly||!isFirstBlock)return false;
+
+  const localRange=document.createRange();
+  localRange.selectNodeContents(block);
+  try{localRange.setEnd(selection.focusNode!,selection.focusOffset)}catch{return false}
+  const localOffset=localRange.toString().length;
+  const targetOffset=direction==="backward"?localOffset-1:localOffset;
+  if(targetOffset<0||targetOffset>=textLength(block))return false;
+
+  const point=pointAtTextOffset(block,targetOffset);
+  if(!point)return false;
+  point.node.deleteData(point.offset,1);
+
+  if(textLength(block)>0){
+    restorePagedCaret(root,{
+      blockId,
+      textOffset:direction==="backward"?Math.max(0,localOffset-1):localOffset,
+      viewportTop:null
+    });
+    return true;
+  }
+
+  const blocks=directBlocks(root),index=blocks.indexOf(block);
+  const previous=[...blocks.slice(0,index)].reverse().find(candidate=>!candidate.hasAttribute("data-sogur-scene-break"));
+  block.remove();
+  if(previous){
+    const previousId=previous.getAttribute(BLOCK_ATTR);
+    if(previousId)restorePagedCaret(root,{blockId:previousId,textOffset:textLength(previous),viewportTop:null});
+  }
   return true;
 }
 
