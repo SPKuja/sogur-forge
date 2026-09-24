@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.37",
+    date:"24 September 2026",
+    title:"Let paragraphs cross the page",
+    added:[],
+    changed:[
+      "Ordinary prose paragraphs and blockquotes now split by line across physical pages instead of being kept together as a whole block whenever possible."
+    ],
+    fixed:[
+      "Live chapter editing no longer pushes an entire first paragraph — and therefore an apparent whole scene — onto the next page simply because the paragraph does not fully fit in the remaining space.",
+      "The live chapter editor now follows the same Word-like line-flow behaviour expected from Full Manuscript pagination."
+    ]
+  },
+  {
     version:"0.0.36",
     date:"23 September 2026",
     title:"Let scenes flow",

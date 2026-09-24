@@ -163,8 +163,10 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       const crossesBottom=box.bottom>bodyEnd+0.5;
       const canMoveWhole=naturalHeight<=bodyHeight-1;
       const alreadyAtPageTop=box.top<=bodyStart+1;
+      const tag=block.tagName.toUpperCase();
+      const splitByLine=(tag==="P"||tag==="BLOCKQUOTE")&&Boolean(block.textContent?.trim());
 
-      if(inBottomMarginOrGap||(crossesBottom&&canMoveWhole&&!alreadyAtPageTop)){
+      if(inBottomMarginOrGap||(crossesBottom&&canMoveWhole&&!alreadyAtPageTop&&!splitByLine)){
         const nextPage=pageIndex+1;
         const targetTop=nextPage*stride+topMargin;
         applyShift(block,Math.max(0,targetTop-box.top));
@@ -172,7 +174,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
         pageIndex=Math.max(0,Math.floor(Math.max(0,box.top)/stride));
       }
 
-      if(naturalHeight>bodyHeight-1||metrics(block).bottom>pageIndex*stride+pageHeight-bottomMargin+.5){
+      if(naturalHeight>bodyHeight-1||(splitByLine&&crossesBottom)||metrics(block).bottom>pageIndex*stride+pageHeight-bottomMargin+.5){
         let boundaryPage=pageIndex,safety=0;
         while(safety++<80){
           box=metrics(block);
