@@ -383,10 +383,16 @@ function appendLogicalBlock(
   if(!block.getAttribute(BLOCK_ATTR))block.setAttribute(BLOCK_ATTR,nextBlockId());
   if(block.hasAttribute("data-sogur-scene-break"))block.contentEditable="false";
 
-  const forceBefore=block.hasAttribute("data-sogur-page-break-before");
-  if(forceBefore&&state.body.children.length){
-    state.pageIndex+=1;
-    state.body=createPage(root,layout,state.pageIndex);
+  const forceBefore=block.getAttribute("data-sogur-page-break-before");
+  if(forceBefore){
+    if(state.body.children.length){
+      state.pageIndex+=1;
+      state.body=createPage(root,layout,state.pageIndex);
+    }
+    if(forceBefore==="recto"&&state.pageIndex%2===1){
+      state.pageIndex+=1;
+      state.body=createPage(root,layout,state.pageIndex);
+    }
   }
 
   while(true){
