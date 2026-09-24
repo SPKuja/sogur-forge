@@ -13,6 +13,8 @@ export type PagedCaret={
   viewportTop:number|null;
 };
 
+export type PagedHistoryCaret={blockIndex:number;textOffset:number};
+
 export type PaginateResult={
   pageCount:number;
 };
@@ -579,6 +581,23 @@ export function capturePagedCaret(root:HTMLElement):PagedCaret|null{
   }catch{
     return {blockId,textOffset:offset,viewportTop:null};
   }
+}
+
+export function capturePagedHistoryCaret(root:HTMLElement):PagedHistoryCaret|null{
+  const caret=capturePagedCaret(root);
+  if(!caret)return null;
+  const blocks=canonicalBlocksFromRoot(root);
+  const blockIndex=blocks.findIndex(block=>block.getAttribute(BLOCK_ATTR)===caret.blockId);
+  return blockIndex<0?null:{blockIndex,textOffset:caret.textOffset};
+}
+
+export function restorePagedHistoryCaret(root:HTMLElement,caret:PagedHistoryCaret|null){
+  if(!caret)return;
+  const blocks=canonicalBlocksFromRoot(root);
+  const block=blocks[Math.min(caret.blockIndex,blocks.length-1)];
+  if(!block)return;
+  const id=block.getAttribute(BLOCK_ATTR);
+  if(id)restorePagedCaret(root,{blockId:id,textOffset:caret.textOffset,viewportTop:null});
 }
 
 export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
