@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.42",
+    date:"24 September 2026",
+    title:"Margins that stay put",
+    added:[],
+    changed:[
+      "Physical sheet backgrounds are now laid out as one CSS page stack using the same page-height and gap variables as the native text fragments.",
+      "Wrapped page fragments now use the standards-documented two-axis gap shorthand so every row reserves the full bottom margin, grey page gap and next-page top margin."
+    ],
+    fixed:[
+      "Top-margin alignment no longer drifts page by page from cumulative JavaScript/CSS pixel rounding.",
+      "The Pages fallback message is now browser-neutral and never implies trustworthy physical pagination when the current browser lacks the required fragmentation support."
+    ]
+  },
+  {
     version:"0.0.41",
     date:"24 September 2026",
     title:"Native pages",
