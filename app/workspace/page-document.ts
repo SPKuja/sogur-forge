@@ -381,6 +381,7 @@ function appendLogicalBlock(
 ){
   let block=logical.cloneNode(true) as HTMLElement;
   if(!block.getAttribute(BLOCK_ATTR))block.setAttribute(BLOCK_ATTR,nextBlockId());
+  if(block.hasAttribute("data-sogur-scene-break"))block.contentEditable="false";
 
   const forceBefore=block.hasAttribute("data-sogur-page-break-before");
   if(forceBefore&&state.body.children.length){
