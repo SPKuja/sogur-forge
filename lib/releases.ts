@@ -20,7 +20,9 @@ export const RELEASES:ReleaseNote[]=[
     changed:[],
     fixed:[
       "Copying an entire paged chapter into another chapter no longer pastes the physical page frame around its text.",
-      "Previously pasted page wrappers are flattened back into manuscript blocks when the chapter loads."
+      "Previously pasted page wrappers are flattened back into manuscript blocks when the chapter loads.",
+      "Ctrl+Z and Ctrl+Y (or Cmd+Z and Cmd+Shift+Z) now undo and redo Pages mode edits after repagination.",
+      "Selected manuscript images can be copied and pasted, and clipboard image files upload at the caret."
     ]
   },
   {
