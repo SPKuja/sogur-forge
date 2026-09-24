@@ -110,9 +110,70 @@ function sceneBreakNeighbours(flow:HTMLElement,sceneBreak:HTMLElement){
 }
 
 
+type CaretSnapshot={root:HTMLElement;offset:number;viewportTop:number;scrollHost:HTMLElement|null};
+
+function focusedEditable(flow:HTMLElement){
+  const active=document.activeElement;
+  return active instanceof HTMLElement&&flow.contains(active)&&active.matches('[data-sogur-page-container][contenteditable="true"]')?active:null;
+}
+
+function scrollHostFor(element:HTMLElement){
+  let parent=element.parentElement;
+  while(parent){
+    const style=getComputedStyle(parent),overflowY=style.overflowY;
+    if((overflowY==="auto"||overflowY==="scroll")&&parent.scrollHeight>parent.clientHeight+1)return parent;
+    parent=parent.parentElement;
+  }
+  return null;
+}
+
+function captureCaret(flow:HTMLElement):CaretSnapshot|null{
+  const root=focusedEditable(flow),selection=window.getSelection();
+  if(!root||!selection?.rangeCount||!selection.isCollapsed)return null;
+  const node=selection.focusNode;
+  if(!node||node.nodeType!==Node.TEXT_NODE||!root.contains(node))return null;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  let current=walker.nextNode() as Text|null,total=0;
+  while(current){
+    if(current===node){
+      const range=selection.getRangeAt(0).cloneRange(),rect=range.getBoundingClientRect();
+      const viewportTop=rect.height||rect.top?rect.top:(node.parentElement?.getBoundingClientRect().top??0);
+      return {root,offset:total+selection.focusOffset,viewportTop,scrollHost:scrollHostFor(root)};
+    }
+    total+=current.data.length;
+    current=walker.nextNode() as Text|null;
+  }
+  return null;
+}
+
+function restoreCaret(snapshot:CaretSnapshot|null){
+  if(!snapshot||!snapshot.root.isConnected)return;
+  const walker=document.createTreeWalker(snapshot.root,NodeFilter.SHOW_TEXT);
+  let current=walker.nextNode() as Text|null,total=0,target:Text|null=null,targetOffset=0,last:Text|null=null;
+  while(current){
+    last=current;
+    if(snapshot.offset<=total+current.data.length){target=current;targetOffset=Math.max(0,snapshot.offset-total);break}
+    total+=current.data.length;
+    current=walker.nextNode() as Text|null;
+  }
+  if(!target&&last){target=last;targetOffset=last.data.length}
+  if(!target)return;
+  try{
+    snapshot.root.focus({preventScroll:true});
+    const range=document.createRange();range.setStart(target,Math.min(targetOffset,target.data.length));range.collapse(true);
+    const selection=window.getSelection();selection?.removeAllRanges();selection?.addRange(range);
+    const rect=range.getBoundingClientRect(),nextTop=rect.height||rect.top?rect.top:(target.parentElement?.getBoundingClientRect().top??snapshot.viewportTop);
+    const delta=nextTop-snapshot.viewportTop;
+    if(Math.abs(delta)>.5){
+      if(snapshot.scrollHost?.isConnected)snapshot.scrollHost.scrollTop+=delta;
+      else window.scrollBy(0,delta);
+    }
+  }catch{}
+}
+
 export default function ManuscriptPageSurface({children,className=""}:{children:ReactNode;className?:string}){
   const {layout,displayMode}=useManuscriptLayout();
-  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),runtimeLayoutRef=useRef(false),lastFlowHeightRef=useRef(0);
+  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),idleTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null),runtimeLayoutRef=useRef(false),lastFlowHeightRef=useRef(0);
   const [pageCount,setPageCount]=useState(1),[currentPage,setCurrentPage]=useState(1),[canvasHeight,setCanvasHeight]=useState(0),[pageStride,setPageStride]=useState(layout.pageHeightMm*MM_TO_PX+28);
 
   const restoreAll=useCallback(()=>{
@@ -124,6 +185,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
   const recalc=useCallback(()=>{
     const surface=surfaceRef.current,flow=flowRef.current;
     if(displayMode!=="PAGES"||!surface||!flow)return;
+    const caretSnapshot=captureCaret(flow);
     runtimeLayoutRef.current=true;
     try{
     restoreAll();
@@ -270,6 +332,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       lastFlowHeightRef.current=flowRect.height;
     }finally{
       runtimeLayoutRef.current=false;
+      restoreCaret(caretSnapshot);
     }
   },[displayMode,layout,restoreAll]);
 
@@ -277,13 +340,18 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     if(displayMode!=="PAGES")return;
     recalc();
     const flow=flowRef.current;if(!flow)return;
-    const schedule=()=>{
-      if(frameRef.current!==null)cancelAnimationFrame(frameRef.current);
-      frameRef.current=requestAnimationFrame(()=>{frameRef.current=null;recalc()});
+    const isEditing=()=>Boolean(focusedEditable(flow));
+    const schedule=(delay=isEditing()?160:24)=>{
+      if(idleTimerRef.current!==null)clearTimeout(idleTimerRef.current);
+      if(frameRef.current!==null){cancelAnimationFrame(frameRef.current);frameRef.current=null}
+      idleTimerRef.current=setTimeout(()=>{
+        idleTimerRef.current=null;
+        frameRef.current=requestAnimationFrame(()=>{frameRef.current=null;recalc()});
+      },delay);
     };
     const observer=new MutationObserver(mutations=>{
       if(runtimeLayoutRef.current)return;
-      if(mutations.some(mutation=>mutation.type==="childList"||mutation.type==="characterData"))schedule();
+      if(mutations.some(mutation=>mutation.type==="childList"||mutation.type==="characterData"))schedule(isEditing()?180:32);
     });
     observer.observe(flow,{subtree:true,childList:true,characterData:true});
     const resizeObserver=typeof ResizeObserver!=="undefined"?new ResizeObserver(entries=>{
@@ -291,22 +359,32 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       const observed=entries[0]?.contentRect.height??flow.getBoundingClientRect().height;
       if(Math.abs(observed-lastFlowHeightRef.current)>1){
         lastFlowHeightRef.current=observed;
-        schedule();
+        schedule(isEditing()?180:32);
       }
     }):null;
     resizeObserver?.observe(flow);
+    const contentChanged=()=>schedule(180);
+    const focusIn=()=>schedule(180);
+    const focusOut=()=>schedule(0);
+    const resized=()=>schedule(0);
+    const loaded=()=>schedule(isEditing()?120:0);
     let disposed=false;
-    if(typeof document!=="undefined"&&"fonts" in document)document.fonts.ready.then(()=>{if(!disposed)schedule()});
-    flow.addEventListener("sogur:content-change",schedule);
-    flow.addEventListener("load",schedule,true);
-    window.addEventListener("resize",schedule);
+    if(typeof document!=="undefined"&&"fonts" in document)document.fonts.ready.then(()=>{if(!disposed)schedule(0)});
+    flow.addEventListener("sogur:content-change",contentChanged);
+    flow.addEventListener("focusin",focusIn);
+    flow.addEventListener("focusout",focusOut);
+    flow.addEventListener("load",loaded,true);
+    window.addEventListener("resize",resized);
     return()=>{
       disposed=true;
       observer.disconnect();
       resizeObserver?.disconnect();
-      flow.removeEventListener("sogur:content-change",schedule);
-      flow.removeEventListener("load",schedule,true);
-      window.removeEventListener("resize",schedule);
+      flow.removeEventListener("sogur:content-change",contentChanged);
+      flow.removeEventListener("focusin",focusIn);
+      flow.removeEventListener("focusout",focusOut);
+      flow.removeEventListener("load",loaded,true);
+      window.removeEventListener("resize",resized);
+      if(idleTimerRef.current!==null)clearTimeout(idleTimerRef.current);
       if(frameRef.current!==null)cancelAnimationFrame(frameRef.current);
       runtimeLayoutRef.current=false;
       restoreAll();
