@@ -26,51 +26,58 @@ function applyShift(element:HTMLElement,pixels:number){
 }
 
 function insertLineSpacer(block:HTMLElement,boundaryY:number,nextBodyY:number){
-  const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
-  let node=walker.nextNode() as Text|null;
-  while(node){
-    if((node.parentElement?.closest("[data-sogur-page-spacer]"))||!node.data.length){node=walker.nextNode() as Text|null;continue}
-    const range=document.createRange();range.selectNodeContents(node);
-    const rects=Array.from(range.getClientRects()).filter(rect=>rect.height>.5);
-    const target=rects.find(rect=>rect.bottom>boundaryY+.5);
-    if(!target){node=walker.nextNode() as Text|null;continue}
+  try{
+    const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+    let node=walker.nextNode() as Text|null;
+    while(node){
+      if(!node.isConnected)return false;
+      if((node.parentElement?.closest("[data-sogur-page-spacer]"))||!node.data.length){node=walker.nextNode() as Text|null;continue}
+      const range=document.createRange();range.selectNodeContents(node);
+      const rects=Array.from(range.getClientRects()).filter(rect=>rect.height>.5);
+      const target=rects.find(rect=>rect.bottom>boundaryY+.5);
+      if(!target){node=walker.nextNode() as Text|null;continue}
 
-    const rectAt=(offset:number)=>{
-      if(!node||!node.data.length)return null;
-      const at=Math.max(0,Math.min(offset,node.data.length-1));
-      const probe=document.createRange();probe.setStart(node,at);probe.setEnd(node,Math.min(node.data.length,at+1));
-      return Array.from(probe.getClientRects()).find(rect=>rect.height>.5)??probe.getBoundingClientRect();
-    };
+      const rectAt=(offset:number)=>{
+        if(!node||!node.isConnected||!node.data.length)return null;
+        const at=Math.max(0,Math.min(offset,node.data.length-1));
+        const probe=document.createRange();probe.setStart(node,at);probe.setEnd(node,Math.min(node.data.length,at+1));
+        return Array.from(probe.getClientRects()).find(rect=>rect.height>.5)??probe.getBoundingClientRect();
+      };
 
-    let low=0,high=Math.max(0,node.data.length-1);
-    while(low<high){
-      const mid=Math.floor((low+high)/2),rect=rectAt(mid);
-      if(rect&&rect.top>=target.top-.75)high=mid;else low=mid+1;
+      let low=0,high=Math.max(0,node.data.length-1);
+      while(low<high){
+        const mid=Math.floor((low+high)/2),rect=rectAt(mid);
+        if(rect&&rect.top>=target.top-.75)high=mid;else low=mid+1;
+      }
+      let offset=low;
+      while(offset>0){
+        const previous=rectAt(offset-1);
+        if(!previous||previous.top<target.top-.75)break;
+        offset--;
+      }
+      if(!node.isConnected)return false;
+
+      const spacer=document.createElement("span");
+      spacer.setAttribute("data-sogur-page-spacer","true");
+      spacer.setAttribute("contenteditable","false");
+      spacer.setAttribute("aria-hidden","true");
+      spacer.style.cssText="display:inline-block;width:100%;height:1px;box-sizing:border-box;margin:0;padding:0;border:0;font-size:0;line-height:0;vertical-align:top;overflow:hidden;pointer-events:none;user-select:none";
+
+      const insertion=document.createRange();
+      insertion.setStart(node,Math.min(offset,node.data.length));
+      insertion.collapse(true);
+      insertion.insertNode(spacer);
+      void spacer.offsetHeight;
+      if(!spacer.isConnected)return false;
+      const spacerTop=spacer.getBoundingClientRect().top;
+      const height=Math.max(1,nextBodyY-spacerTop);
+      spacer.style.height=`${height}px`;
+      return true;
     }
-    let offset=low;
-    while(offset>0){
-      const previous=rectAt(offset-1);
-      if(!previous||previous.top<target.top-.75)break;
-      offset--;
-    }
-
-    const spacer=document.createElement("span");
-    spacer.setAttribute("data-sogur-page-spacer","true");
-    spacer.setAttribute("contenteditable","false");
-    spacer.setAttribute("aria-hidden","true");
-    spacer.style.cssText="display:inline-block;width:100%;height:1px;box-sizing:border-box;margin:0;padding:0;border:0;font-size:0;line-height:0;vertical-align:top;overflow:hidden;pointer-events:none;user-select:none";
-
-    const insertion=document.createRange();
-    insertion.setStart(node,offset);
-    insertion.collapse(true);
-    insertion.insertNode(spacer);
-    void spacer.offsetHeight;
-    const spacerTop=spacer.getBoundingClientRect().top;
-    const height=Math.max(1,nextBodyY-spacerTop);
-    spacer.style.height=`${height}px`;
-    return true;
+    return false;
+  }catch{
+    return false;
   }
-  return false;
 }
 
 function pageBlocks(flow:HTMLElement){
@@ -99,7 +106,7 @@ function sceneBreakNeighbours(flow:HTMLElement,sceneBreak:HTMLElement){
 
 export default function ManuscriptPageSurface({children,className=""}:{children:ReactNode;className?:string}){
   const {layout,displayMode}=useManuscriptLayout();
-  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),runtimeLayoutRef=useRef(false);
+  const surfaceRef=useRef<HTMLDivElement>(null),flowRef=useRef<HTMLDivElement>(null),frameRef=useRef<number|null>(null),runtimeLayoutRef=useRef(false),lastFlowHeightRef=useRef(0);
   const [pageCount,setPageCount]=useState(1),[currentPage,setCurrentPage]=useState(1),[canvasHeight,setCanvasHeight]=useState(0),[pageStride,setPageStride]=useState(layout.pageHeightMm*MM_TO_PX+28);
 
   const restoreAll=useCallback(()=>{
@@ -112,6 +119,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
     const surface=surfaceRef.current,flow=flowRef.current;
     if(displayMode!=="PAGES"||!surface||!flow)return;
     runtimeLayoutRef.current=true;
+    try{
     restoreAll();
     const sceneBreaks=Array.from(flow.querySelectorAll<HTMLElement>("[data-sogur-scene-break]"));
     sceneBreaks.forEach(element=>element.setAttribute("data-sogur-scene-break-hidden","true"));
@@ -235,11 +243,28 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       const rect=block.getBoundingClientRect();
       maxBottom=Math.max(maxBottom,rect.bottom-surfaceTop);
     }
+    const flowRect=flow.getBoundingClientRect();
+    maxBottom=Math.max(maxBottom,flowRect.bottom-surfaceTop,(flowRect.top-surfaceTop)+flow.scrollHeight);
     const count=Math.max(1,Math.floor(Math.max(0,maxBottom-1)/stride)+1);
     setPageCount(count);
     setPageStride(stride);
     setCanvasHeight(count*pageHeight+(count-1)*gap);
-    window.setTimeout(()=>{runtimeLayoutRef.current=false},0);
+    lastFlowHeightRef.current=flowRect.height;
+    }catch{
+      const fallbackPageHeight=layout.pageHeightMm*MM_TO_PX;
+      const fallbackGap=parseFloat(getComputedStyle(surface).getPropertyValue("--sogur-page-gap"))||28;
+      const fallbackStride=fallbackPageHeight+fallbackGap;
+      const fallbackSurfaceTop=surface.getBoundingClientRect().top;
+      const flowRect=flow.getBoundingClientRect();
+      const extent=Math.max(fallbackPageHeight,flowRect.bottom-fallbackSurfaceTop,(flowRect.top-fallbackSurfaceTop)+flow.scrollHeight);
+      const count=Math.max(1,Math.floor(Math.max(0,extent-1)/fallbackStride)+1);
+      setPageCount(count);
+      setPageStride(fallbackStride);
+      setCanvasHeight(count*fallbackPageHeight+(count-1)*fallbackGap);
+      lastFlowHeightRef.current=flowRect.height;
+    }finally{
+      runtimeLayoutRef.current=false;
+    }
   },[displayMode,layout,restoreAll]);
 
   useLayoutEffect(()=>{
@@ -255,15 +280,29 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
       if(mutations.some(mutation=>mutation.type==="childList"||mutation.type==="characterData"))schedule();
     });
     observer.observe(flow,{subtree:true,childList:true,characterData:true});
+    const resizeObserver=typeof ResizeObserver!=="undefined"?new ResizeObserver(entries=>{
+      if(runtimeLayoutRef.current)return;
+      const observed=entries[0]?.contentRect.height??flow.getBoundingClientRect().height;
+      if(Math.abs(observed-lastFlowHeightRef.current)>1){
+        lastFlowHeightRef.current=observed;
+        schedule();
+      }
+    }):null;
+    resizeObserver?.observe(flow);
+    let disposed=false;
+    if(typeof document!=="undefined"&&"fonts" in document)document.fonts.ready.then(()=>{if(!disposed)schedule()});
     flow.addEventListener("sogur:content-change",schedule);
     flow.addEventListener("load",schedule,true);
     window.addEventListener("resize",schedule);
     return()=>{
+      disposed=true;
       observer.disconnect();
+      resizeObserver?.disconnect();
       flow.removeEventListener("sogur:content-change",schedule);
       flow.removeEventListener("load",schedule,true);
       window.removeEventListener("resize",schedule);
       if(frameRef.current!==null)cancelAnimationFrame(frameRef.current);
+      runtimeLayoutRef.current=false;
       restoreAll();
     };
   },[displayMode,recalc,restoreAll]);
