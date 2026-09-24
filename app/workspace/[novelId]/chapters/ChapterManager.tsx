@@ -9,7 +9,6 @@ import {CHAPTER_TEMPLATE_TAGS,type ChapterTemplateDesign} from "@/lib/chapter-te
 import {chapterNumberMap,manuscriptChapterOrder,reorderChapterForDrop} from "@/lib/manuscript-order";
 import {PAGE_TYPE_OPTIONS,pageTypeLabel} from "@/lib/manuscript-item";
 import PageSetupButton from "../../PageSetupButton";
-import ManuscriptPageSurface from "../../ManuscriptPageSurface";
 import ManuscriptViewToggle from "../../ManuscriptViewToggle";
 
 type Part={id:string;title:string;position:number};
