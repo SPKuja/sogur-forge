@@ -41,17 +41,25 @@ function cleanRuntimeAttributes(element:HTMLElement){
 
 function normaliseTopLevelNodes(source:HTMLElement){
   const result:HTMLElement[]=[];
-  for(const node of Array.from(source.childNodes)){
+  const appendNode=(node:Node,segmentId="")=>{
     if(node.nodeType===Node.TEXT_NODE){
-      if(!(node.textContent??"").trim())continue;
+      if(!(node.textContent??"").trim())return;
       const p=document.createElement("p");
       p.textContent=node.textContent;
+      if(segmentId)p.dataset.sogurSegmentId=segmentId;
       result.push(p);
-      continue;
+      return;
     }
-    if(!isElement(node))continue;
+    if(!isElement(node))return;
+    const containerSegment=node.getAttribute("data-sogur-segment-container");
+    if(containerSegment){
+      for(const child of Array.from(node.childNodes))appendNode(child,containerSegment);
+      return;
+    }
+    if(segmentId&&!node.dataset.sogurSegmentId)node.dataset.sogurSegmentId=segmentId;
     result.push(node);
-  }
+  };
+  for(const node of Array.from(source.childNodes))appendNode(node);
   if(!result.length){
     const p=document.createElement("p");
     p.append(document.createElement("br"));
@@ -116,6 +124,25 @@ export function serialisePagedDocument(root:HTMLElement){
   const box=document.createElement("div");
   for(const block of output)box.append(block);
   return box.innerHTML;
+}
+
+export function splitHtmlBySegment(html:string,segmentIds:string[]){
+  const source=document.createElement("div");
+  source.innerHTML=html;
+  const buckets=new Map(segmentIds.map(id=>[id,[] as string[]]));
+  let current=segmentIds[0]??"";
+  for(const node of Array.from(source.children) as HTMLElement[]){
+    if(node.hasAttribute("data-sogur-scene-break"))continue;
+    const explicit=node.dataset.sogurSegmentId;
+    if(explicit&&buckets.has(explicit))current=explicit;
+    if(!current)continue;
+    const clone=node.cloneNode(true) as HTMLElement;
+    clone.removeAttribute("data-sogur-segment-id");
+    clone.removeAttribute("data-sogur-segment-container");
+    cleanRuntimeAttributes(clone);
+    buckets.get(current)?.push(clone.outerHTML);
+  }
+  return new Map(Array.from(buckets.entries()).map(([id,parts])=>[id,parts.join("")]));
 }
 
 export function canonicalBlocksFromHtml(html:string){
