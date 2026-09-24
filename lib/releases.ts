@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.38",
+    date:"24 September 2026",
+    title:"Keep live pages alive",
+    added:[
+      "Live manuscript pagination now watches rendered flow height as well as DOM edits, so asynchronously loaded scene content and layout-height changes trigger a fresh page pass."
+    ],
+    changed:[
+      "Page counts now fall back to the actual rendered manuscript height when block measurement is incomplete."
+    ],
+    fixed:[
+      "A transient live-editor DOM range failure can no longer leave pagination permanently locked and unable to recalculate.",
+      "The internal pagination lock is always cleared, even when a layout pass encounters temporary contentEditable DOM changes.",
+      "The chapter editor can no longer remain on a single physical sheet while prose continues into the grey canvas after a failed layout pass."
+    ]
+  },
+  {
     version:"0.0.37",
     date:"24 September 2026",
     title:"Let paragraphs cross the page",
