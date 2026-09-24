@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.49",
+    date:"24 September 2026",
+    title:"Keep mid-word edits in place",
+    added:[],
+    changed:[],
+    fixed:[
+      "Pages mode finishes restoring the caret before sending edits to the rest of the app.",
+      "If an edited page is rebuilt during React synchronisation, its logical caret block keeps the same identity."
+    ]
+  },
+  {
     version:"0.0.48",
     date:"24 September 2026",
     title:"Keep the caret where you put it",
