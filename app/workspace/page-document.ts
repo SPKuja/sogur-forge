@@ -23,6 +23,60 @@ function nextBlockId(){
   return `b-${Date.now().toString(36)}-${blockSequence.toString(36)}`;
 }
 
+export function resetPagedBlockIdentity(element:HTMLElement){
+  element.setAttribute(BLOCK_ATTR,nextBlockId());
+  element.removeAttribute(FRAGMENT_ATTR);
+  element.removeAttribute(CONTINUATION_ATTR);
+}
+
+function logicalBlockForNode(root:HTMLElement,node:Node){
+  const element=node.nodeType===Node.ELEMENT_NODE?node as HTMLElement:node.parentElement;
+  if(!element||!root.contains(element))return null;
+  const identified=element.closest<HTMLElement>(`[${BLOCK_ATTR}]`);
+  if(identified&&root.contains(identified))return identified;
+
+  let candidate:HTMLElement|null=element;
+  while(candidate&&candidate!==root){
+    const parentElement:HTMLElement|null=candidate.parentElement;
+    if(parentElement?.hasAttribute(BODY_ATTR))return candidate;
+    candidate=parentElement;
+  }
+  return null;
+}
+
+export function ensurePagedCaretIdentity(root:HTMLElement){
+  const selection=window.getSelection();
+  const node=selection?.focusNode;
+  if(!node||!root.contains(node))return null;
+  const block=logicalBlockForNode(root,node);
+  if(!block)return null;
+  if(!block.hasAttribute(BLOCK_ATTR))resetPagedBlockIdentity(block);
+  return block;
+}
+
+export function finalisePagedParagraphBreak(root:HTMLElement,paragraph:HTMLElement){
+  if(!root.contains(paragraph))return;
+  const blocks=directBlocks(root);
+  const index=blocks.indexOf(paragraph);
+  if(index<0){
+    resetPagedBlockIdentity(paragraph);
+    return;
+  }
+
+  const inheritedId=paragraph.getAttribute(BLOCK_ATTR);
+  const freshId=nextBlockId();
+  const segmentId=paragraph.dataset.sogurSegmentId??"";
+
+  for(let i=index;i<blocks.length;i++){
+    const block=blocks[i];
+    if(i>index&&(!inheritedId||block.getAttribute(BLOCK_ATTR)!==inheritedId))break;
+    block.setAttribute(BLOCK_ATTR,freshId);
+    block.removeAttribute(FRAGMENT_ATTR);
+    block.removeAttribute(CONTINUATION_ATTR);
+    if(segmentId&&!block.dataset.sogurSegmentId)block.dataset.sogurSegmentId=segmentId;
+  }
+}
+
 function isElement(node:Node):node is HTMLElement{
   return node.nodeType===Node.ELEMENT_NODE;
 }
@@ -475,8 +529,7 @@ export function capturePagedCaret(root:HTMLElement):PagedCaret|null{
   if(!selection?.rangeCount||!selection.isCollapsed)return null;
   const node=selection.focusNode;
   if(!node||!root.contains(node))return null;
-  const element=node.nodeType===Node.ELEMENT_NODE?node as HTMLElement:node.parentElement;
-  const block=element?.closest<HTMLElement>(`[${BLOCK_ATTR}]`);
+  const block=ensurePagedCaretIdentity(root);
   if(!block)return null;
   const blockId=block.getAttribute(BLOCK_ATTR);
   if(!blockId)return null;
@@ -513,12 +566,12 @@ export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
     remaining-=length;
   }
   const point=pointAtTextOffset(target,remaining);
-  if(!point)return;
 
   try{
     root.focus({preventScroll:true});
     const range=document.createRange();
-    range.setStart(point.node,Math.min(point.offset,point.node.data.length));
+    if(point)range.setStart(point.node,Math.min(point.offset,point.node.data.length));
+    else range.setStart(target,0);
     range.collapse(true);
     const selection=window.getSelection();
     selection?.removeAllRanges();
@@ -542,6 +595,7 @@ export function paginateDocument(
   caret?:PagedCaret|null
 ):PaginateResult{
   const captured=caret===undefined?capturePagedCaret(root):caret;
+  const viewport=typeof window!=="undefined"?{x:window.scrollX,y:window.scrollY}:null;
   const blocks=html===undefined?canonicalBlocksFromRoot(root):canonicalBlocksFromHtml(html);
 
   root.classList.add("sogur-paged-document");
@@ -564,6 +618,7 @@ export function paginateDocument(
   }
 
   const pageCount=pageBodies(root).length||1;
+  if(viewport)window.scrollTo(viewport.x,viewport.y);
   restorePagedCaret(root,captured);
   return {pageCount};
 }

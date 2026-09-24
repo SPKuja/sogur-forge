@@ -357,6 +357,7 @@
   background:transparent!important;
   box-shadow:none!important;
   overflow:visible;
+  overflow-anchor:none;
 }
 .rich-editor.sogur-paged-editor>.sogur-physical-page{
   position:relative;
@@ -444,3 +445,5 @@
 
 .imagebar button.danger{color:var(--danger,#dc2626)}
 .imagebar button.danger:hover{background:color-mix(in srgb,var(--danger,#dc2626) 10%,transparent)}
+
+.sogur-paged-editor>.sogur-physical-page,.sogur-paged-editor .sogur-physical-page-body{overflow-anchor:none}
