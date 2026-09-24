@@ -534,3 +534,17 @@
   .paged-formatbar{top:66px!important;width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important}
   .focus .paged-formatbar{top:10px!important}
 }
+
+
+/* Pages v2 supporting details */
+.sogur-pagination-source{display:none!important}
+.sogur-paged-editor .scene-manuscript-break{
+  display:block!important;
+  margin:1.45em 0;
+  text-align:center;
+  color:var(--muted);
+  font:700 11px/1 var(--font-writing);
+  letter-spacing:.35em;
+  user-select:none;
+}
+.sogur-paged-preview{user-select:text}
