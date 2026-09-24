@@ -57,16 +57,22 @@ function insertLineSpacer(block:HTMLElement,boundaryY:number,nextBodyY:number){
       }
       if(!node.isConnected)return false;
 
+      const lineBreak=document.createElement("br");
+      lineBreak.setAttribute("data-sogur-page-break","true");
+      lineBreak.setAttribute("aria-hidden","true");
+
       const spacer=document.createElement("span");
       spacer.setAttribute("data-sogur-page-spacer","true");
       spacer.setAttribute("contenteditable","false");
       spacer.setAttribute("aria-hidden","true");
       spacer.style.cssText="display:inline-block;width:100%;height:1px;box-sizing:border-box;margin:0;padding:0;border:0;font-size:0;line-height:0;vertical-align:top;overflow:hidden;pointer-events:none;user-select:none";
 
+      const fragment=document.createDocumentFragment();
+      fragment.append(lineBreak,spacer);
       const insertion=document.createRange();
       insertion.setStart(node,Math.min(offset,node.data.length));
       insertion.collapse(true);
-      insertion.insertNode(spacer);
+      insertion.insertNode(fragment);
       void spacer.offsetHeight;
       if(!spacer.isConnected)return false;
       const spacerTop=spacer.getBoundingClientRect().top;
@@ -111,7 +117,7 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
 
   const restoreAll=useCallback(()=>{
     const flow=flowRef.current;if(!flow)return;
-    flow.querySelectorAll<HTMLElement>("[data-sogur-page-spacer]").forEach(element=>element.remove());
+    flow.querySelectorAll<HTMLElement>("[data-sogur-page-break],[data-sogur-page-spacer]").forEach(element=>element.remove());
     flow.querySelectorAll<HTMLElement>("[data-sogur-page-shift]").forEach(restoreShift);
   },[]);
 
