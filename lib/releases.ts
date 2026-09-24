@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.53",
+    date:"24 September 2026",
+    title:"Keep pasted image groups intact",
+    added:[],
+    changed:[],
+    fixed:[
+      "Whole-chapter cut and copy now capture the logical manuscript, including every image, even when browser selection HTML omits some figures.",
+      "Backspace or Delete on an empty chapter keeps an editable paragraph and caret.",
+      "Deleting a selected image removes only that figure while preserving the other images in its pasted group.",
+      "Pasted figures containing multiple image elements are separated into individual figures."
+    ]
+  },
+  {
     version:"0.0.52",
     date:"24 September 2026",
     title:"Cut and paste chapters with images",
