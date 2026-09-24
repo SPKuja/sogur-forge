@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.54",
+    date:"24 September 2026",
+    title:"Keep image-only chapters editable",
+    added:[],
+    changed:[],
+    fixed:[
+      "Image-only chapters now retain an editable paragraph after the final image, including after reload or deletion.",
+      "Backspace and Delete preserve the viewport while Pages mode rebuilds the chapter."
+    ]
+  },
+  {
     version:"0.0.53",
     date:"24 September 2026",
     title:"Keep pasted image groups intact",
