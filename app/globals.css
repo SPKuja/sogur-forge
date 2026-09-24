@@ -399,14 +399,12 @@
   object-fit:contain;
 }
 .paged-formatbar{
-  position:fixed!important;
-  left:50%;
-  top:74px!important;
+  position:sticky!important;
+  top:82px!important;
   z-index:85;
-  transform:translateX(-50%);
   width:min(760px,calc(100vw - 36px))!important;
   max-width:calc(100vw - 36px)!important;
-  margin:0!important;
+  margin:0 auto 16px!important;
   background:color-mix(in srgb,var(--surface) 96%,transparent)!important;
   box-shadow:0 10px 28px rgba(16,29,48,.16)!important;
   backdrop-filter:blur(16px);
@@ -424,7 +422,7 @@
 .focus .paged-imagebar{top:68px!important}
 @media(max-width:760px){
   .rich-editor.sogur-paged-editor{gap:20px;padding:12px 0 60px!important}
-  .paged-formatbar{top:66px!important;width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important}
+  .paged-formatbar{top:68px!important;width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;margin-bottom:12px!important}
   .focus .paged-formatbar{top:10px!important}
 }
 

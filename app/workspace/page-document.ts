@@ -495,11 +495,15 @@ export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
     const selection=window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(range);
-    if(caret.viewportTop!==null){
-      const rect=range.getBoundingClientRect();
-      const delta=rect.top-caret.viewportTop;
-      if(Number.isFinite(delta)&&Math.abs(delta)>.5)window.scrollBy(0,delta);
-    }
+    const rect=range.getBoundingClientRect();
+    const toolbar=document.querySelector<HTMLElement>(".paged-formatbar");
+    const toolbarRect=toolbar?.getBoundingClientRect();
+    const safeTop=toolbarRect&&toolbarRect.bottom>0&&toolbarRect.top<window.innerHeight?toolbarRect.bottom+12:16;
+    const safeBottom=window.innerHeight-24;
+    let delta=0;
+    if(rect.bottom>safeBottom)delta=rect.bottom-safeBottom;
+    else if(rect.top<safeTop)delta=rect.top-safeTop;
+    if(Number.isFinite(delta)&&Math.abs(delta)>.5)window.scrollBy(0,delta);
   }catch{}
 }
 
