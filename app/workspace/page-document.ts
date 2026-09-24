@@ -366,11 +366,15 @@ function pageLastMeaningfulBlock(body:HTMLElement){
   return children.at(-1)??null;
 }
 
-function cleanTrailingSceneOrnaments(root:HTMLElement){
+function trailingSceneOrnamentIds(root:HTMLElement){
+  const ids=new Set<string>();
   for(const body of pageBodies(root)){
     const last=pageLastMeaningfulBlock(body);
-    if(last?.hasAttribute("data-sogur-scene-break"))last.remove();
+    if(!last?.hasAttribute("data-sogur-scene-break"))continue;
+    const id=last.getAttribute(BLOCK_ATTR);
+    if(id)ids.add(id);
   }
+  return ids;
 }
 
 function appendLogicalBlock(
@@ -505,15 +509,25 @@ export function paginateDocument(
   const captured=caret===undefined?capturePagedCaret(root):caret;
   const blocks=html===undefined?canonicalBlocksFromRoot(root):canonicalBlocksFromHtml(html);
 
-  root.innerHTML="";
   root.classList.add("sogur-paged-document");
   root.dataset.sogurPagination="v2";
 
-  const state={body:createPage(root,layout,0),pageIndex:0};
-  for(const block of blocks)appendLogicalBlock(root,layout,state,block);
+  const suppressedSceneBreaks=new Set<string>();
+  for(let pass=0;pass<4;pass++){
+    root.innerHTML="";
+    const state={body:createPage(root,layout,0),pageIndex:0};
+    for(const block of blocks){
+      const id=block.getAttribute(BLOCK_ATTR)??"";
+      if(id&&suppressedSceneBreaks.has(id))continue;
+      appendLogicalBlock(root,layout,state,block);
+    }
+    markFragmentRoles(root);
+    const trailing=trailingSceneOrnamentIds(root);
+    const fresh=[...trailing].filter(id=>!suppressedSceneBreaks.has(id));
+    if(!fresh.length)break;
+    fresh.forEach(id=>suppressedSceneBreaks.add(id));
+  }
 
-  cleanTrailingSceneOrnaments(root);
-  markFragmentRoles(root);
   const pageCount=pageBodies(root).length||1;
   restorePagedCaret(root,captured);
   return {pageCount};
@@ -568,13 +582,6 @@ export function flattenPagedDocument(root:HTMLElement,html:string){
 }
 
 export function currentPagedPage(root:HTMLElement){
-  const selection=window.getSelection();
-  const node=selection?.focusNode;
-  if(node&&root.contains(node)){
-    const element=node.nodeType===Node.ELEMENT_NODE?node as HTMLElement:node.parentElement;
-    const page=element?.closest<HTMLElement>(`[${PAGE_ATTR}]`);
-    if(page)return Number(page.dataset.sogurPageIndex??0)+1;
-  }
   const pages=Array.from(root.querySelectorAll<HTMLElement>(`:scope > [${PAGE_ATTR}]`));
   const middle=window.innerHeight*.5;
   let nearest=1,distance=Number.POSITIVE_INFINITY;
