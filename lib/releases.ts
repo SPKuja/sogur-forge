@@ -13,6 +13,18 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.52",
+    date:"24 September 2026",
+    title:"Cut and paste chapters with images",
+    added:[],
+    changed:[],
+    fixed:[
+      "Cutting selected manuscript text now keeps embedded images in the clipboard HTML.",
+      "Pasting a selection with text and images restores the entire selection rather than only its first image.",
+      "Cutting an entire chapter leaves a valid blank paragraph so the chapter can be pasted back immediately."
+    ]
+  },
+  {
     version:"0.0.51",
     date:"24 September 2026",
     title:"Copy images between chapters",

@@ -99,7 +99,7 @@ export function cleanPastedPages(html:string){
   const source=document.createElement("div");
   source.innerHTML=html;
   const pages=Array.from(source.querySelectorAll<HTMLElement>(`[${PAGE_ATTR}],.sogur-physical-page`));
-  if(!pages.length)return null;
+  if(!pages.length&&!source.querySelector("figure.manuscript-image"))return null;
   for(const page of pages){
     const body=page.querySelector<HTMLElement>(`[${BODY_ATTR}],.sogur-physical-page-body`);
     page.replaceWith(...Array.from((body??page).childNodes));
@@ -299,6 +299,12 @@ export function canonicalBlocksFromHtml(html:string){
 
 function canonicalBlocksFromRoot(root:HTMLElement){
   const blocks=directBlocks(root);
+  if(!blocks.length){
+    const paragraph=document.createElement("p");
+    paragraph.append(document.createElement("br"));
+    paragraph.setAttribute(BLOCK_ATTR,nextBlockId());
+    return [paragraph];
+  }
   const merged:HTMLElement[]=[];
   let previousId="",previousOutput:HTMLElement|null=null;
 
