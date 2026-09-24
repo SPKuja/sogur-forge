@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.55",
+    date:"24 September 2026",
+    title:"Edit below template images",
+    added:[],
+    changed:[],
+    fixed:[
+      "Clicking the white space below a template image now places the caret in an editable paragraph.",
+      "Existing chapters with no editable block on the clicked page receive one before typing."
+    ]
+  },
+  {
     version:"0.0.54",
     date:"24 September 2026",
     title:"Keep image-only chapters editable",
