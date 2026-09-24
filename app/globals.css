@@ -453,3 +453,84 @@
 .manuscript-page-surface.pages.native-pages-unsupported .manuscript-page-sheet{
   flex-shrink:0;
 }
+
+
+/* Pages v2 — real physical page containers */
+.rich-editor.sogur-paged-editor{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:28px;
+  width:100%;
+  min-height:0!important;
+  padding:18px 0 66px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible;
+}
+.rich-editor.sogur-paged-editor>.sogur-physical-page{
+  position:relative;
+  flex:0 0 auto;
+  box-sizing:border-box;
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--line) 86%,transparent);
+  border-radius:2px;
+  background:var(--paper);
+  box-shadow:0 12px 34px rgba(16,29,48,.13);
+  color:var(--paper-ink);
+}
+[data-theme=dark] .rich-editor.sogur-paged-editor>.sogur-physical-page{
+  box-shadow:0 15px 38px rgba(0,0,0,.35);
+}
+.sogur-physical-page-body{
+  position:relative;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+.sogur-paged-editor [data-sogur-page-continuation="true"]{
+  text-indent:0!important;
+}
+.sogur-paged-editor [data-sogur-fragment="start"],
+.sogur-paged-editor [data-sogur-fragment="middle"]{
+  margin-bottom:0!important;
+}
+.sogur-paged-editor figure.manuscript-image{
+  max-height:100%;
+}
+.sogur-paged-editor figure.manuscript-image img{
+  max-height:calc(var(--manuscript-content-height) - 10mm);
+  object-fit:contain;
+}
+.paged-formatbar{
+  position:fixed!important;
+  left:50%;
+  top:74px!important;
+  z-index:85;
+  transform:translateX(-50%);
+  width:min(760px,calc(100vw - 36px))!important;
+  max-width:calc(100vw - 36px)!important;
+  margin:0!important;
+  background:color-mix(in srgb,var(--surface) 96%,transparent)!important;
+  box-shadow:0 10px 28px rgba(16,29,48,.16)!important;
+  backdrop-filter:blur(16px);
+}
+.focus .paged-formatbar{top:18px!important}
+.paged-imagebar{
+  position:fixed!important;
+  left:50%;
+  top:124px!important;
+  z-index:86;
+  transform:translateX(-50%);
+  margin:0!important;
+  background:var(--surface)!important;
+}
+.focus .paged-imagebar{top:68px!important}
+@media(max-width:760px){
+  .rich-editor.sogur-paged-editor{gap:20px;padding:12px 0 60px!important}
+  .paged-formatbar{top:66px!important;width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important}
+  .focus .paged-formatbar{top:10px!important}
+}
