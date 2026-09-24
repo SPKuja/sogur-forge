@@ -113,41 +113,39 @@ function refreshStoryReferences(){
   if(ranges.length)registry.set(highlightName,new HighlightCtor(...ranges));referenceMatches.current=matches;
 }
 function pageMarginMouseDown(event:ReactMouseEvent<HTMLDivElement>){
-  if(!pagesMode||!ref.current)return;
-  const target=event.target as HTMLElement,page=target.closest<HTMLElement>("[data-sogur-physical-page]");
-  if(!page||target.closest("[data-sogur-page-body]"))return;
+  const root=ref.current;
+  if(!pagesMode||!root)return;
+  const target=event.target as HTMLElement;
+  const page=target.closest<HTMLElement>("[data-sogur-physical-page]");
+  if(!page)return;
   const body=page.querySelector<HTMLElement>("[data-sogur-page-body]");
   if(!body)return;
+  const insideBody=body.contains(target);
+  if(insideBody&&target.closest("p,h1,h2,h3,h4,h5,h6,blockquote,li,[contenteditable=true]"))return;
   event.preventDefault();
-  const rect=body.getBoundingClientRect();
-  const x=Math.max(rect.left+1,Math.min(event.clientX,rect.right-1));
-  const y=Math.max(rect.top+1,Math.min(event.clientY,rect.bottom-1));
-  let node:Node|null=null,offset=0;
-  if("caretPositionFromPoint" in document){
-    const position=document.caretPositionFromPoint(x,y);
-    node=position?.offsetNode??null;
-    offset=position?.offset??0;
-  }else{
-    const legacy=(document as Document&{caretRangeFromPoint?:(x:number,y:number)=>Range|null}).caretRangeFromPoint?.(x,y);
-    node=legacy?.startContainer??null;
-    offset=legacy?.startOffset??0;
+  const lastImage=Array.from(body.querySelectorAll<HTMLElement>("figure.manuscript-image")).at(-1);
+  const belowImage=Boolean(lastImage&&event.clientY>=lastImage.getBoundingClientRect().bottom-4);
+  const candidates=Array.from(body.querySelectorAll<HTMLElement>("p,h1,h2,h3,h4,h5,h6,blockquote,li"))
+    .filter(block=>!block.closest("figure.manuscript-image")&&(!belowImage||Boolean(lastImage!.compareDocumentPosition(block)&Node.DOCUMENT_POSITION_FOLLOWING)));
+  let paragraph=candidates.reduce<HTMLElement|null>((best,block)=>{
+    if(!best)return block;
+    const distance=(element:HTMLElement)=>{
+      const rect=element.getBoundingClientRect();
+      return Math.max(rect.top-event.clientY,0,event.clientY-rect.bottom);
+    };
+    return distance(block)<distance(best)?block:best;
+  },null);
+  if(!paragraph){
+    const blank=document.createElement("p");
+    blank.append(document.createElement("br"));
+    body.append(blank);
+    emit();
+    paragraph=Array.from(root.querySelectorAll<HTMLElement>("[data-sogur-page-body] > p")).at(-1)??null;
   }
-  if(!node||!body.contains(node)){
-    const walker=document.createTreeWalker(body,NodeFilter.SHOW_TEXT);
-    node=walker.nextNode();
-    offset=0;
-  }
-  if(!node)return;
-  try{
-    ref.current.focus({preventScroll:true});
-    const range=document.createRange();
-    range.setStart(node,Math.min(offset,node.nodeType===Node.TEXT_NODE?(node as Text).data.length:node.childNodes.length));
-    range.collapse(true);
-    const selection=window.getSelection();
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-    rememberCaret();
-  }catch{}
+  if(!paragraph)return;
+  root.focus({preventScroll:true});
+  placeCaretAtBlockEdge(paragraph,Boolean(paragraph.textContent?.trim())&&event.clientY>=paragraph.getBoundingClientRect().bottom);
+  rememberCaret();
 }
 function referenceMove(event:ReactMouseEvent<HTMLDivElement>){if(!referencesEnabled){setReferenceHover(null);return}let found:StoryReference|undefined;for(const match of referenceMatches.current){for(const box of Array.from(match.range.getClientRects()))if(event.clientX>=box.left&&event.clientX<=box.right&&event.clientY>=box.top&&event.clientY<=box.bottom){found=match.reference;break}if(found)break}if(!found){setReferenceHover(null);return}const x=Math.max(12,Math.min(event.clientX+14,window.innerWidth-320)),y=event.clientY+190>window.innerHeight?Math.max(12,event.clientY-178):event.clientY+18;setReferenceHover(current=>current?.reference.id===found?.id?current:{reference:found!,x,y})}
  function wrapRange(range:Range,anchorId:string){const root=ref.current;if(!root)return;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes:Text[]=[];let node:Node|null;while((node=walker.nextNode())){const t=node as Text;if(t.data&&range.intersectsNode(t))nodes.push(t)}const parts=nodes.map(n=>({n,start:n===range.startContainer?range.startOffset:0,end:n===range.endContainer?range.endOffset:n.data.length})).filter(p=>p.end>p.start);for(const p of parts){let target=p.n;if(p.start>0)target=target.splitText(p.start);const length=p.end-p.start;if(length<target.data.length)target.splitText(length);const span=document.createElement("span");span.className="note-anchor";span.dataset.noteAnchor=anchorId;target.parentNode?.insertBefore(span,target);span.appendChild(target)}emit()}
