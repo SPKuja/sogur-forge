@@ -600,6 +600,47 @@ export function currentPagedPage(root:HTMLElement){
   return nearest;
 }
 
+export function deletePagedFragmentCharacter(root:HTMLElement,direction:"backward"|"forward"){
+  const selection=window.getSelection();
+  if(!selection?.rangeCount||!selection.isCollapsed)return false;
+  const node=selection.focusNode;
+  if(!node||!root.contains(node))return false;
+  const element=node.nodeType===Node.ELEMENT_NODE?node as HTMLElement:node.parentElement;
+  const block=element?.closest<HTMLElement>(`[${BLOCK_ATTR}]`);
+  const blockId=block?.getAttribute(BLOCK_ATTR);
+  if(!block||!blockId)return false;
+
+  const fragments=Array.from(root.querySelectorAll<HTMLElement>(`[${BLOCK_ATTR}="${CSS.escape(blockId)}"]`));
+  if(fragments.length<2)return false;
+
+  const caret=capturePagedCaret(root);
+  if(!caret||caret.blockId!==blockId)return false;
+  const total=fragments.reduce((sum,fragment)=>sum+textLength(fragment),0);
+  const targetOffset=direction==="backward"?caret.textOffset-1:caret.textOffset;
+  if(targetOffset<0||targetOffset>=total)return false;
+
+  let remaining=targetOffset,targetNode:Text|null=null,targetNodeOffset=0;
+  outer:for(const fragment of fragments){
+    for(const text of allTextNodes(fragment)){
+      if(remaining<text.data.length){
+        targetNode=text;
+        targetNodeOffset=remaining;
+        break outer;
+      }
+      remaining-=text.data.length;
+    }
+  }
+  if(!targetNode)return false;
+
+  targetNode.deleteData(targetNodeOffset,1);
+  restorePagedCaret(root,{
+    blockId,
+    textOffset:direction==="backward"?Math.max(0,caret.textOffset-1):caret.textOffset,
+    viewportTop:null
+  });
+  return true;
+}
+
 export function pageBodyForNode(node:Node|null){
   const element=node?.nodeType===Node.ELEMENT_NODE?node as HTMLElement:node?.parentElement;
   return element?.closest<HTMLElement>(`[${BODY_ATTR}]`)??null;
