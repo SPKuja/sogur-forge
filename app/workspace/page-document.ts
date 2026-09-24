@@ -122,7 +122,37 @@ export function serialisePagedDocument(root:HTMLElement){
   }
 
   const box=document.createElement("div");
-  for(const block of output)box.append(block);
+  const hasSegments=output.some(block=>Boolean(block.dataset.sogurSegmentId));
+  if(!hasSegments){
+    for(const block of output)box.append(block);
+    return box.innerHTML;
+  }
+
+  let container:HTMLElement|null=null,currentSegment="";
+  for(const block of output){
+    if(block.hasAttribute("data-sogur-scene-break")){
+      block.removeAttribute(BLOCK_ATTR);
+      block.removeAttribute(FRAGMENT_ATTR);
+      block.removeAttribute(CONTINUATION_ATTR);
+      box.append(block);
+      container=null;
+      currentSegment="";
+      continue;
+    }
+    const segmentId=block.dataset.sogurSegmentId??currentSegment;
+    if(!segmentId){
+      box.append(block);
+      continue;
+    }
+    if(!container||segmentId!==currentSegment){
+      container=document.createElement("div");
+      container.setAttribute("data-sogur-segment-container",segmentId);
+      box.append(container);
+      currentSegment=segmentId;
+    }
+    block.removeAttribute("data-sogur-segment-id");
+    container.append(block);
+  }
   return box.innerHTML;
 }
 
@@ -133,6 +163,19 @@ export function splitHtmlBySegment(html:string,segmentIds:string[]){
   let current=segmentIds[0]??"";
   for(const node of Array.from(source.children) as HTMLElement[]){
     if(node.hasAttribute("data-sogur-scene-break"))continue;
+    const containerId=node.getAttribute("data-sogur-segment-container");
+    if(containerId&&buckets.has(containerId)){
+      const clone=node.cloneNode(true) as HTMLElement;
+      cleanRuntimeAttributes(clone);
+      for(const child of Array.from(clone.children) as HTMLElement[]){
+        child.removeAttribute("data-sogur-segment-id");
+        child.removeAttribute("data-sogur-segment-container");
+        cleanRuntimeAttributes(child);
+        buckets.get(containerId)?.push(child.outerHTML);
+      }
+      current=containerId;
+      continue;
+    }
     const explicit=node.dataset.sogurSegmentId;
     if(explicit&&buckets.has(explicit))current=explicit;
     if(!current)continue;
