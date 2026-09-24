@@ -363,7 +363,9 @@
   flex:0 0 auto;
   box-sizing:border-box;
   overflow:hidden;
-  border:1px solid color-mix(in srgb,var(--line) 86%,transparent);
+  border:0;
+  outline:1px solid color-mix(in srgb,var(--line) 86%,transparent);
+  outline-offset:-1px;
   border-radius:2px;
   background:var(--paper);
   box-shadow:0 12px 34px rgba(16,29,48,.13);
