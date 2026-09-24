@@ -13,6 +13,21 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.41",
+    date:"24 September 2026",
+    title:"Keep the page under the cursor",
+    added:[],
+    changed:[
+      "Live Pages mode now waits briefly for active typing/caret movement to settle before repaginating instead of rewriting page markers on every animation frame.",
+      "The paginator captures the active editor’s logical caret offset and viewport position, then restores both after a page reflow."
+    ],
+    fixed:[
+      "Typing inside a paginated chapter no longer fights the browser’s caret scrolling while the page layout is recalculated.",
+      "Chrome scroll anchoring is disabled inside the physical-page flow so it cannot counteract Sögur Forge’s own caret-position preservation.",
+      "Scene editing can continue scrolling normally while pagination updates after the keystroke rather than during it."
+    ]
+  },
+  {
     version:"0.0.40",
     date:"24 September 2026",
     title:"Keep typing",
