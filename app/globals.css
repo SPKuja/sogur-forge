@@ -385,3 +385,8 @@
 
 /* Page-aware scene separators */
 .manuscript-page-surface.pages .scene-manuscript-break[data-sogur-scene-break-hidden="true"]{display:none!important}
+
+
+/* Stable live editing inside physical pages */
+.manuscript-page-surface.pages .manuscript-page-flow{overflow-anchor:none}
+.manuscript-page-surface.pages [data-sogur-page-container][contenteditable="true"]{overflow-anchor:none}
