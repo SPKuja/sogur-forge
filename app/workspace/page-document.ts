@@ -566,12 +566,12 @@ export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
     remaining-=length;
   }
   const point=pointAtTextOffset(target,remaining);
-  if(!point)return;
 
   try{
     root.focus({preventScroll:true});
     const range=document.createRange();
-    range.setStart(point.node,Math.min(point.offset,point.node.data.length));
+    if(point)range.setStart(point.node,Math.min(point.offset,point.node.data.length));
+    else range.setStart(target,0);
     range.collapse(true);
     const selection=window.getSelection();
     selection?.removeAllRanges();
