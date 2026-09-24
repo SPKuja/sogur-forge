@@ -13,6 +13,25 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.41",
+    date:"24 September 2026",
+    title:"Native pages",
+    added:[
+      "Live Pages mode now uses Chromium's native wrapped multi-column fragmentation so editable prose flows between physical page bodies without injecting page-break nodes into the manuscript.",
+      "Unsupported browsers fall back to one continuous paper surface instead of allowing text to cross fake page gaps."
+    ],
+    changed:[
+      "Physical sheets are now visual only; the browser's layout engine handles line fragmentation, page-body height and inter-page spacing.",
+      "Scene ornaments remain optional and can be suppressed when the next scene naturally fragments onto a fresh page without touching editable text.",
+      "New-page chapter starts use native column fragmentation in Full Manuscript."
+    ],
+    fixed:[
+      "Typing can no longer split a word or paragraph around temporary pagination markers, such as leaving a single character stranded before a page gap.",
+      "Live page boundaries no longer depend on runtime BR, spacer or margin mutations inside contentEditable.",
+      "Caret movement, scrolling and browser editing behaviour are no longer coupled to Sögur Forge inserting and removing page-break nodes while the author types."
+    ]
+  },
+  {
     version:"0.0.40",
     date:"24 September 2026",
     title:"Keep typing",
