@@ -402,8 +402,7 @@
     column-count:1;
     column-height:var(--manuscript-content-height);
     column-wrap:wrap;
-    column-gap:0;
-    row-gap:calc(var(--manuscript-margin-top) + var(--manuscript-margin-bottom) + var(--sogur-page-gap));
+    gap:calc(var(--manuscript-margin-top) + var(--manuscript-margin-bottom) + var(--sogur-page-gap)) 0;
   }
   .manuscript-page-surface.pages.native-page-flow [data-sogur-page-container]{
     display:block;
@@ -425,4 +424,32 @@
 .manuscript-page-surface.pages.native-pages-unsupported .manuscript-page-flow{
   column-count:auto;
   margin-bottom:var(--manuscript-margin-bottom);
+}
+
+
+/* Keep visual sheets and native fragment rows on the same CSS coordinate system */
+.manuscript-page-sheets{
+  position:absolute;
+  inset:0 auto auto 0;
+  z-index:0;
+  display:flex;
+  flex-direction:column;
+  gap:var(--sogur-page-gap);
+  width:var(--manuscript-page-width);
+  pointer-events:none;
+}
+.manuscript-page-sheets .manuscript-page-sheet{
+  position:relative;
+  inset:auto;
+  top:auto!important;
+  left:auto;
+  flex:0 0 var(--manuscript-page-height);
+  width:100%;
+  height:var(--manuscript-page-height);
+}
+.manuscript-page-surface.pages.native-pages-unsupported .manuscript-page-sheets{
+  height:100%;
+}
+.manuscript-page-surface.pages.native-pages-unsupported .manuscript-page-sheet{
+  flex-shrink:0;
 }
