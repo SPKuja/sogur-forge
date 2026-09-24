@@ -93,6 +93,24 @@ function cleanRuntimeAttributes(element:HTMLElement){
   });
 }
 
+export function cleanPastedPages(html:string){
+  const source=document.createElement("div");
+  source.innerHTML=html;
+  const pages=Array.from(source.querySelectorAll<HTMLElement>(`[${PAGE_ATTR}],.sogur-physical-page`));
+  if(!pages.length)return null;
+  for(const page of pages){
+    const body=page.querySelector<HTMLElement>(`[${BODY_ATTR}],.sogur-physical-page-body`);
+    page.replaceWith(...Array.from((body??page).childNodes));
+  }
+  source.querySelectorAll<HTMLElement>(`[${BODY_ATTR}],.sogur-physical-page-body`).forEach(body=>body.replaceWith(...Array.from(body.childNodes)));
+  source.querySelectorAll<HTMLElement>("*").forEach(element=>{
+    cleanRuntimeAttributes(element);
+    element.removeAttribute("data-sogur-segment-id");
+    element.removeAttribute("data-sogur-segment-container");
+  });
+  return source.innerHTML;
+}
+
 function normaliseTopLevelNodes(source:HTMLElement){
   const result:HTMLElement[]=[];
   const appendNode=(node:Node,segmentId="")=>{
@@ -105,6 +123,15 @@ function normaliseTopLevelNodes(source:HTMLElement){
       return;
     }
     if(!isElement(node))return;
+    if(node.matches(`[${PAGE_ATTR}],.sogur-physical-page`)){
+      const body=node.querySelector<HTMLElement>(`[${BODY_ATTR}],.sogur-physical-page-body`);
+      for(const child of Array.from((body??node).childNodes))appendNode(child,segmentId);
+      return;
+    }
+    if(node.matches(`[${BODY_ATTR}],.sogur-physical-page-body`)){
+      for(const child of Array.from(node.childNodes))appendNode(child,segmentId);
+      return;
+    }
     const containerSegment=node.getAttribute("data-sogur-segment-container");
     if(containerSegment){
       for(const child of Array.from(node.childNodes))appendNode(child,containerSegment);
