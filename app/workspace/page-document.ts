@@ -469,6 +469,48 @@ export function paginateDocument(
   return {pageCount};
 }
 
+function cleanLogicalBlockForOutput(block:HTMLElement){
+  const clone=block.cloneNode(true) as HTMLElement;
+  clone.removeAttribute("data-sogur-segment-id");
+  clone.removeAttribute("data-sogur-segment-container");
+  cleanRuntimeAttributes(clone);
+  return clone;
+}
+
+export function splitPagedSegmentAtCaret(root:HTMLElement,segmentId:string){
+  const caret=capturePagedCaret(root);
+  if(!caret)return null;
+  const blocks=canonicalBlocksFromRoot(root).filter(block=>block.dataset.sogurSegmentId===segmentId&&!block.hasAttribute("data-sogur-scene-break"));
+  const index=blocks.findIndex(block=>block.getAttribute(BLOCK_ATTR)===caret.blockId);
+  if(index<0)return null;
+
+  const current=blocks[index];
+  const point=pointAtTextOffset(current,caret.textOffset);
+  if(!point)return null;
+
+  const beforeRange=document.createRange();
+  beforeRange.selectNodeContents(current);
+  beforeRange.setEnd(point.node,point.offset);
+  const afterRange=document.createRange();
+  afterRange.selectNodeContents(current);
+  afterRange.setStart(point.node,point.offset);
+
+  const first=current.cloneNode(false) as HTMLElement;
+  first.append(beforeRange.cloneContents());
+  const second=current.cloneNode(false) as HTMLElement;
+  second.append(afterRange.cloneContents());
+
+  const beforeBlocks=[...blocks.slice(0,index).map(cleanLogicalBlockForOutput)];
+  const afterBlocks=[...blocks.slice(index+1).map(cleanLogicalBlockForOutput)];
+  if(hasRenderableContent(first))beforeBlocks.push(cleanLogicalBlockForOutput(first));
+  if(hasRenderableContent(second))afterBlocks.unshift(cleanLogicalBlockForOutput(second));
+
+  return {
+    beforeHtml:beforeBlocks.map(block=>block.outerHTML).join(""),
+    afterHtml:afterBlocks.map(block=>block.outerHTML).join("")
+  };
+}
+
 export function flattenPagedDocument(root:HTMLElement,html:string){
   root.classList.remove("sogur-paged-document");
   delete root.dataset.sogurPagination;
