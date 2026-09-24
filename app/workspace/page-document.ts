@@ -298,7 +298,10 @@ function prefixFits(element:HTMLElement,body:HTMLElement,offset:number){
 
 function splittable(element:HTMLElement){
   const tag=element.tagName.toUpperCase();
-  return tag==="P"||tag==="BLOCKQUOTE"||tag==="UL"||tag==="OL"||tag==="LI";
+  // Lists need item-aware fragmentation so their semantic structure and
+  // numbering survive recombination. Until that paginator exists, keep a
+  // list together rather than split it at an arbitrary text offset.
+  return tag==="P"||tag==="BLOCKQUOTE";
 }
 
 function splitElementForBody(element:HTMLElement,body:HTMLElement){
