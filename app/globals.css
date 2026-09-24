@@ -384,6 +384,7 @@
   box-sizing:border-box;
 }
 .sogur-paged-editor [data-sogur-page-continuation="true"]{
+  margin-top:0!important;
   text-indent:0!important;
 }
 .sogur-paged-editor [data-sogur-fragment="start"],
