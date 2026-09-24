@@ -23,6 +23,7 @@ export const RELEASES:ReleaseNote[]=[
     ],
     fixed:[
       "Pressing Enter near a page boundary no longer leaves the new paragraph temporarily anonymous, which could lose the selection and send the caret to the top of the chapter.",
+      "Pressing Enter in the middle of existing text now finalises the browser-created paragraph split before the first repagination, so both halves keep distinct logical identities and the caret stays with the second half.",
       "Browser scroll anchoring no longer competes with Sögur Forge while physical pages are rebuilt.",
       "After a reflow, the caret is restored to the same logical character and the viewport only moves if that position would otherwise be off-screen."
     ]
