@@ -385,3 +385,44 @@
 
 /* Page-aware scene separators */
 .manuscript-page-surface.pages .scene-manuscript-break[data-sogur-scene-break-hidden="true"]{display:none!important}
+
+
+/* Native physical-page fragmentation — leaves the editable DOM untouched */
+.manuscript-page-surface.pages.native-page-flow .manuscript-page-flow{
+  width:var(--manuscript-content-width)!important;
+  min-height:var(--manuscript-content-height);
+  margin:var(--manuscript-margin-top) 0 var(--manuscript-margin-bottom) calc(var(--manuscript-margin-inside) + var(--manuscript-gutter));
+  padding:0!important;
+  box-sizing:border-box;
+  overflow-anchor:auto;
+}
+.manuscript-page-surface.pages.native-page-flow [data-sogur-page-container][contenteditable="true"]{overflow-anchor:auto}
+@supports (column-height: 100px) and (column-wrap: wrap){
+  .manuscript-page-surface.pages.native-page-flow .manuscript-page-flow{
+    column-count:1;
+    column-height:var(--manuscript-content-height);
+    column-wrap:wrap;
+    column-gap:0;
+    row-gap:calc(var(--manuscript-margin-top) + var(--manuscript-margin-bottom) + var(--sogur-page-gap));
+  }
+  .manuscript-page-surface.pages.native-page-flow [data-sogur-page-container]{
+    display:block;
+    width:100%;
+    min-height:0!important;
+    margin:0;
+    padding:0!important;
+    break-inside:auto;
+  }
+  .manuscript-page-surface.pages.native-page-flow .scene-continuous-item,
+  .manuscript-page-surface.pages.native-page-flow .full-manuscript-item{break-inside:auto}
+  .manuscript-page-surface.pages.native-page-flow .rich-editor p,
+  .manuscript-page-surface.pages.native-page-flow .rich-editor blockquote{break-inside:auto}
+  .manuscript-page-surface.pages.native-page-flow .rich-editor h2{break-after:avoid}
+  .manuscript-page-surface.pages.native-page-flow figure.manuscript-image{break-inside:avoid}
+  .manuscript-page-surface.pages.native-page-flow.chapter-start-new-page .manuscript-item-start,
+  .manuscript-page-surface.pages.native-page-flow.chapter-start-recto .manuscript-item-start{break-before:column}
+}
+.manuscript-page-surface.pages.native-pages-unsupported .manuscript-page-flow{
+  column-count:auto;
+  margin-bottom:var(--manuscript-margin-bottom);
+}
