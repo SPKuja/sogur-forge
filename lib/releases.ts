@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.45",
+    date:"24 September 2026",
+    title:"Delete across the page",
+    added:[],
+    changed:[],
+    fixed:[
+      "Backspace and Delete now edit the logical paragraph when the caret sits inside a paragraph rendered across multiple physical pages.",
+      "Deleting the final character from a page-continuation fragment no longer throws the caret back to the top of the chapter."
+    ]
+  },
+  {
     version:"0.0.44",
     date:"24 September 2026",
     title:"Pages polish",
