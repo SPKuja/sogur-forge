@@ -148,7 +148,18 @@ function normaliseTopLevelNodes(source:HTMLElement){
     p.append(document.createElement("br"));
     result.push(p);
   }
+  if(endsWithImage(result.at(-1)!)){
+    const p=document.createElement("p");
+    p.append(document.createElement("br"));
+    result.push(p);
+  }
   return result;
+}
+
+function endsWithImage(block:HTMLElement){
+  if(block.matches("figure.manuscript-image"))return true;
+  const descendants=block.querySelectorAll("figure.manuscript-image,p,h1,h2,h3,h4,h5,h6,blockquote,li");
+  return descendants.length>0&&descendants[descendants.length-1].matches("figure.manuscript-image");
 }
 
 function assignMissingSegmentIds(blocks:HTMLElement[]){
@@ -323,6 +334,14 @@ function canonicalBlocksFromRoot(root:HTMLElement){
     previousOutput=clone;
   }
   assignMissingSegmentIds(merged);
+  if(merged.length&&endsWithImage(merged[merged.length-1])){
+    const p=document.createElement("p");
+    p.append(document.createElement("br"));
+    p.setAttribute(BLOCK_ATTR,nextBlockId());
+    const segmentId=merged[merged.length-1].dataset.sogurSegmentId;
+    if(segmentId)p.dataset.sogurSegmentId=segmentId;
+    merged.push(p);
+  }
   return merged;
 }
 
@@ -606,7 +625,7 @@ export function restorePagedHistoryCaret(root:HTMLElement,caret:PagedHistoryCare
   if(id)restorePagedCaret(root,{blockId:id,textOffset:caret.textOffset,viewportTop:null});
 }
 
-export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
+export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null,scrollCaret=true){
   if(!caret)return;
   const fragments=Array.from(root.querySelectorAll<HTMLElement>(`[${BLOCK_ATTR}="${CSS.escape(caret.blockId)}"]`));
   if(!fragments.length)return;
@@ -636,7 +655,7 @@ export function restorePagedCaret(root:HTMLElement,caret:PagedCaret|null){
     let delta=0;
     if(rect.bottom>safeBottom)delta=rect.bottom-safeBottom;
     else if(rect.top<safeTop)delta=rect.top-safeTop;
-    if(Number.isFinite(delta)&&Math.abs(delta)>.5)window.scrollBy(0,delta);
+    if(scrollCaret&&caret.viewportTop!==null&&Number.isFinite(delta)&&Math.abs(delta)>.5)window.scrollBy(0,delta);
   }catch{}
 }
 
@@ -644,7 +663,8 @@ export function paginateDocument(
   root:HTMLElement,
   layout:ManuscriptLayoutSettings,
   html?:string,
-  caret?:PagedCaret|null
+  caret?:PagedCaret|null,
+  scrollCaret=true
 ):PaginateResult{
   const captured=caret===undefined?capturePagedCaret(root):caret;
   const viewport=typeof window!=="undefined"?{x:window.scrollX,y:window.scrollY}:null;
@@ -682,7 +702,8 @@ export function paginateDocument(
 
   const pageCount=pageBodies(root).length||1;
   if(viewport)window.scrollTo(viewport.x,viewport.y);
-  restorePagedCaret(root,captured);
+  restorePagedCaret(root,captured,scrollCaret);
+  if(!scrollCaret&&viewport)window.scrollTo(viewport.x,viewport.y);
   return {pageCount};
 }
 
