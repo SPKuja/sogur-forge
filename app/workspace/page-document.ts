@@ -101,6 +101,21 @@ function cloneForLogicalHtml(element:HTMLElement){
   const clone=element.cloneNode(true) as HTMLElement;
   cleanRuntimeAttributes(clone);
   clone.removeAttribute("contenteditable");
+  if(clone.matches("figure.manuscript-image")){
+    clone.removeAttribute("draggable");
+    clone.querySelectorAll<HTMLElement>("[draggable],[contenteditable]").forEach(child=>{
+      child.removeAttribute("draggable");
+      child.removeAttribute("contenteditable");
+    });
+  }
+  clone.querySelectorAll<HTMLElement>("figure.manuscript-image").forEach(figure=>{
+    figure.removeAttribute("contenteditable");
+    figure.removeAttribute("draggable");
+    figure.querySelectorAll<HTMLElement>("[draggable],[contenteditable]").forEach(child=>{
+      child.removeAttribute("draggable");
+      child.removeAttribute("contenteditable");
+    });
+  });
   return clone;
 }
 
