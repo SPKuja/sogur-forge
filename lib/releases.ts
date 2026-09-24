@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.50",
+    date:"24 September 2026",
+    title:"Clean chapter-to-chapter paste",
+    added:[],
+    changed:[],
+    fixed:[
+      "Copying an entire paged chapter into another chapter no longer pastes the physical page frame around its text.",
+      "Previously pasted page wrappers are flattened back into manuscript blocks when the chapter loads.",
+      "Ctrl+Z and Ctrl+Y (or Cmd+Z and Cmd+Shift+Z) now undo and redo Pages mode edits after repagination.",
+      "Selected manuscript images can be copied and pasted, and clipboard image files upload at the caret."
+    ]
+  },
+  {
     version:"0.0.49",
     date:"24 September 2026",
     title:"Keep mid-word edits in place",
