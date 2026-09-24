@@ -165,9 +165,11 @@ export default function ManuscriptPageSurface({children,className=""}:{children:
 
   return <div className={`manuscript-page-stage ${className}`}>
     <div ref={surfaceRef} className={`manuscript-page-surface pages native-page-flow chapter-start-${chapterStartClass}${unsupported?" native-pages-unsupported":""}`} style={{minHeight:canvasHeight||undefined}}>
-      {Array.from({length:visiblePages},(_,index)=><div key={index} className="manuscript-page-sheet" style={{top:`${index*pageStride}px`,height:unsupported&&index===0&&canvasHeight?canvasHeight:undefined}} aria-hidden="true"><span>{index+1}</span></div>)}
+      <div className="manuscript-page-sheets" aria-hidden="true">
+        {Array.from({length:visiblePages},(_,index)=><div key={index} className="manuscript-page-sheet" style={unsupported&&index===0&&canvasHeight?{height:canvasHeight,flexBasis:canvasHeight}:undefined}><span>{index+1}</span></div>)}
+      </div>
       <div ref={flowRef} className="manuscript-page-flow">{children}</div>
     </div>
-    <div className="manuscript-page-status" aria-live="polite">{unsupported?"Continuous fallback · Pages requires Chrome/Edge 145+":`Page ${currentPage} of ${pageCount}`}</div>
+    <div className="manuscript-page-status" aria-live="polite">{unsupported?"Pages preview is not supported by this browser · showing continuous layout":`Page ${currentPage} of ${pageCount}`}</div>
   </div>;
 }
