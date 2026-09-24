@@ -13,6 +13,16 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.56",
+    date:"24 September 2026",
+    title:"Reach the blank page caret",
+    added:[],
+    changed:[],
+    fixed:[
+      "Blank-area clicks beneath template images now reach the caret placement handler; the editor root no longer causes those clicks to be ignored."
+    ]
+  },
+  {
     version:"0.0.55",
     date:"24 September 2026",
     title:"Edit below template images",
