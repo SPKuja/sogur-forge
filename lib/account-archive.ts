@@ -8,12 +8,11 @@ function safeName(value:string){return value.normalize("NFKD").replace(/[^a-zA-Z
 function stripHtml(value:string){return value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<br\s*\/?\s*>/gi,"\n").replace(/<\/p\s*>/gi,"\n\n").replace(/<[^>]+>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\n{3,}/g,"\n\n").trim()}
 
 export async function accountArchive(userId:string,mode:"export"|"backup"){
-  const [account,novels,parts,chapters,scenes,revisions,assets,boards,notes,characters,images,relationships,templates,events,sessions,backupDestinations]=await Promise.all([
+  const [account,novels,parts,chapters,revisions,assets,boards,notes,characters,images,relationships,templates,events,sessions,backupDestinations]=await Promise.all([
     query<any>(`SELECT "id","username","email","emailVerifiedAt","role","totpEnabled","createdAt","updatedAt" FROM "User" WHERE "id"=$1`,[userId]),
     query<any>(`SELECT "id","title","description","createdAt","updatedAt" FROM "Novel" WHERE "userId"=$1 ORDER BY "updatedAt"`,[userId]),
     query<any>(`SELECT p.* FROM "Part" p JOIN "Novel" n ON n."id"=p."novelId" WHERE n."userId"=$1 ORDER BY p."novelId",p."position"`,[userId]),
     query<any>(`SELECT c.* FROM "Chapter" c JOIN "Novel" n ON n."id"=c."novelId" WHERE n."userId"=$1 ORDER BY c."novelId",c."position"`,[userId]),
-    query<any>(`SELECT s.* FROM "Scene" s JOIN "Chapter" c ON c."id"=s."chapterId" JOIN "Novel" n ON n."id"=c."novelId" WHERE n."userId"=$1 ORDER BY s."chapterId",s."position"`,[userId]),
     query<any>(`SELECT r.* FROM "ChapterRevision" r JOIN "Chapter" c ON c."id"=r."chapterId" JOIN "Novel" n ON n."id"=c."novelId" WHERE n."userId"=$1 ORDER BY r."chapterId",r."createdAt"`,[userId]),
     query<any>(`SELECT a.* FROM "Asset" a JOIN "Novel" n ON n."id"=a."novelId" WHERE n."userId"=$1 ORDER BY a."novelId",a."createdAt"`,[userId]),
     query<any>(`SELECT b.* FROM "CorkBoard" b JOIN "Novel" n ON n."id"=b."novelId" WHERE n."userId"=$1 ORDER BY b."novelId",b."position"`,[userId]),
@@ -36,7 +35,6 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
       sections:parts.rows.filter((item:any)=>item.novelId===novel.id),
       manuscript:chapters.rows.filter((item:any)=>item.novelId===novel.id).map((item:any)=>({
         ...item,
-        scenes:scenes.rows.filter((scene:any)=>scene.chapterId===item.id),
         revisions:revisions.rows.filter((revision:any)=>revision.chapterId===item.id),
         notes:notes.rows.filter((note:any)=>note.chapterId===item.id)
       })),
