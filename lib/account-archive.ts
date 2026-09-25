@@ -8,7 +8,7 @@ function safeName(value:string){return value.normalize("NFKD").replace(/[^a-zA-Z
 function stripHtml(value:string){return value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<br\s*\/?\s*>/gi,"\n").replace(/<\/p\s*>/gi,"\n\n").replace(/<[^>]+>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\n{3,}/g,"\n\n").trim()}
 
 export async function accountArchive(userId:string,mode:"export"|"backup"){
-  const [account,novels,parts,chapters,revisions,assets,boards,notes,characters,images,relationships,templates,events,sessions,backupDestinations]=await Promise.all([
+  const [account,novels,parts,chapters,revisions,assets,boards,notes,characters,images,relationships,locations,locationImages,locationCharacterLinks,templates,events,sessions,backupDestinations]=await Promise.all([
     query<any>(`SELECT "id","username","email","emailVerifiedAt","role","totpEnabled","createdAt","updatedAt" FROM "User" WHERE "id"=$1`,[userId]),
     query<any>(`SELECT "id","title","description","createdAt","updatedAt" FROM "Novel" WHERE "userId"=$1 ORDER BY "updatedAt"`,[userId]),
     query<any>(`SELECT p.* FROM "Part" p JOIN "Novel" n ON n."id"=p."novelId" WHERE n."userId"=$1 ORDER BY p."novelId",p."position"`,[userId]),
@@ -20,6 +20,9 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
     query<any>(`SELECT c.* FROM "Character" c JOIN "Novel" n ON n."id"=c."novelId" WHERE n."userId"=$1 ORDER BY c."novelId",c."position"`,[userId]),
     query<any>(`SELECT ci.* FROM "CharacterImage" ci JOIN "Character" c ON c."id"=ci."characterId" JOIN "Novel" n ON n."id"=c."novelId" WHERE n."userId"=$1 ORDER BY ci."characterId",ci."position"`,[userId]),
     query<any>(`SELECT r.* FROM "CharacterRelationship" r JOIN "Novel" n ON n."id"=r."novelId" WHERE n."userId"=$1 ORDER BY r."novelId",r."createdAt"`,[userId]),
+    query<any>(`SELECT l.* FROM "Location" l JOIN "Novel" n ON n."id"=l."novelId" WHERE n."userId"=$1 ORDER BY l."novelId",l."position"`,[userId]),
+    query<any>(`SELECT li.* FROM "LocationImage" li JOIN "Location" l ON l."id"=li."locationId" JOIN "Novel" n ON n."id"=l."novelId" WHERE n."userId"=$1 ORDER BY li."locationId",li."position"`,[userId]),
+    query<any>(`SELECT link.* FROM "LocationCharacterLink" link JOIN "Location" l ON l."id"=link."locationId" JOIN "Novel" n ON n."id"=l."novelId" WHERE n."userId"=$1 ORDER BY link."locationId",link."createdAt"`,[userId]),
     query<any>(`SELECT t.* FROM "ChapterTemplate" t JOIN "Novel" n ON n."id"=t."novelId" WHERE n."userId"=$1 ORDER BY t."novelId",t."createdAt"`,[userId]),
     query<any>(`SELECT "id","type","metadata","createdAt" FROM "SecurityEvent" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
     query<any>(`SELECT "id","lastSeenAt","expiresAt","absoluteExpiresAt","userAgent","createdAt" FROM "Session" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
@@ -41,6 +44,7 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
       chapterTemplates:templates.rows.filter((item:any)=>item.novelId===novel.id),
       characters:characters.rows.filter((item:any)=>item.novelId===novel.id).map((character:any)=>({...character,images:images.rows.filter((image:any)=>image.characterId===character.id)})),
       characterRelationships:relationships.rows.filter((item:any)=>item.novelId===novel.id),
+      locations:locations.rows.filter((item:any)=>item.novelId===novel.id).map((location:any)=>({...location,images:locationImages.rows.filter((image:any)=>image.locationId===location.id),characterLinks:locationCharacterLinks.rows.filter((link:any)=>link.locationId===location.id)})),
       corkBoards:boards.rows.filter((item:any)=>item.novelId===novel.id).map((board:any)=>({...board,notes:notes.rows.filter((note:any)=>note.boardId===board.id)})),
       unboardedNotes:notes.rows.filter((note:any)=>note.novelId===novel.id&&!note.boardId&&!note.chapterId),
       assets:assetRows.filter((item:any)=>item.novelId===novel.id).map(({storedName,...asset}:any)=>asset)
