@@ -30,13 +30,13 @@ export default async function NovelPage({
   searchParams
 }:{
   params:Promise<{novelId:string}>;
-  searchParams:Promise<{chapter?:string;scene?:string}>;
+  searchParams:Promise<{chapter?:string}>;
 }){
   const user=await currentUser();
   if(!user)redirect("/");
 
   const {novelId}=await params;
-  const {chapter:requestedChapter,scene:requestedScene}=await searchParams;
+  const {chapter:requestedChapter}=await searchParams;
   const novel=await query<{id:string;title:string}>(
     `SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,
     [novelId,user.id]
@@ -86,7 +86,6 @@ export default async function NovelPage({
     initialNotes={notes.rows}
     initialTemplates={templates.rows.map(normaliseChapterTemplate)}
     initialActiveId={initialActiveId}
-    initialSceneId={requestedScene}
     appVersion={CURRENT_VERSION}
   /></ManuscriptLayoutProvider>;
 }
