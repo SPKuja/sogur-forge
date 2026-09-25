@@ -220,7 +220,6 @@ model Chapter {
   template ChapterTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   headerImageAsset Asset? @relation("ChapterHeaderAsset", fields: [headerImageAssetId], references: [id], onDelete: SetNull)
   revisions ChapterRevision[]
-  scenes Scene[]
   stickyNotes StickyNote[]
   @@unique([novelId, position])
   @@index([partId])
@@ -229,28 +228,6 @@ model Chapter {
   @@index([headerImageAssetId])
 }
 
-
-model Scene {
-  id String @id @default(cuid())
-  chapterId String
-  povCharacterId String?
-  title String @default("")
-  content String @default("")
-  summary String @default("")
-  goal String @default("")
-  conflict String @default("")
-  outcome String @default("")
-  location String @default("")
-  status String @default("DRAFT")
-  position Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  povCharacter Character? @relation("ScenePovCharacter", fields: [povCharacterId], references: [id], onDelete: SetNull)
-  @@unique([chapterId, position])
-  @@index([chapterId])
-  @@index([povCharacterId])
-}
 
 model ChapterRevision {
   id String @id @default(cuid())
@@ -339,7 +316,6 @@ model Character {
   images CharacterImage[]
   relationshipsFrom CharacterRelationship[] @relation("RelationshipSource")
   relationshipsTo CharacterRelationship[] @relation("RelationshipTarget")
-  scenePovs Scene[] @relation("ScenePovCharacter")
   @@index([novelId, position])
   @@index([novelId, updatedAt])
 }
