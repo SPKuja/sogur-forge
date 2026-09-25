@@ -19,13 +19,10 @@ export const RELEASES:ReleaseNote[]=[
     added:[],
     changed:[
       "Chapters now edit as one continuous manuscript surface with no scene strip, scene metadata or nested scene editor.",
-      "Existing scene-enabled chapters are folded back into chapter content during migration, preserving their writing and visible * * * manuscript breaks."
+      "Existing scene-enabled chapters are folded back into chapter content during migration, preserving their writing and visible * * * manuscript breaks.",
+      "Scene creation, splitting, reordering, deletion, metadata, scene-specific navigation, APIs and the Scene database model have been removed."
     ],
-    fixed:[],
-    removed:[
-      "Scene creation, splitting, reordering, deletion, metadata and scene-specific navigation.",
-      "The Scene database model and scene API endpoints."
-    ]
+    fixed:[]
   },
   {
     version:"0.0.60",
