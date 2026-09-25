@@ -715,6 +715,58 @@ function cleanLogicalBlockForOutput(block:HTMLElement){
   return clone;
 }
 
+export function splitPagedParagraphAtCaret(
+  root:HTMLElement,
+  layout:ManuscriptLayoutSettings,
+  autoIndent=false
+){
+  const caret=capturePagedCaret(root);
+  if(!caret)return null;
+  const blocks=canonicalBlocksFromRoot(root);
+  const index=blocks.findIndex(block=>block.getAttribute(BLOCK_ATTR)===caret.blockId);
+  if(index<0)return null;
+
+  const current=blocks[index];
+  if(current.tagName.toUpperCase()!=="P")return null;
+
+  const first=current.cloneNode(false) as HTMLElement;
+  const second=current.cloneNode(false) as HTMLElement;
+  const point=pointAtTextOffset(current,caret.textOffset);
+
+  if(point){
+    const beforeRange=document.createRange();
+    beforeRange.selectNodeContents(current);
+    beforeRange.setEnd(point.node,point.offset);
+    const afterRange=document.createRange();
+    afterRange.selectNodeContents(current);
+    afterRange.setStart(point.node,point.offset);
+    first.append(beforeRange.cloneContents());
+    second.append(afterRange.cloneContents());
+  }
+
+  if(!hasRenderableContent(first))first.append(document.createElement("br"));
+  if(!hasRenderableContent(second))second.append(document.createElement("br"));
+
+  const firstId=current.getAttribute(BLOCK_ATTR)||nextBlockId();
+  first.setAttribute(BLOCK_ATTR,firstId);
+  first.removeAttribute(FRAGMENT_ATTR);
+  first.removeAttribute(CONTINUATION_ATTR);
+
+  resetPagedBlockIdentity(second);
+  second.classList.toggle("paragraph-indent",autoIndent);
+  const secondId=second.getAttribute(BLOCK_ATTR);
+  if(!secondId)return null;
+
+  blocks.splice(index,1,first,second);
+  const html=blocks.map(block=>block.outerHTML).join("");
+  const result=paginateDocument(root,layout,html,{
+    blockId:secondId,
+    textOffset:0,
+    viewportTop:caret.viewportTop
+  },false);
+  return result;
+}
+
 export function splitPagedSegmentAtCaret(root:HTMLElement,segmentId:string){
   const caret=capturePagedCaret(root);
   if(!caret)return null;
