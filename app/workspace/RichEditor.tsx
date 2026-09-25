@@ -1,4 +1,4 @@
-"use client";import {useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent as ReactKeyboardEvent,type MouseEvent as ReactMouseEvent} from "react";import AssetPicker,{type ProjectAsset} from "./AssetPicker";import type {StoryReference} from "@/lib/story-reference";import {WRITING_FONTS,WRITING_FONT_SIZES,writingFontIdFromComputed,writingFontSizeValueFromComputed} from "@/lib/editor-typography";import {useManuscriptLayout} from "./ManuscriptLayoutProvider";import {capturePagedCaret,capturePagedHistoryCaret,cleanPastedPages,currentPagedPage,deletePagedFragmentCharacter,ensurePagedCaretIdentity,finalisePagedParagraphBreak,restorePagedHistoryCaret,type PagedHistoryCaret,flattenPagedDocument,paginateDocument,serialisePagedDocument,splitPagedSegmentAtCaret} from "./page-document";
+"use client";import {useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent as ReactKeyboardEvent,type MouseEvent as ReactMouseEvent} from "react";import AssetPicker,{type ProjectAsset} from "./AssetPicker";import type {StoryReference} from "@/lib/story-reference";import {WRITING_FONTS,WRITING_FONT_SIZES,writingFontIdFromComputed,writingFontSizeValueFromComputed} from "@/lib/editor-typography";import {useManuscriptLayout} from "./ManuscriptLayoutProvider";import {capturePagedCaret,capturePagedHistoryCaret,cleanPastedPages,currentPagedPage,deletePagedFragmentCharacter,ensurePagedCaretIdentity,finalisePagedParagraphBreak,resetPagedBlockIdentity,restorePagedHistoryCaret,type PagedHistoryCaret,flattenPagedDocument,paginateDocument,serialisePagedDocument,splitPagedSegmentAtCaret} from "./page-document";
 type ReferenceMatch={range:Range;reference:StoryReference};type HighlightRegistryLike={set:(name:string,highlight:unknown)=>void;delete:(name:string)=>void};const escRegex=(value:string)=>value.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");const esc=(s:string)=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]!));export function legacyToHtml(v:string){if(!v)return "";if(/^\s*</.test(v))return v;return v.split(/\n{2,}/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("")}export function plainText(v:string){if(typeof document==="undefined")return v.replace(/<[^>]*>/g," ");const d=document.createElement("div");d.innerHTML=legacyToHtml(v);return d.textContent||""}function serialiseEditorHtml(root:HTMLElement){if(root.dataset.sogurPagination==="v2")return serialisePagedDocument(root);const clone=root.cloneNode(true) as HTMLElement;clone.querySelectorAll<HTMLElement>("[data-sogur-page-break],[data-sogur-page-spacer]").forEach(element=>element.remove());clone.querySelectorAll<HTMLElement>("[data-sogur-page-shift]").forEach(element=>{const original=element.getAttribute("data-sogur-page-original-margin-top")??"";if(original)element.style.marginTop=original;else element.style.removeProperty("margin-top");element.removeAttribute("data-sogur-page-shift");element.removeAttribute("data-sogur-page-original-margin-top");if(!element.getAttribute("style")?.trim())element.removeAttribute("style")});clone.querySelectorAll<HTMLElement>("figure.manuscript-image").forEach(figure=>{figure.removeAttribute("contenteditable");figure.removeAttribute("draggable");figure.querySelectorAll<HTMLElement>("[draggable]").forEach(child=>child.removeAttribute("draggable"))});return clone.innerHTML}
 function hardenManuscriptImages(root:HTMLElement){
   let repaired=false;
@@ -122,7 +122,7 @@ function pageMarginMouseDown(event:ReactMouseEvent<HTMLDivElement>){
   if(!body)return;
   const insideBody=body.contains(target);
   const textBlock=target.closest("p,h1,h2,h3,h4,h5,h6,blockquote,li");
-  if(insideBody&&textBlock&&body.contains(textBlock))return;
+  if(insideBody&&textBlock&&body.contains(textBlock)&&textBlock.textContent?.trim())return;
   event.preventDefault();
   const lastImage=Array.from(body.querySelectorAll<HTMLElement>("figure.manuscript-image")).at(-1);
   const belowImage=Boolean(lastImage&&event.clientY>=lastImage.getBoundingClientRect().bottom-4);
@@ -139,9 +139,14 @@ function pageMarginMouseDown(event:ReactMouseEvent<HTMLDivElement>){
   if(!paragraph){
     const blank=document.createElement("p");
     blank.append(document.createElement("br"));
+    resetPagedBlockIdentity(blank);
     body.append(blank);
+    paragraph=blank;
+    root.focus({preventScroll:true});
+    placeCaretAtBlockEdge(blank,false);
     emit();
-    paragraph=Array.from(root.querySelectorAll<HTMLElement>("[data-sogur-page-body] > p")).at(-1)??null;
+    rememberCaret();
+    return;
   }
   if(!paragraph)return;
   root.focus({preventScroll:true});
