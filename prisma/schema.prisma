@@ -161,6 +161,7 @@ model Novel {
   corkBoards CorkBoard[]
   characters Character[]
   characterRelationships CharacterRelationship[]
+  locations Location[]
   chapterTemplates ChapterTemplate[]
   layout NovelLayout?
   manuscriptViewPreferences ManuscriptViewPreference[]
@@ -251,6 +252,7 @@ model Asset {
   createdAt DateTime @default(now())
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   characterImages CharacterImage[]
+  locationImages LocationImage[]
   chapterTemplateHeaders ChapterTemplate[] @relation("TemplateHeaderAsset")
   chapterHeaderOverrides Chapter[] @relation("ChapterHeaderAsset")
   @@index([novelId, createdAt])
@@ -316,6 +318,7 @@ model Character {
   images CharacterImage[]
   relationshipsFrom CharacterRelationship[] @relation("RelationshipSource")
   relationshipsTo CharacterRelationship[] @relation("RelationshipTarget")
+  locationLinks LocationCharacterLink[]
   @@index([novelId, position])
   @@index([novelId, updatedAt])
 }
@@ -355,6 +358,61 @@ model CharacterRelationship {
   @@index([targetId])
 }
 
+
+model Location {
+  id String @id @default(cuid())
+  novelId String
+  parentId String?
+  name String @default("New Location")
+  aliases String @default("")
+  type String @default("")
+  region String @default("")
+  description String @default("")
+  atmosphere String @default("")
+  history String @default("")
+  significance String @default("")
+  notes String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  parent Location? @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Location[] @relation("LocationHierarchy")
+  images LocationImage[]
+  characterLinks LocationCharacterLink[]
+  @@index([novelId, position])
+  @@index([novelId, updatedAt])
+  @@index([parentId])
+}
+
+model LocationImage {
+  id String @id @default(cuid())
+  locationId String
+  assetId String
+  caption String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  @@unique([locationId, assetId])
+  @@index([locationId, position])
+  @@index([assetId])
+}
+
+model LocationCharacterLink {
+  id String @id @default(cuid())
+  locationId String
+  characterId String
+  type String @default("ASSOCIATED")
+  notes String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  @@unique([locationId, characterId])
+  @@index([locationId])
+  @@index([characterId])
+}
 
 model ChapterTemplate {
   id String @id @default(cuid())
