@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.57",
+    date:"25 September 2026",
+    title:"Keep the caret on the clicked page",
+    added:[],
+    changed:[],
+    fixed:[
+      "Clicking beneath a template image now focuses a paragraph on that page, even when the template's original blank paragraph appears on the next page.",
+      "Clicks on empty manuscript paragraphs explicitly place the caret so typing can begin."
+    ]
+  },
+  {
     version:"0.0.56",
     date:"24 September 2026",
     title:"Reach the blank page caret",
