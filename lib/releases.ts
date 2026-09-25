@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.58",
+    date:"25 September 2026",
+    title:"Repair empty template paragraphs",
+    added:[],
+    changed:[],
+    fixed:[
+      "Existing template chapters with empty zero-height paragraphs now restore a visible editable line beneath their images.",
+      "Empty manuscript paragraphs now have a visible caret target in Pages and continuous writing modes."
+    ]
+  },
+  {
     version:"0.0.57",
     date:"25 September 2026",
     title:"Keep the caret on the clicked page",

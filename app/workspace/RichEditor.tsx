@@ -88,6 +88,15 @@ function hardenManuscriptImages(root:HTMLElement){
       repaired=true;
     }
   });
+  // Older template chapters can contain <p></p> or <p><span></span></p>.
+  // These have no line box, so clicking the page can focus the editor without
+  // giving the browser a visible, writable caret.
+  root.querySelectorAll<HTMLParagraphElement>("p").forEach(paragraph=>{
+    if(paragraph.closest("figure,[contenteditable='false']"))return;
+    if(paragraph.textContent?.trim()||paragraph.querySelector("br,img,hr,svg,video,audio,iframe,canvas"))return;
+    paragraph.append(document.createElement("br"));
+    repaired=true;
+  });
   return repaired;
 }
 
