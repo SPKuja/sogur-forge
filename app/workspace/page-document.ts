@@ -767,6 +767,38 @@ export function splitPagedParagraphAtCaret(
   return result;
 }
 
+export function insertPagedSectionBreakAfterCaret(root:HTMLElement,layout:ManuscriptLayoutSettings){
+  const caret=capturePagedCaret(root);
+  if(!caret)return null;
+  const blocks=canonicalBlocksFromRoot(root);
+  const index=blocks.findIndex(block=>block.getAttribute(BLOCK_ATTR)===caret.blockId);
+  if(index<0)return null;
+
+  const divider=document.createElement("p");
+  divider.className="section-break";
+  divider.textContent="* * *";
+  divider.setAttribute(BLOCK_ATTR,nextBlockId());
+
+  let target=blocks[index+1];
+  const reusable=target?.tagName.toUpperCase()==="P"&&!hasRenderableContent(target);
+  if(!reusable){
+    target=document.createElement("p");
+    target.append(document.createElement("br"));
+    target.setAttribute(BLOCK_ATTR,nextBlockId());
+    blocks.splice(index+1,0,divider,target);
+  }else{
+    blocks.splice(index+1,0,divider);
+  }
+
+  const targetId=target.getAttribute(BLOCK_ATTR)||nextBlockId();
+  target.setAttribute(BLOCK_ATTR,targetId);
+  return paginateDocument(root,layout,blocks.map(block=>block.outerHTML).join(""),{
+    blockId:targetId,
+    textOffset:0,
+    viewportTop:caret.viewportTop
+  },false);
+}
+
 export function splitPagedSegmentAtCaret(root:HTMLElement,segmentId:string){
   const caret=capturePagedCaret(root);
   if(!caret)return null;
