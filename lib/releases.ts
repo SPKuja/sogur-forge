@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.60",
+    date:"25 September 2026",
+    title:"Make paragraph splitting native to Pages",
+    added:[],
+    changed:[
+      "Pages mode now creates paragraph breaks through the logical manuscript paginator instead of relying on the browser to split fragmented page DOM."
+    ],
+    fixed:[
+      "Pressing Enter inside an existing paragraph no longer allows the browser's contentEditable re-anchoring to send the manuscript view back to the top.",
+      "Paragraph splits preserve their logical block identity, inline content and scene ownership across page boundaries."
+    ]
+  },
+  {
     version:"0.0.59",
     date:"25 September 2026",
     title:"Keep paragraph splits in place",
