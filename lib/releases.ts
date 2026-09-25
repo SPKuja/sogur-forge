@@ -13,6 +13,19 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.62",
+    date:"25 September 2026",
+    title:"Add lightweight section breaks",
+    added:[
+      "A * * * Break button in the manuscript toolbar inserts a simple ornamental section divider after the current paragraph."
+    ],
+    changed:[
+      "Section breaks are ordinary manuscript content, with no nested scene records, metadata or special navigation.",
+      "The remaining scene-specific RichEditor props and toolbar wiring have been removed."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.61",
     date:"25 September 2026",
     title:"Simplify chapters by removing scenes",
