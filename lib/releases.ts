@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.59",
+    date:"25 September 2026",
+    title:"Keep paragraph splits in place",
+    added:[],
+    changed:[],
+    fixed:[
+      "Pressing Enter to split a paragraph in Pages mode now preserves the manuscript viewport instead of jumping back to the top.",
+      "Viewport preservation now includes scrollable editor ancestors as well as the browser window, covering embedded manuscript and template writing surfaces."
+    ]
+  },
+  {
     version:"0.0.58",
     date:"25 September 2026",
     title:"Repair empty template paragraphs",
