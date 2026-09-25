@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.63",
+    date:"25 September 2026",
+    title:"Build the Locations Story Bible",
+    added:[
+      "A complete Locations workspace with searchable profiles, nested parent/child locations and autosaving world-building fields.",
+      "Reusable project image galleries for locations, including a primary image.",
+      "Character-to-location links for residents, birthplaces, rulers, workplaces, visitors and other associations.",
+      "Location names and aliases now participate in manuscript Story Bible reference highlighting alongside characters."
+    ],
+    changed:[
+      "Locations are now available from both manuscript and Story Bible navigation.",
+      "Account exports and backups now include location profiles, image links and character connections."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.62",
     date:"25 September 2026",
     title:"Add lightweight section breaks",
