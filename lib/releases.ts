@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.64",
+    date:"26 September 2026",
+    title:"Build World Notes v1",
+    added:[
+      "A flexible World Notes workspace for factions, cultures, religions, magic, creatures, artifacts, events, technology, organisations, terminology and custom categories.",
+      "World Notes support aliases, summaries, detailed lore, story significance, private notes and reusable project image galleries.",
+      "Authors can connect World Notes to characters, locations and other World Notes with custom relationship labels and notes.",
+      "World Note names and aliases now participate in manuscript Story Bible reference highlighting."
+    ],
+    changed:[
+      "World Notes are available from manuscript and Story Bible navigation.",
+      "Account exports and backups now include World Notes, images and all Story Bible connections.",
+      "Story Bible hover cards display World Note as a friendly label."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.63",
     date:"25 September 2026",
     title:"Build the Locations Story Bible",
