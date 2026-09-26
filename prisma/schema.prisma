@@ -162,6 +162,7 @@ model Novel {
   characters Character[]
   characterRelationships CharacterRelationship[]
   locations Location[]
+  worldNotes WorldNote[]
   chapterTemplates ChapterTemplate[]
   layout NovelLayout?
   manuscriptViewPreferences ManuscriptViewPreference[]
@@ -253,6 +254,7 @@ model Asset {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   characterImages CharacterImage[]
   locationImages LocationImage[]
+  worldNoteImages WorldNoteImage[]
   chapterTemplateHeaders ChapterTemplate[] @relation("TemplateHeaderAsset")
   chapterHeaderOverrides Chapter[] @relation("ChapterHeaderAsset")
   @@index([novelId, createdAt])
@@ -319,6 +321,7 @@ model Character {
   relationshipsFrom CharacterRelationship[] @relation("RelationshipSource")
   relationshipsTo CharacterRelationship[] @relation("RelationshipTarget")
   locationLinks LocationCharacterLink[]
+  worldNoteLinks WorldNoteCharacterLink[]
   @@index([novelId, position])
   @@index([novelId, updatedAt])
 }
@@ -380,6 +383,7 @@ model Location {
   children Location[] @relation("LocationHierarchy")
   images LocationImage[]
   characterLinks LocationCharacterLink[]
+  worldNoteLinks WorldNoteLocationLink[]
   @@index([novelId, position])
   @@index([novelId, updatedAt])
   @@index([parentId])
@@ -412,6 +416,89 @@ model LocationCharacterLink {
   @@unique([locationId, characterId])
   @@index([locationId])
   @@index([characterId])
+}
+
+model WorldNote {
+  id String @id @default(cuid())
+  novelId String
+  name String @default("New World Note")
+  aliases String @default("")
+  category String @default("Lore")
+  summary String @default("")
+  details String @default("")
+  significance String @default("")
+  notes String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  images WorldNoteImage[]
+  characterLinks WorldNoteCharacterLink[]
+  locationLinks WorldNoteLocationLink[]
+  linksFrom WorldNoteRelation[] @relation("WorldNoteSource")
+  linksTo WorldNoteRelation[] @relation("WorldNoteTarget")
+  @@index([novelId, position])
+  @@index([novelId, category])
+  @@index([novelId, updatedAt])
+}
+
+model WorldNoteImage {
+  id String @id @default(cuid())
+  worldNoteId String
+  assetId String
+  caption String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  worldNote WorldNote @relation(fields: [worldNoteId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  @@unique([worldNoteId, assetId])
+  @@index([worldNoteId, position])
+  @@index([assetId])
+}
+
+model WorldNoteCharacterLink {
+  id String @id @default(cuid())
+  worldNoteId String
+  characterId String
+  label String @default("Associated")
+  notes String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  worldNote WorldNote @relation(fields: [worldNoteId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  @@unique([worldNoteId, characterId])
+  @@index([worldNoteId])
+  @@index([characterId])
+}
+
+model WorldNoteLocationLink {
+  id String @id @default(cuid())
+  worldNoteId String
+  locationId String
+  label String @default("Associated")
+  notes String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  worldNote WorldNote @relation(fields: [worldNoteId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@unique([worldNoteId, locationId])
+  @@index([worldNoteId])
+  @@index([locationId])
+}
+
+model WorldNoteRelation {
+  id String @id @default(cuid())
+  sourceId String
+  targetId String
+  label String @default("Related")
+  notes String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  source WorldNote @relation("WorldNoteSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target WorldNote @relation("WorldNoteTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  @@unique([sourceId, targetId])
+  @@index([sourceId])
+  @@index([targetId])
 }
 
 model ChapterTemplate {
