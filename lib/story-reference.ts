@@ -1,4 +1,4 @@
-export type StoryReferenceKind="CHARACTER"|"LOCATION";
+export type StoryReferenceKind="CHARACTER"|"LOCATION"|"WORLD_NOTE";
 
 export type StoryReference={
   id:string;
