@@ -8,7 +8,7 @@ export async function POST(request:NextRequest){
   if(!requireSameOrigin(request))return NextResponse.json({error:"Invalid origin"},{status:403});
   const user=await currentUser();
   if(!user)return NextResponse.json({error:"Unauthorized"},{status:401});
-  const body=await request.json(),novelId=String(body.novelId||""),parentId=body.parentId?String(body.parentId):null;
+  const body=await request.json(),novelId=String(body.novelId||""),parentId=body.parentId?String(body.parentId):null,name=String(body.name||"New Location").trim().slice(0,180)||"New Location";
   const owned=await query(`SELECT "id" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id]);
   if(!owned.rows[0])return NextResponse.json({error:"Not found"},{status:404});
   if(parentId){
@@ -17,7 +17,7 @@ export async function POST(request:NextRequest){
   }
   const next=await query<{position:number}>(`SELECT COALESCE(MAX("position"),-1)+1 AS "position" FROM "Location" WHERE "novelId"=$1`,[novelId]);
   const id=randomUUID(),position=Number(next.rows[0]?.position??0);
-  const created=await query(`INSERT INTO "Location" ("id","novelId","parentId","name","position","createdAt","updatedAt") VALUES ($1,$2,$3,'New Location',$4,NOW(),NOW()) RETURNING "id","parentId","name","aliases","type","region","description","atmosphere","history","significance","notes","position"`,[id,novelId,parentId,position]);
+  const created=await query(`INSERT INTO "Location" ("id","novelId","parentId","name","position","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,NOW(),NOW()) RETURNING "id","parentId","name","aliases","type","region","description","atmosphere","history","significance","notes","position"`,[id,novelId,parentId,name,position]);
   await query(`UPDATE "Novel" SET "updatedAt"=NOW() WHERE "id"=$1`,[novelId]);
   return NextResponse.json(created.rows[0],{status:201});
 }

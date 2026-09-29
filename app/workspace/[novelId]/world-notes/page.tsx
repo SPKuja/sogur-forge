@@ -14,9 +14,9 @@ type CharacterLink={id:string;worldNoteId:string;characterId:string;label:string
 type LocationLink={id:string;worldNoteId:string;locationId:string;label:string;notes:string};
 type Relation={id:string;sourceId:string;targetId:string;label:string;notes:string};
 
-export default async function Page({params}:{params:Promise<{novelId:string}>}){
+export default async function Page({params,searchParams}:{params:Promise<{novelId:string}>;searchParams:Promise<{note?:string}>}){
   const user=await currentUser();if(!user)redirect("/");
-  const {novelId}=await params;
+  const {novelId}=await params,{note:requestedNote}=await searchParams;
   const novel=await query<{id:string;title:string}>(`SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id]);if(!novel.rows[0])notFound();
   const [notes,images,characters,portraits,locations,locationImages,characterLinks,locationLinks,relations]=await Promise.all([
     query<NoteRow>(`SELECT "id","name","aliases","category","summary","details","significance","notes","position" FROM "WorldNote" WHERE "novelId"=$1 ORDER BY "position","createdAt"`,[novelId]),
@@ -33,5 +33,6 @@ export default async function Page({params}:{params:Promise<{novelId:string}>}){
   const entries=notes.rows.map(note=>({...note,images:images.rows.filter(image=>image.worldNoteId===note.id).map(image=>({...image,url:`/api/assets/${image.assetId}`}))}));
   const cast=characters.rows.map(character=>({...character,portraitUrl:portraitByCharacter.get(character.id)?`/api/assets/${portraitByCharacter.get(character.id)}`:null}));
   const places=locations.rows.map(location=>({...location,imageUrl:imageByLocation.get(location.id)?`/api/assets/${imageByLocation.get(location.id)}`:null}));
-  return <WorldNotesBible username={user.username} novel={novel.rows[0]} initialNotes={entries} characters={cast} locations={places} initialCharacterLinks={characterLinks.rows} initialLocationLinks={locationLinks.rows} initialRelations={relations.rows}/>;
+  const initialActiveId=notes.rows.some(note=>note.id===requestedNote)?requestedNote:notes.rows[0]?.id;
+  return <WorldNotesBible username={user.username} novel={novel.rows[0]} initialNotes={entries} characters={cast} locations={places} initialCharacterLinks={characterLinks.rows} initialLocationLinks={locationLinks.rows} initialRelations={relations.rows} initialActiveId={initialActiveId}/>;
 }

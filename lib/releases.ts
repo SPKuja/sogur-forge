@@ -13,6 +13,22 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.65",
+    date:"29 September 2026",
+    title:"Story Bible v2",
+    added:[
+      "Characters, Locations and World Notes now show manuscript mention counts, chapter snippets and direct links back to the manuscript.",
+      "Selected manuscript text can be turned directly into a named Character, Location or World Note from the right-click menu.",
+      "Story Bible deep links open a specific Character, Location or World Note profile."
+    ],
+    changed:[
+      "Story Bible relationships are now bidirectional in the UI: character profiles surface linked places and lore, location profiles surface linked lore, and connection cards navigate across the Bible.",
+      "Characters and Locations gain role/type filters to match World Notes category filtering.",
+      "Location hierarchy is clearer in the sidebar with visual nesting guides, and Story Bible labels and connection presentation are more consistent across all three areas."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.64",
     date:"26 September 2026",
     title:"Build World Notes v1",
