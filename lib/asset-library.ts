@@ -56,7 +56,7 @@ export async function loadAssetLibrary(novelId:string){
     query<LinkRow>(`SELECT ci."assetId",c."id",c."name" FROM "CharacterImage" ci JOIN "Character" c ON c."id"=ci."characterId" WHERE c."novelId"=$1`,[novelId]),
     query<LinkRow>(`SELECT li."assetId",l."id",l."name" FROM "LocationImage" li JOIN "Location" l ON l."id"=li."locationId" WHERE l."novelId"=$1`,[novelId]),
     query<LinkRow>(`SELECT wi."assetId",w."id",w."name" FROM "WorldNoteImage" wi JOIN "WorldNote" w ON w."id"=wi."worldNoteId" WHERE w."novelId"=$1`,[novelId]),
-    query<LinkRow>(`SELECT ii."assetId",s."id",COALESCE(NULLIF(s."title",''),LEFT(s."body",80),'Untitled idea') AS "name" FROM "IdeaImage" ii JOIN "StickyNote" s ON s."id"=ii."ideaId" WHERE s."novelId"=$1 AND s."kind"='IDEA'`,[novelId])
+    query<LinkRow>(`SELECT ii."assetId",s."id",COALESCE(NULLIF(s."title",''),NULLIF(LEFT(s."body",80),''),'Untitled idea') AS "name" FROM "IdeaImage" ii JOIN "StickyNote" s ON s."id"=ii."ideaId" WHERE s."novelId"=$1 AND s."kind"='IDEA'`,[novelId])
   ]);
   const known=new Set(assets.rows.map(asset=>asset.id));
   const usageMaps=new Map<string,Map<string,AssetUsage>>(assets.rows.map(asset=>[asset.id,new Map()]));
