@@ -64,7 +64,7 @@ export default async function NovelPage({
     query<{id:string;chapterId:string;body:string;color:string;anchorId:string|null;anchorQuote:string|null}>(
       `SELECT "id","chapterId","body","color","anchorId","anchorQuote"
        FROM "StickyNote"
-       WHERE "novelId"=$1 AND "chapterId" IS NOT NULL
+       WHERE "novelId"=$1 AND "chapterId" IS NOT NULL AND "kind"='NOTE'
        ORDER BY "createdAt"`,
       [novelId]
     ),
