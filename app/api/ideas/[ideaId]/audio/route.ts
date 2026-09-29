@@ -6,7 +6,7 @@ import {currentUser} from "@/lib/auth/session";
 import {requireSameOrigin} from "@/lib/auth/request";
 import {query} from "@/lib/db";
 const dir=process.env.IDEA_AUDIO_DIR||"/app/data/idea-audio";
-const allowed=new Map([["audio/webm",".webm"],["audio/ogg",".ogg"],["audio/mp4",".m4a"],["audio/mpeg",".mp3"],["audio/wav",".wav"],["audio/x-wav",".wav"]]);
+const allowed=new Map([["audio/webm",".webm"],["audio/ogg",".ogg"],["audio/mp4",".m4a"],["audio/x-m4a",".m4a"],["audio/aac",".aac"],["audio/mpeg",".mp3"],["audio/wav",".wav"],["audio/x-wav",".wav"]]);
 export async function POST(request:NextRequest,{params}:{params:Promise<{ideaId:string}>}){
   if(!requireSameOrigin(request))return NextResponse.json({error:"Invalid origin"},{status:403});const user=await currentUser();if(!user)return NextResponse.json({error:"Unauthorized"},{status:401});
   const {ideaId}=await params,idea=await query(`SELECT s."id" FROM "StickyNote" s JOIN "Novel" n ON n."id"=s."novelId" WHERE s."id"=$1 AND s."kind"='IDEA' AND n."userId"=$2`,[ideaId,user.id]);if(!idea.rows[0])return NextResponse.json({error:"Idea not found"},{status:404});
