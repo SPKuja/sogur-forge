@@ -255,6 +255,7 @@ model Asset {
   characterImages CharacterImage[]
   locationImages LocationImage[]
   worldNoteImages WorldNoteImage[]
+  ideaImages IdeaImage[]
   chapterTemplateHeaders ChapterTemplate[] @relation("TemplateHeaderAsset")
   chapterHeaderOverrides Chapter[] @relation("ChapterHeaderAsset")
   @@index([novelId, createdAt])
@@ -269,6 +270,7 @@ model CorkBoard {
   updatedAt DateTime @updatedAt
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   stickyNotes StickyNote[]
+  ideaPlacements IdeaBoardPlacement[]
   @@index([novelId, position])
 }
 
@@ -280,6 +282,11 @@ model StickyNote {
   anchorId String?
   anchorQuote String?
   body String @default("")
+  kind String @default("NOTE")
+  title String @default("")
+  category String @default("Idea")
+  tags String @default("")
+  status String @default("INBOX")
   color String @default("yellow")
   positionX Int @default(40)
   positionY Int @default(40)
@@ -290,12 +297,101 @@ model StickyNote {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   board CorkBoard? @relation(fields: [boardId], references: [id], onDelete: Cascade)
   chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  ideaPlacements IdeaBoardPlacement[]
+  ideaImages IdeaImage[]
+  ideaAudio IdeaAudio[]
+  ideaCharacterLinks IdeaCharacterLink[]
+  ideaLocationLinks IdeaLocationLink[]
+  ideaWorldNoteLinks IdeaWorldNoteLink[]
   @@index([novelId, updatedAt])
+  @@index([novelId, kind, updatedAt])
+  @@index([novelId, status])
   @@index([boardId])
   @@index([chapterId])
   @@index([anchorId])
 }
 
+
+model IdeaBoardPlacement {
+  id String @id @default(cuid())
+  ideaId String
+  boardId String
+  color String @default("yellow")
+  positionX Int @default(40)
+  positionY Int @default(40)
+  width Int @default(240)
+  height Int @default(190)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  board CorkBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  @@unique([ideaId, boardId])
+  @@index([boardId])
+  @@index([ideaId])
+}
+
+model IdeaImage {
+  id String @id @default(cuid())
+  ideaId String
+  assetId String
+  caption String @default("")
+  position Int @default(0)
+  createdAt DateTime @default(now())
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  @@unique([ideaId, assetId])
+  @@index([ideaId, position])
+  @@index([assetId])
+}
+
+model IdeaAudio {
+  id String @id @default(cuid())
+  ideaId String
+  originalName String @default("Voice note")
+  storedName String @unique
+  mimeType String
+  size Int
+  durationMs Int @default(0)
+  createdAt DateTime @default(now())
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  @@index([ideaId, createdAt])
+}
+
+model IdeaCharacterLink {
+  id String @id @default(cuid())
+  ideaId String
+  characterId String
+  createdAt DateTime @default(now())
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  @@unique([ideaId, characterId])
+  @@index([ideaId])
+  @@index([characterId])
+}
+
+model IdeaLocationLink {
+  id String @id @default(cuid())
+  ideaId String
+  locationId String
+  createdAt DateTime @default(now())
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@unique([ideaId, locationId])
+  @@index([ideaId])
+  @@index([locationId])
+}
+
+model IdeaWorldNoteLink {
+  id String @id @default(cuid())
+  ideaId String
+  worldNoteId String
+  createdAt DateTime @default(now())
+  idea StickyNote @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  worldNote WorldNote @relation(fields: [worldNoteId], references: [id], onDelete: Cascade)
+  @@unique([ideaId, worldNoteId])
+  @@index([ideaId])
+  @@index([worldNoteId])
+}
 
 model Character {
   id String @id @default(cuid())
@@ -322,6 +418,7 @@ model Character {
   relationshipsTo CharacterRelationship[] @relation("RelationshipTarget")
   locationLinks LocationCharacterLink[]
   worldNoteLinks WorldNoteCharacterLink[]
+  ideaLinks IdeaCharacterLink[]
   @@index([novelId, position])
   @@index([novelId, updatedAt])
 }
@@ -384,6 +481,7 @@ model Location {
   images LocationImage[]
   characterLinks LocationCharacterLink[]
   worldNoteLinks WorldNoteLocationLink[]
+  ideaLinks IdeaLocationLink[]
   @@index([novelId, position])
   @@index([novelId, updatedAt])
   @@index([parentId])
@@ -437,6 +535,7 @@ model WorldNote {
   locationLinks WorldNoteLocationLink[]
   linksFrom WorldNoteRelation[] @relation("WorldNoteSource")
   linksTo WorldNoteRelation[] @relation("WorldNoteTarget")
+  ideaLinks IdeaWorldNoteLink[]
   @@index([novelId, position])
   @@index([novelId, category])
   @@index([novelId, updatedAt])
