@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.68",
+    date:"29 September 2026",
+    title:"Simplify Ideas",
+    added:[],
+    changed:[
+      "Ideas now opens as a focused capture screen: search and select on the left, then title and notes on the right.",
+      "Image and voice-note actions sit directly beneath the note instead of occupying separate empty panels.",
+      "Status, category, tags, manuscript links, Corkboard placement and Story Bible links now live under one optional More section.",
+      "The Corkboard remains available from Ideas without duplicating idea content or removing any existing links and attachments."
+    ],
+    fixed:[]
+  },
+
+  {
     version:"0.0.67",
     date:"29 September 2026",
     title:"Merge Ideas and Corkboard",
