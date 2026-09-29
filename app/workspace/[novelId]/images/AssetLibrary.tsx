@@ -14,7 +14,7 @@ function bytes(value:number){
   return (value/(1024*1024)).toFixed(value>=10*1024*1024?0:1)+" MB";
 }
 function kindLabel(kind:string){
-  return ({MANUSCRIPT:"Manuscript",REVISION:"Revision history",TEMPLATE_CONTENT:"Template",CHAPTER_HEADER:"Chapter header",TEMPLATE_HEADER:"Template header",CHARACTER:"Character",LOCATION:"Location",WORLD_NOTE:"World Note"} as Record<string,string>)[kind]||kind;
+  return ({MANUSCRIPT:"Manuscript",REVISION:"Revision history",TEMPLATE_CONTENT:"Template",CHAPTER_HEADER:"Chapter header",TEMPLATE_HEADER:"Template header",CHARACTER:"Character",LOCATION:"Location",WORLD_NOTE:"World Note",IDEA:"Idea"} as Record<string,string>)[kind]||kind;
 }
 
 export default function AssetLibrary({username,novel}:{username:string;novel:{id:string;title:string}}){
