@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 
 type Theme="system"|"light"|"dark";
-export type WorkspaceSection="manuscript"|"characters"|"locations"|"cork-board"|"ideas"|"world-notes";
+export type WorkspaceSection="manuscript"|"characters"|"locations"|"cork-board"|"ideas"|"world-notes"|"images";
 
 export default function WorkspaceSectionSidebar({username,novel,active,open,onClose,beforeNavigate}:{username:string;novel:{id:string;title:string};active:WorkspaceSection;open:boolean;onClose:()=>void;beforeNavigate?:()=>Promise<void>|void}){
   const router=useRouter(),[theme,setTheme]=useState<Theme>("system");
@@ -21,6 +21,7 @@ export default function WorkspaceSectionSidebar({username,novel,active,open,onCl
       {item("cork-board","▣","Cork Board",`/workspace/${novel.id}/cork-board`)}
       {item("ideas","◌","Ideas")}
       {item("world-notes","◇","World notes",`/workspace/${novel.id}/world-notes`)}
+      {item("images","▧","Images",`/workspace/${novel.id}/images`)}
     </nav>
     <div className="sidebar-foot"><button className="sidebar-settings" onClick={()=>go("/settings")}>⚙ <span>Settings</span></button><div className="theme-switch">{(["system","light","dark"] as Theme[]).map(value=><button key={value} className={theme===value?"active":""} onClick={()=>setTheme(value)}>{value==="system"?"Auto":value[0].toUpperCase()+value.slice(1)}</button>)}</div></div>
   </aside>

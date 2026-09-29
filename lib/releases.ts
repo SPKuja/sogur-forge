@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.66",
+    date:"29 September 2026",
+    title:"Manage the project image library",
+    added:[
+      "A dedicated Images workspace shows every uploaded project image with search, Used/Unused filters, sorting, storage totals and multi-select controls.",
+      "Each image now has a Used in view covering manuscript content, chapter revisions, templates, chapter/template headers, Characters, Locations and World Notes.",
+      "Unused images can be safely deleted individually or in bulk, and images can be renamed without changing their stored file.",
+      "Multiple images can be uploaded at once by picker or drag and drop."
+    ],
+    changed:[
+      "Deleting an in-use image requires an explicit Remove uses & delete confirmation and cleans its manuscript, template and revision references before removing the asset.",
+      "Images are now available as a first-class project section from the workspace sidebar."
+    ],
+    fixed:[
+      "Project images no longer become permanently undeletable after upload."
+    ]
+  },
+  {
     version:"0.0.65",
     date:"29 September 2026",
     title:"Story Bible v2",
