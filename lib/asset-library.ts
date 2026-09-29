@@ -5,7 +5,7 @@ import {db,query} from "@/lib/db";
 const assetDir=process.env.ASSET_DIR||"/app/data/assets";
 
 export type AssetUsage={
-  kind:"MANUSCRIPT"|"REVISION"|"TEMPLATE_CONTENT"|"CHAPTER_HEADER"|"TEMPLATE_HEADER"|"CHARACTER"|"LOCATION"|"WORLD_NOTE";
+  kind:"MANUSCRIPT"|"REVISION"|"TEMPLATE_CONTENT"|"CHAPTER_HEADER"|"TEMPLATE_HEADER"|"CHARACTER"|"LOCATION"|"WORLD_NOTE"|"IDEA";
   label:string;
   detail:string;
   href:string|null;
@@ -48,14 +48,15 @@ function removeAssetFromHtml(html:string,assetIds:Set<string>){
 }
 
 export async function loadAssetLibrary(novelId:string){
-  const [assets,chapters,revisions,templates,characterImages,locationImages,worldNoteImages]=await Promise.all([
+  const [assets,chapters,revisions,templates,characterImages,locationImages,worldNoteImages,ideaImages]=await Promise.all([
     query<AssetRow>(`SELECT "id","originalName","storedName","mimeType","size","createdAt" FROM "Asset" WHERE "novelId"=$1 ORDER BY "createdAt" DESC`,[novelId]),
     query<ContentRow>(`SELECT "id","title","content","headerImageAssetId" FROM "Chapter" WHERE "novelId"=$1 ORDER BY "position"`,[novelId]),
     query<RevisionRow>(`SELECT r."id",r."chapterId",c."title" AS "chapterTitle",r."content" FROM "ChapterRevision" r JOIN "Chapter" c ON c."id"=r."chapterId" WHERE c."novelId"=$1 ORDER BY r."createdAt" DESC`,[novelId]),
     query<TemplateRow>(`SELECT "id","name","content","headerImageAssetId" FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "createdAt"`,[novelId]),
     query<LinkRow>(`SELECT ci."assetId",c."id",c."name" FROM "CharacterImage" ci JOIN "Character" c ON c."id"=ci."characterId" WHERE c."novelId"=$1`,[novelId]),
     query<LinkRow>(`SELECT li."assetId",l."id",l."name" FROM "LocationImage" li JOIN "Location" l ON l."id"=li."locationId" WHERE l."novelId"=$1`,[novelId]),
-    query<LinkRow>(`SELECT wi."assetId",w."id",w."name" FROM "WorldNoteImage" wi JOIN "WorldNote" w ON w."id"=wi."worldNoteId" WHERE w."novelId"=$1`,[novelId])
+    query<LinkRow>(`SELECT wi."assetId",w."id",w."name" FROM "WorldNoteImage" wi JOIN "WorldNote" w ON w."id"=wi."worldNoteId" WHERE w."novelId"=$1`,[novelId]),
+    query<LinkRow>(`SELECT ii."assetId",s."id",COALESCE(NULLIF(s."title",''),LEFT(s."body",80),'Untitled idea') AS "name" FROM "IdeaImage" ii JOIN "StickyNote" s ON s."id"=ii."ideaId" WHERE s."novelId"=$1 AND s."kind"='IDEA'`,[novelId])
   ]);
   const known=new Set(assets.rows.map(asset=>asset.id));
   const usageMaps=new Map<string,Map<string,AssetUsage>>(assets.rows.map(asset=>[asset.id,new Map()]));
@@ -78,6 +79,7 @@ export async function loadAssetLibrary(novelId:string){
   for(const item of characterImages.rows)add(item.assetId,`character:${item.id}`,{kind:"CHARACTER",label:item.name,detail:"Character gallery",href:`/workspace/${novelId}/characters?character=${encodeURIComponent(item.id)}`});
   for(const item of locationImages.rows)add(item.assetId,`location:${item.id}`,{kind:"LOCATION",label:item.name,detail:"Location gallery",href:`/workspace/${novelId}/locations?location=${encodeURIComponent(item.id)}`});
   for(const item of worldNoteImages.rows)add(item.assetId,`world-note:${item.id}`,{kind:"WORLD_NOTE",label:item.name,detail:"World Note gallery",href:`/workspace/${novelId}/world-notes?note=${encodeURIComponent(item.id)}`});
+  for(const item of ideaImages.rows)add(item.assetId,`idea:${item.id}`,{kind:"IDEA",label:item.name,detail:"Idea attachment",href:`/workspace/${novelId}/ideas?idea=${encodeURIComponent(item.id)}`});
   return assets.rows.map(asset=>{
     const usages=[...(usageMaps.get(asset.id)?.values()||[])];
     return {id:asset.id,name:asset.originalName,mimeType:asset.mimeType,size:asset.size,createdAt:asset.createdAt.toISOString(),url:`/api/assets/${asset.id}`,usageCount:usages.length,usageOccurrences:usages.reduce((sum,item)=>sum+item.count,0),usages} satisfies ManagedAsset;
