@@ -46,7 +46,7 @@ export async function GET(request:NextRequest){
   const item=await entity(kind,id,user.id);if(!item)return NextResponse.json({error:"Not found"},{status:404});
   const terms=[item.name,...aliases(item.aliases)].map(value=>value.trim()).filter(Boolean).sort((a,b)=>b.length-a.length);
   if(!terms.length)return NextResponse.json({mentions:[],totalOccurrences:0});
-  const expression=new RegExp(`(?<![\\p{L}\\p{N}_])(?:\${terms.map(esc).join("|")})(?![\\p{L}\\p{N}_])`,"giu");
+  const expression=new RegExp("(?<![\\\\p{L}\\\\p{N}_])(?:"+terms.map(esc).join("|")+")(?![\\\\p{L}\\\\p{N}_])","giu");
   const chapters=await query<ChapterRow>(`SELECT c."id",c."title",c."kind",c."pageType",c."content",p."title" AS "partTitle" FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId" WHERE c."novelId"=$1 ORDER BY c."position"`,[item.novelId]);
   const mentions=[] as Array<{chapterId:string;title:string;kind:string;pageType:string|null;partTitle:string|null;occurrences:number;snippet:string}>;
   let totalOccurrences=0;
