@@ -13,6 +13,25 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.67",
+    date:"29 September 2026",
+    title:"Merge Ideas and Corkboard",
+    added:[
+      "A unified Ideas workspace with Library and Boards views, replacing the separate Ideas placeholder and Cork Board section.",
+      "Ideas support titles, categories, tags and Inbox/Developing/Used/Archived status with project-wide search and filters.",
+      "The same Idea can appear on multiple visual boards without duplicating its content.",
+      "Ideas can hold project-library images, recorded or uploaded voice notes, manuscript links and links to Characters, Locations and World Notes.",
+      "Selected manuscript text can be sent directly to Ideas without leaving the writing flow.",
+      "Ideas can create and automatically link a new Character, Location or World Note when a rough concept becomes established story canon."
+    ],
+    changed:[
+      "Existing Cork Board sticky notes are migrated into Ideas while preserving their text, colour, size and board position; manuscript-linked notes remain manuscript notes.",
+      "The old Cork Board URL redirects into Ideas, and project navigation now has one Ideas entry instead of two overlapping planning sections.",
+      "Idea images participate in project image Used in tracking, and voice notes are included in account exports/backups."
+    ],
+    fixed:[]
+  },
+  {
     version:"0.0.66",
     date:"29 September 2026",
     title:"Manage the project image library",

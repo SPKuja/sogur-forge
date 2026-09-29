@@ -18,8 +18,7 @@ export default function WorkspaceSectionSidebar({username,novel,active,open,onCl
       {item("manuscript","✦","Manuscript",`/workspace/${novel.id}`)}
       {item("characters","♙","Characters",`/workspace/${novel.id}/characters`)}
       {item("locations","⌖","Locations",`/workspace/${novel.id}/locations`)}
-      {item("cork-board","▣","Cork Board",`/workspace/${novel.id}/cork-board`)}
-      {item("ideas","◌","Ideas")}
+      {item("ideas","◌","Ideas",`/workspace/${novel.id}/ideas`)}
       {item("world-notes","◇","World notes",`/workspace/${novel.id}/world-notes`)}
       {item("images","▧","Images",`/workspace/${novel.id}/images`)}
     </nav>
