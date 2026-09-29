@@ -43,6 +43,7 @@ services:
     volumes:
       - secrets:/run/secrets:ro
       - assets:/app/data/assets
+      - idea-audio:/app/data/idea-audio
     environment:
       APP_BASE_URL: ${APP_BASE_URL:-}
       SMTP_HOST: ${SMTP_HOST:-}
@@ -64,3 +65,4 @@ volumes:
   secrets:
   recovery:
   assets:
+  idea-audio:
