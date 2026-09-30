@@ -13,6 +13,25 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.72",
+    date:"30 September 2026",
+    title:"Private manuscript sharing",
+    added:[
+      "Authors can create private read-only links for the full live manuscript or a selected set of chapters and pages.",
+      "Share links can be delivered by email when SMTP is configured, with optional recipient labels and expiry dates.",
+      "A dedicated Sharing screen lists every reader link with its scope, recipient, expiry, view count and last-viewed time.",
+      "Authors can copy or revoke each share independently; revoked and expired links stop opening immediately.",
+      "Recipients get a clean read-only manuscript reader with chapter navigation and permission-gated manuscript images."
+    ],
+    changed:[
+      "Sharing is now available from the manuscript toolbar, full manuscript view and workspace navigation.",
+      "Full-manuscript shares stay live as the manuscript changes, while selected-item shares remain limited to the chosen chapters/pages and show their latest saved text."
+    ],
+    fixed:[]
+  },
+
+
+  {
     version:"0.0.71",
     date:"30 September 2026",
     title:"Ideas opens to the library",
