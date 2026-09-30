@@ -10,7 +10,6 @@ type Share={
 };
 
 function shareStatus(share:Share){
-  if(share.revokedAt)return "Revoked";
   if(share.expiresAt&&new Date(share.expiresAt).getTime()<=Date.now())return "Expired";
   return "Active";
 }
@@ -53,11 +52,11 @@ export default function ShareManager({username,novel,chapters,initialShares,emai
   async function revoke(share:Share){
     if(!confirm(`Revoke access to “${share.label||novel.title}”? The link will stop working immediately.`))return;
     setError("");
-    const response=await fetch(`/api/manuscript-shares/${share.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"revoke"})});
+    const response=await fetch(`/api/manuscript-shares/${share.id}`,{method:"DELETE"});
     const data=await response.json().catch(()=>({error:"The share could not be revoked."}));
     if(!response.ok){setError(data.error||"The share could not be revoked.");return}
-    setShares(current=>current.map(item=>item.id===share.id?{...item,revokedAt:data.revokedAt}:item));
-    setNotice("Access revoked. That private link no longer opens the manuscript.");
+    setShares(current=>current.filter(item=>item.id!==share.id));
+    setNotice("Access revoked and the share was deleted. That private link no longer opens the manuscript.");
   }
 
   return <div className="app section-shell">
@@ -87,7 +86,7 @@ export default function ShareManager({username,novel,chapters,initialShares,emai
           <div className="share-section-head"><div><small>ACCESS</small><h2>Shared readers</h2><p>Every link is independent, so revoking one does not affect the others.</p></div><b>{shares.length}</b></div>
           <div className="share-list">{shares.map(share=>{const status=shareStatus(share),active=status==="Active";return <article key={share.id} className={active?"":"inactive"}>
             <div className="share-item-head"><div><span className={"share-status "+status.toLowerCase()}>{status}</span><strong>{share.label||novel.title}</strong><small>{share.scope==="ALL"?"Full manuscript":`${share.chapterIds.length} selected item${share.chapterIds.length===1?"":"s"}`}</small></div><div>{active&&share.path&&<button onClick={()=>void copy(share.path,share.id)}>{copied===share.id?"Copied ✓":"Copy link"}</button>}{active&&<button className="danger" onClick={()=>void revoke(share)}>Revoke</button>}</div></div>
-            <dl><div><dt>Recipient</dt><dd>{share.recipientEmail||"Link only"}</dd></div><div><dt>Created</dt><dd>{displayDate(share.createdAt)}</dd></div><div><dt>Expires</dt><dd>{share.expiresAt?displayDate(share.expiresAt):"No expiry"}</dd></div><div><dt>Views</dt><dd>{share.viewCount.toLocaleString()}</dd></div><div><dt>Last viewed</dt><dd>{displayDate(share.lastViewedAt)}</dd></div>{share.revokedAt&&<div><dt>Revoked</dt><dd>{displayDate(share.revokedAt)}</dd></div>}</dl>
+            <dl><div><dt>Recipient</dt><dd>{share.recipientEmail||"Link only"}</dd></div><div><dt>Created</dt><dd>{displayDate(share.createdAt)}</dd></div><div><dt>Expires</dt><dd>{share.expiresAt?displayDate(share.expiresAt):"No expiry"}</dd></div><div><dt>Views</dt><dd>{share.viewCount.toLocaleString()}</dd></div><div><dt>Last viewed</dt><dd>{displayDate(share.lastViewedAt)}</dd></div></dl>
           </article>})}{!shares.length&&<div className="share-empty"><strong>Nothing shared yet</strong><span>Create a private reader link when you are ready for feedback.</span></div>}</div>
         </section>
       </div>
