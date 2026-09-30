@@ -36,7 +36,7 @@ export default async function FullManuscriptPage({params}:{params:Promise<{novel
     <header className="full-manuscript-top">
       <Link href={`/workspace/${novelId}`}>← Back to editing</Link>
       <div><small>FULL MANUSCRIPT</small><strong>{novel.title}</strong></div>
-      <div className="full-manuscript-modes" aria-label="Manuscript display mode"><ManuscriptViewToggle compact/><PageSetupButton className="full-page-setup" label="Setup"/></div>
+      <div className="full-manuscript-modes" aria-label="Manuscript display mode"><Link className="full-share-link" href={`/workspace/${novelId}/sharing`}>Share</Link><ManuscriptViewToggle compact/><PageSetupButton className="full-page-setup" label="Setup"/></div>
     </header>
     <div className="full-manuscript-layout">
       <aside className="full-manuscript-nav">

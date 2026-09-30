@@ -166,6 +166,7 @@ model Novel {
   chapterTemplates ChapterTemplate[]
   layout NovelLayout?
   manuscriptViewPreferences ManuscriptViewPreference[]
+  manuscriptShares ManuscriptShare[]
   @@index([userId, updatedAt])
 }
 
@@ -175,6 +176,35 @@ model NovelLayout {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+model ManuscriptShare {
+  id String @id
+  novelId String
+  tokenHash String @unique
+  tokenEncrypted String
+  label String @default("")
+  recipientEmail String @default("")
+  scope String @default("ALL")
+  expiresAt DateTime?
+  revokedAt DateTime?
+  lastViewedAt DateTime?
+  viewCount Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapters ManuscriptShareChapter[]
+  @@index([novelId, revokedAt])
+  @@index([expiresAt])
+}
+
+model ManuscriptShareChapter {
+  shareId String
+  chapterId String
+  share ManuscriptShare @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  @@id([shareId, chapterId])
+  @@index([chapterId])
 }
 
 model ManuscriptViewPreference {
@@ -223,6 +253,7 @@ model Chapter {
   headerImageAsset Asset? @relation("ChapterHeaderAsset", fields: [headerImageAssetId], references: [id], onDelete: SetNull)
   revisions ChapterRevision[]
   stickyNotes StickyNote[]
+  shareSelections ManuscriptShareChapter[]
   @@unique([novelId, position])
   @@index([partId])
   @@index([novelId, kind, position])

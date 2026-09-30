@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 
 type Theme="system"|"light"|"dark";
-export type WorkspaceSection="manuscript"|"characters"|"locations"|"cork-board"|"ideas"|"world-notes"|"images";
+export type WorkspaceSection="manuscript"|"sharing"|"characters"|"locations"|"cork-board"|"ideas"|"world-notes"|"images";
 
 export default function WorkspaceSectionSidebar({username,novel,active,open,onClose,beforeNavigate}:{username:string;novel:{id:string;title:string};active:WorkspaceSection;open:boolean;onClose:()=>void;beforeNavigate?:()=>Promise<void>|void}){
   const router=useRouter(),[theme,setTheme]=useState<Theme>("system");
@@ -16,6 +16,7 @@ export default function WorkspaceSectionSidebar({username,novel,active,open,onCl
     <button className="project project-button" onClick={()=>go("/workspace")}><small>← LIBRARY</small><strong>{novel.title}</strong></button>
     <nav>
       {item("manuscript","✦","Manuscript",`/workspace/${novel.id}`)}
+      {item("sharing","↗","Sharing",`/workspace/${novel.id}/sharing`)}
       {item("characters","♙","Characters",`/workspace/${novel.id}/characters`)}
       {item("locations","⌖","Locations",`/workspace/${novel.id}/locations`)}
       {item("ideas","◌","Ideas",`/workspace/${novel.id}/ideas`)}
