@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.73",
+    date:"30 September 2026",
+    title:"Delete revoked shares",
+    added:[],
+    changed:[
+      "Revoking a manuscript share now deletes the share entirely instead of keeping it as a revoked historical entry."
+    ],
+    fixed:[
+      "Revoked links disappear from the Sharing list immediately while continuing to stop access to the reader."
+    ]
+  },
+
+
+  {
     version:"0.0.72",
     date:"30 September 2026",
     title:"Private manuscript sharing",
