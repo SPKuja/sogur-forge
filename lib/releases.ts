@@ -13,6 +13,20 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.75",
+    date:"30 September 2026",
+    title:"Sharing follows manuscript order",
+    added:[],
+    changed:[
+      "The selected-items sharing picker now uses the same canonical Part and chapter order as the manuscript."
+    ],
+    fixed:[
+      "Chapters from different Parts no longer appear interleaved in the Sharing screen when their global position values differ."
+    ]
+  },
+
+
+  {
     version:"0.0.74",
     date:"30 September 2026",
     title:"Story Bible libraries",
