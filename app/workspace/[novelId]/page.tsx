@@ -7,6 +7,7 @@ import {normaliseChapterTemplate} from "@/lib/chapter-template";
 import {materialiseLegacyTemplateChapters} from "@/lib/template-materialisation";
 import ManuscriptLayoutProvider from "../ManuscriptLayoutProvider";
 import {getManuscriptLayoutBundle} from "@/lib/manuscript-layout-server";
+import {dayKey,getWritingPreferences} from "@/lib/writing-progress";
 
 export const dynamic="force-dynamic";
 
@@ -46,8 +47,10 @@ export default async function NovelPage({
   await materialiseLegacyTemplateChapters(novelId,user.id);
   const layoutBundle=await getManuscriptLayoutBundle(user.id,novelId);
   if(!layoutBundle)notFound();
+  const writingPreferences=await getWritingPreferences(user.id);
+  const writingToday=dayKey(new Date(),writingPreferences.timezone);
 
-  const [chapters,parts,notes,templates]=await Promise.all([
+  const [chapters,parts,notes,templates,todayProgress]=await Promise.all([
     query<ChapterRow>(
       `SELECT c."id",c."partId",p."title" AS "partTitle",c."title",c."kind",c."pageType",
               c."content",c."summary",c."status",c."position",c."templateId",c."headerImageAssetId"
@@ -71,7 +74,8 @@ export default async function NovelPage({
     query<Record<string,unknown>&{id:string;name:string;isDefault:boolean}>(
       `SELECT * FROM "ChapterTemplate" WHERE "novelId"=$1 ORDER BY "isDefault" DESC,"createdAt"`,
       [novelId]
-    )
+    ),
+    query<{words:string}>(`SELECT COALESCE(SUM("endWords"-"startWords"),0)::text AS "words" FROM "WritingDay" WHERE "userId"=$1 AND "day"=$2`,[user.id,writingToday])
   ]);
 
   const initialActiveId=chapters.rows.some(item=>item.id===requestedChapter)
@@ -87,5 +91,7 @@ export default async function NovelPage({
     initialTemplates={templates.rows.map(normaliseChapterTemplate)}
     initialActiveId={initialActiveId}
     appVersion={CURRENT_VERSION}
+    writingPreferences={{dailyWordTarget:writingPreferences.dailyWordTarget,showEditorGoal:writingPreferences.showEditorGoal}}
+    initialTodayWords={Number(todayProgress.rows[0]?.words||0)}
   /></ManuscriptLayoutProvider>;
 }
