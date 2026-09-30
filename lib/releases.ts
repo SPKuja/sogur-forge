@@ -13,6 +13,24 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.74",
+    date:"30 September 2026",
+    title:"Story Bible libraries",
+    added:[
+      "Characters, Locations and World Notes now open as visual Story Bible libraries with searchable, filterable cards.",
+      "Clicking a Bible card opens a focused read view, with a deliberate Edit action for the full existing profile.",
+      "New characters, locations and world notes use quick-create dialogs before opening the full editor."
+    ],
+    changed:[
+      "Normal navigation to Characters, Locations and World Notes now lands on the library; explicit deep-links still open the requested profile.",
+      "The existing rich editors, images, relationships, hierarchy, manuscript mentions and Story Bible connections are retained inside the edit modal.",
+      "The manuscript sharing example placeholder now uses a neutral beta-reader example."
+    ],
+    fixed:[]
+  },
+
+
+  {
     version:"0.0.73",
     date:"30 September 2026",
     title:"Delete revoked shares",
