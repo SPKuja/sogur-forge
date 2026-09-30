@@ -109,4 +109,6 @@ export async function recordWritingDay(input:{
     ON CONFLICT ("userId","chapterId","day")
     DO UPDATE SET "chapterTitle"=EXCLUDED."chapterTitle","endWords"=EXCLUDED."endWords","lastActivityAt"=NOW()
   `,[randomUUID(),input.userId,input.novelId,input.chapterId,input.chapterTitle.slice(0,200),day,startWords,endWords]);
+  const total=await query<{words:string}>(`SELECT COALESCE(SUM("endWords"-"startWords"),0)::text AS "words" FROM "WritingDay" WHERE "userId"=$1 AND "day"=$2`,[input.userId,day]);
+  return {day,todayWords:Number(total.rows[0]?.words||0)};
 }
