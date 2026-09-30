@@ -13,6 +13,23 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.70",
+    date:"30 September 2026",
+    title:"Ideas library and flexible Corkboard",
+    added:[
+      "Ideas now opens entries in a focused pop-up, with a read view and a separate Edit action.",
+      "New ideas use a quick-capture pop-up and are only created after Add idea is pressed.",
+      "Corkboard sticky notes can now be resized from the bottom-right corner.",
+      "Sticky notes now have eight colour choices: yellow, blue, pink, green, orange, purple, red and grey."
+    ],
+    changed:[
+      "The Ideas screen is now a card-based library so existing ideas stay visible instead of sharing the page with a permanent editor.",
+      "Corkboard stickies open the same idea pop-up directly, without sending the author back to the Ideas library."
+    ],
+    fixed:[]
+  },
+
+  {
     version:"0.0.69",
     date:"30 September 2026",
     title:"Keep typing in Ideas",
