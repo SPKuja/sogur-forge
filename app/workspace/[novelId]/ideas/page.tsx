@@ -40,6 +40,6 @@ export default async function Page({params,searchParams}:{params:Promise<{novelI
     locationIds:locationLinks.rows.filter(link=>link.ideaId===idea.id).map(link=>link.targetId),
     worldNoteIds:worldNoteLinks.rows.filter(link=>link.ideaId===idea.id).map(link=>link.targetId)
   }));
-  const initialIdeaId=entries.some(idea=>idea.id===requestedIdea)?requestedIdea:entries[0]?.id;
+  const initialIdeaId=requestedIdea&&entries.some(idea=>idea.id===requestedIdea)?requestedIdea:undefined;
   return <IdeasWorkspace username={user.username} novel={novel.rows[0]} initialBoards={boards.rows} initialIdeas={entries} initialPlacements={placements.rows} chapters={chapters.rows} characters={characters.rows} locations={locations.rows} worldNotes={worldNotes.rows} initialIdeaId={initialIdeaId}/>;
 }
