@@ -13,6 +13,27 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.76",
+    date:"30 September 2026",
+    title:"Writing goals and progress",
+    added:[
+      "A Writing Progress dashboard with today, this week and this month word totals, current streak, manuscript word counts and recent weekly roundups.",
+      "User-configurable daily, weekly and monthly word targets, week start, time zone, editor goal visibility and weekly roundup visibility in Settings.",
+      "A lightweight per-chapter daily writing ledger tracks net word changes, writing days and chapters worked without logging every keystroke.",
+      "Weekly roundups include tracked manuscript progress plus newly created Ideas, Characters, Locations, World Notes and manuscript items."
+    ],
+    changed:[
+      "The editor sidebar now shows real account-wide words written today against the configured daily target instead of using the current chapter total as a fake daily meter.",
+      "Library manuscript word counts now use the same plain-text counting logic as writing progress rather than counting raw HTML markup.",
+      "Writing preferences and progress history are included in account exports and backups."
+    ],
+    fixed:[
+      "Daily writing targets are no longer hard-coded to 1,000 words."
+    ]
+  },
+
+
+  {
     version:"0.0.75",
     date:"30 September 2026",
     title:"Sharing follows manuscript order",

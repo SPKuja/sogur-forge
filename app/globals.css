@@ -816,3 +816,93 @@
   .bible-read-sections{grid-template-columns:1fr}
   .bible-read-gallery>div{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* v0.0.76 — writing goals and progress */
+.progress-goal{display:block;width:100%;color:var(--sidebar-ink);text-align:left;cursor:pointer;font:inherit}
+.progress-goal:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--sidebar-line))}
+.progress-goal div strong{font-variant-numeric:tabular-nums}
+.writing-settings-card .settings-card-head>button{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:7px 10px;cursor:pointer;font-size:9px}
+.writing-settings-form{display:grid;gap:16px;margin-top:15px}
+.writing-target-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.writing-settings-grid{display:grid;grid-template-columns:minmax(180px,.55fr) minmax(240px,1fr);gap:10px}
+.writing-target-grid label,.writing-settings-grid label{display:grid;gap:6px}
+.writing-target-grid label>span,.writing-settings-grid label>span{color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.writing-target-grid input,.writing-settings-grid input,.writing-settings-grid select{width:100%;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);padding:10px 11px}
+.writing-target-grid input:focus,.writing-settings-grid input:focus,.writing-settings-grid select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.writing-toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.writing-settings-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:3px}
+.writing-settings-actions>span{max-width:620px;color:var(--muted);font-size:8px;line-height:1.45}
+.writing-settings-actions>button{flex:0 0 auto}
+
+.progress-shell{min-height:100dvh;background:var(--surface-2)}
+.progress-top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;min-height:62px;padding:8px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(16px)}
+.progress-top>div{display:flex;align-items:center;gap:13px}
+.progress-top a{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:7px 10px;text-decoration:none;font-size:9px}
+.progress-top div>div small,.progress-top div>div strong{display:block}
+.progress-top div>div small{color:var(--muted);font-size:7px;font-weight:850;letter-spacing:.1em}
+.progress-top div>div strong{margin-top:2px;font:700 16px var(--font-writing)}
+.progress-main{max-width:1280px;margin:0 auto;padding:24px 20px 70px}
+.progress-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:18px}
+.progress-heading>div:first-child{max-width:740px}
+.progress-heading small{color:var(--accent);font-size:8px;font-weight:850;letter-spacing:.11em}
+.progress-heading h1{margin:5px 0 0;font:700 30px/1.1 var(--font-writing)}
+.progress-heading p{margin:8px 0 0;color:var(--muted);font-size:9px;line-height:1.55}
+.progress-total{flex:0 0 auto;min-width:190px;border:1px solid var(--line);border-radius:13px;background:var(--surface);padding:13px 16px;text-align:right}
+.progress-total span,.progress-total small{display:block;color:var(--muted);font-size:8px}
+.progress-total strong{display:block;margin:3px 0;font:700 24px var(--font-writing)}
+.progress-target-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.progress-target-grid article{min-width:0;border:1px solid var(--line);border-radius:13px;background:var(--surface);padding:14px;box-shadow:0 3px 12px #00000007}
+.progress-target-grid article>small:first-child{display:block;color:var(--accent);font-size:7px;font-weight:850;letter-spacing:.1em}
+.progress-target-grid article>strong{display:block;margin-top:6px;font:700 24px var(--font-writing);font-variant-numeric:tabular-nums}
+.progress-target-grid article>span{display:block;margin-top:2px;color:var(--muted);font-size:8px}
+.progress-target-grid article>i{display:block;height:5px;margin-top:12px;overflow:hidden;border-radius:99px;background:var(--surface-3)}
+.progress-target-grid article>i b{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-bright))}
+.progress-subtle{margin-top:9px!important;color:var(--muted)!important;font-weight:500!important;letter-spacing:0!important}
+.progress-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:14px}
+.progress-card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:17px;box-shadow:0 4px 18px #00000007}
+.progress-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:14px}
+.progress-card-head small{display:block;color:var(--accent);font-size:7px;font-weight:850;letter-spacing:.1em}
+.progress-card-head h2{margin:4px 0 0;font:700 18px var(--font-writing)}
+.progress-card-head>b{color:var(--ink);font:700 15px var(--font-writing);white-space:nowrap}
+.roundup-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.roundup-facts>span{border:1px solid var(--line);border-radius:9px;background:var(--surface-2);padding:9px;color:var(--muted);font-size:8px}
+.roundup-facts strong{display:block;margin-bottom:2px;color:var(--ink);font:700 15px var(--font-writing)}
+.roundup-chapters{display:grid;gap:6px}
+.roundup-chapters>div,.progress-novels>a{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:9px 2px}
+.roundup-chapters strong,.progress-novels strong{font-size:9px}
+.roundup-chapters span,.progress-novels span{color:var(--muted);font-size:8px}
+.progress-novels>a{color:var(--ink);text-decoration:none}
+.progress-novels>a:first-child{border-top:0}
+.progress-novels>a>div{display:grid;gap:2px}
+.progress-novels>a>b{font-size:9px;white-space:nowrap}
+.progress-empty{margin:15px 0 3px;color:var(--muted);font-size:9px}
+.progress-history{margin-top:20px}
+.progress-history-head small{color:var(--accent);font-size:8px;font-weight:850;letter-spacing:.11em}
+.progress-history-head h2{margin:4px 0 0;font:700 21px var(--font-writing)}
+.progress-history-head p{margin:5px 0 13px;color:var(--muted);font-size:9px}
+.roundup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.roundup-grid article{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px}
+.roundup-grid article>div:first-child{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.roundup-grid article>div:first-child small{color:var(--muted);font-size:7px}
+.roundup-grid article>div:first-child strong{font:700 13px var(--font-writing);white-space:nowrap}
+.roundup-grid article>p{margin:8px 0;color:var(--muted);font-size:8px}
+.roundup-mini{display:flex;flex-wrap:wrap;gap:5px}
+.roundup-mini span{padding:4px 6px;border-radius:99px;background:var(--surface-3);color:var(--muted);font-size:7px}
+.roundup-grid footer{display:grid;gap:3px;margin-top:9px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font-size:7px}
+
+@media(max-width:900px){
+  .progress-target-grid{grid-template-columns:1fr 1fr}
+  .progress-layout{grid-template-columns:1fr}
+  .roundup-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+  .writing-target-grid,.writing-settings-grid,.writing-toggle-grid{grid-template-columns:1fr}
+  .writing-settings-actions{align-items:stretch;flex-direction:column}
+  .progress-main{padding:16px 12px 50px}
+  .progress-heading{align-items:stretch;flex-direction:column}
+  .progress-total{text-align:left}
+  .progress-target-grid,.roundup-grid{grid-template-columns:1fr}
+  .roundup-facts{grid-template-columns:1fr 1fr}
+  .progress-card-head{align-items:flex-start;flex-direction:column}
+}

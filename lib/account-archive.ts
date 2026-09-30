@@ -8,7 +8,7 @@ function safeName(value:string){return value.normalize("NFKD").replace(/[^a-zA-Z
 function stripHtml(value:string){return value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<br\s*\/?\s*>/gi,"\n").replace(/<\/p\s*>/gi,"\n\n").replace(/<[^>]+>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\n{3,}/g,"\n\n").trim()}
 
 export async function accountArchive(userId:string,mode:"export"|"backup"){
-  const [account,novels,parts,chapters,revisions,assets,boards,notes,ideaPlacements,ideaImages,ideaAudio,ideaCharacterLinks,ideaLocationLinks,ideaWorldNoteLinks,characters,images,relationships,locations,locationImages,locationCharacterLinks,worldNotes,worldNoteImages,worldNoteCharacterLinks,worldNoteLocationLinks,worldNoteRelations,templates,events,sessions,backupDestinations]=await Promise.all([
+  const [account,novels,parts,chapters,revisions,assets,boards,notes,ideaPlacements,ideaImages,ideaAudio,ideaCharacterLinks,ideaLocationLinks,ideaWorldNoteLinks,characters,images,relationships,locations,locationImages,locationCharacterLinks,worldNotes,worldNoteImages,worldNoteCharacterLinks,worldNoteLocationLinks,worldNoteRelations,templates,events,sessions,backupDestinations,writingPreferences,writingDays]=await Promise.all([
     query<any>(`SELECT "id","username","email","emailVerifiedAt","role","totpEnabled","createdAt","updatedAt" FROM "User" WHERE "id"=$1`,[userId]),
     query<any>(`SELECT "id","title","description","createdAt","updatedAt" FROM "Novel" WHERE "userId"=$1 ORDER BY "updatedAt"`,[userId]),
     query<any>(`SELECT p.* FROM "Part" p JOIN "Novel" n ON n."id"=p."novelId" WHERE n."userId"=$1 ORDER BY p."novelId",p."position"`,[userId]),
@@ -37,13 +37,17 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
     query<any>(`SELECT t.* FROM "ChapterTemplate" t JOIN "Novel" n ON n."id"=t."novelId" WHERE n."userId"=$1 ORDER BY t."novelId",t."createdAt"`,[userId]),
     query<any>(`SELECT "id","type","metadata","createdAt" FROM "SecurityEvent" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
     query<any>(`SELECT "id","lastSeenAt","expiresAt","absoluteExpiresAt","userAgent","createdAt" FROM "Session" WHERE "userId"=$1 ORDER BY "createdAt"`,[userId]),
-    query<any>(`SELECT "provider","enabled","folder","accountLabel","connectedAt","lastBackupAt","lastBackupError","createdAt","updatedAt" FROM "BackupDestination" WHERE "userId"=$1 ORDER BY "provider"`,[userId])
+    query<any>(`SELECT "provider","enabled","folder","accountLabel","connectedAt","lastBackupAt","lastBackupError","createdAt","updatedAt" FROM "BackupDestination" WHERE "userId"=$1 ORDER BY "provider"`,[userId]),
+    query<any>(`SELECT "dailyWordTarget","weeklyWordTarget","monthlyWordTarget","showEditorGoal","weeklyRoundupEnabled","weekStartsOn","timezone","createdAt","updatedAt" FROM "WritingPreference" WHERE "userId"=$1`,[userId]),
+    query<any>(`SELECT "id","novelId","chapterId","chapterTitle","day","startWords","endWords","firstActivityAt","lastActivityAt" FROM "WritingDay" WHERE "userId"=$1 ORDER BY "day","firstActivityAt"`,[userId])
   ]);
   const assetRows=assets.rows,generatedAt=new Date().toISOString();
   const data={
     format:"sogur-forge-account-data",formatVersion:1,generatedAt,
     account:account.rows[0],
     backupDestinations:backupDestinations.rows,
+    writingPreferences:writingPreferences.rows[0]||null,
+    writingProgress:writingDays.rows,
     novels:novels.rows.map((novel:any)=>({
       ...novel,
       sections:parts.rows.filter((item:any)=>item.novelId===novel.id),
@@ -60,7 +64,8 @@ export async function accountArchive(userId:string,mode:"export"|"backup"){
       ideas:notes.rows.filter((note:any)=>note.novelId===novel.id&&note.kind==="IDEA").map((idea:any)=>({...idea,placements:ideaPlacements.rows.filter((placement:any)=>placement.ideaId===idea.id),images:ideaImages.rows.filter((image:any)=>image.ideaId===idea.id),audio:ideaAudio.rows.filter((audio:any)=>audio.ideaId===idea.id).map(({storedName,...item}:any)=>item),characterLinks:ideaCharacterLinks.rows.filter((link:any)=>link.ideaId===idea.id),locationLinks:ideaLocationLinks.rows.filter((link:any)=>link.ideaId===idea.id),worldNoteLinks:ideaWorldNoteLinks.rows.filter((link:any)=>link.ideaId===idea.id)})),
       corkBoards:boards.rows.filter((item:any)=>item.novelId===novel.id).map((board:any)=>({...board,placements:ideaPlacements.rows.filter((placement:any)=>placement.boardId===board.id)})),
       unboardedNotes:notes.rows.filter((note:any)=>note.novelId===novel.id&&note.kind!=="IDEA"&&!note.boardId&&!note.chapterId),
-      assets:assetRows.filter((item:any)=>item.novelId===novel.id).map(({storedName,...asset}:any)=>asset)
+      assets:assetRows.filter((item:any)=>item.novelId===novel.id).map(({storedName,...asset}:any)=>asset),
+      writingProgress:writingDays.rows.filter((item:any)=>item.novelId===novel.id)
     })),
     accountActivity:{securityEvents:events.rows,sessions:sessions.rows}
   };

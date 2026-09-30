@@ -27,6 +27,8 @@ model User {
   backupOAuthStates BackupOAuthState[]
   novels Novel[]
   manuscriptViewPreferences ManuscriptViewPreference[]
+  writingPreference WritingPreference?
+  writingDays WritingDay[]
 }
 
 model Session {
@@ -167,6 +169,7 @@ model Novel {
   layout NovelLayout?
   manuscriptViewPreferences ManuscriptViewPreference[]
   manuscriptShares ManuscriptShare[]
+  writingDays WritingDay[]
   @@index([userId, updatedAt])
 }
 
@@ -217,6 +220,38 @@ model ManuscriptViewPreference {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
   @@id([userId, novelId])
   @@index([novelId])
+}
+
+model WritingPreference {
+  userId String @id
+  dailyWordTarget Int @default(1000)
+  weeklyWordTarget Int @default(5000)
+  monthlyWordTarget Int @default(20000)
+  showEditorGoal Boolean @default(true)
+  weeklyRoundupEnabled Boolean @default(true)
+  weekStartsOn Int @default(1)
+  timezone String @default("Europe/London")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WritingDay {
+  id String @id @default(cuid())
+  userId String
+  novelId String
+  chapterId String
+  chapterTitle String @default("")
+  day String
+  startWords Int
+  endWords Int
+  firstActivityAt DateTime @default(now())
+  lastActivityAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  @@unique([userId, chapterId, day])
+  @@index([userId, day])
+  @@index([novelId, day])
 }
 
 model Part {
