@@ -21,8 +21,8 @@ export default async function SharingPage({params}:{params:Promise<{novelId:stri
 
   const [parts,chapters,shares,emailEnabled]=await Promise.all([
     query<{id:string;position:number}>(`SELECT "id","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,[novelId]),
-    query<{id:string;title:string;kind:string;pageType:string|null;partTitle:string|null;position:number}>(`
-      SELECT c."id",c."title",c."kind",c."pageType",p."title" AS "partTitle",c."position"
+    query<{id:string;partId:string|null;title:string;kind:string;pageType:string|null;partTitle:string|null;position:number}>(`
+      SELECT c."id",c."partId",c."title",c."kind",c."pageType",p."title" AS "partTitle",c."position"
       FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId"
       WHERE c."novelId"=$1 ORDER BY c."position"
     `,[novelId]),
