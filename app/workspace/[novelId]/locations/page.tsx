@@ -30,6 +30,6 @@ export default async function Page({params,searchParams}:{params:Promise<{novelI
   const portraitByCharacter=new Map(portraits.rows.map(row=>[row.characterId,row.assetId]));
   const places=locations.rows.map(place=>({...place,images:images.rows.filter(image=>image.locationId===place.id).map(image=>({...image,url:`/api/assets/${image.assetId}`}))}));
   const cast=characters.rows.map(character=>({...character,portraitUrl:portraitByCharacter.get(character.id)?`/api/assets/${portraitByCharacter.get(character.id)}`:null}));
-  const initialActiveId=locations.rows.some(location=>location.id===requestedLocation)?requestedLocation:locations.rows[0]?.id;
+  const initialActiveId=requestedLocation&&locations.rows.some(location=>location.id===requestedLocation)?requestedLocation:undefined;
   return <LocationBible username={user.username} novel={novel.rows[0]} initialLocations={places} characters={cast} initialCharacterLinks={links.rows} initialActiveId={initialActiveId} worldNoteConnections={worldNoteConnections.rows.map(item=>({...item,imageUrl:item.imageAssetId?`/api/assets/${item.imageAssetId}`:null}))}/>;
 }
