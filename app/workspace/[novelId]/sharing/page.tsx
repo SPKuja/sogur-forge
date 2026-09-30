@@ -3,6 +3,7 @@ import {currentUser} from "@/lib/auth/session";
 import {query} from "@/lib/db";
 import {decryptManuscriptShareToken,manuscriptSharePath} from "@/lib/manuscript-share";
 import {emailConfigured} from "@/lib/email";
+import {manuscriptChapterOrder} from "@/lib/manuscript-order";
 import ShareManager from "./ShareManager";
 
 export const dynamic="force-dynamic";
@@ -18,7 +19,8 @@ export default async function SharingPage({params}:{params:Promise<{novelId:stri
   const novel=(await query<{id:string;title:string}>(`SELECT "id","title" FROM "Novel" WHERE "id"=$1 AND "userId"=$2`,[novelId,user.id])).rows[0];
   if(!novel)notFound();
 
-  const [chapters,shares,emailEnabled]=await Promise.all([
+  const [parts,chapters,shares,emailEnabled]=await Promise.all([
+    query<{id:string;position:number}>(`SELECT "id","position" FROM "Part" WHERE "novelId"=$1 ORDER BY "position"`,[novelId]),
     query<{id:string;title:string;kind:string;pageType:string|null;partTitle:string|null;position:number}>(`
       SELECT c."id",c."title",c."kind",c."pageType",p."title" AS "partTitle",c."position"
       FROM "Chapter" c LEFT JOIN "Part" p ON p."id"=c."partId"
@@ -47,5 +49,6 @@ export default async function SharingPage({params}:{params:Promise<{novelId:stri
     };
   });
 
-  return <ShareManager username={user.username} novel={novel} chapters={chapters.rows} initialShares={initialShares} emailEnabled={emailEnabled}/>;
+  const orderedChapters=manuscriptChapterOrder(chapters.rows,parts.rows);
+  return <ShareManager username={user.username} novel={novel} chapters={orderedChapters} initialShares={initialShares} emailEnabled={emailEnabled}/>;
 }
