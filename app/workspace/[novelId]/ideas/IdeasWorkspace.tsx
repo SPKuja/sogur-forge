@@ -16,15 +16,15 @@ type WorldNote={id:string;name:string;category:string};
 type View="library"|"boards";
 const statuses=[["INBOX","Inbox"],["DEVELOPING","Developing"],["USED","Used"],["ARCHIVED","Archived"]] as const;
 const categories=["Plot","Character","Dialogue","Scene idea","Research","Question","Worldbuilding","Theme","Idea"];
-const colors=["yellow","blue","pink","green"];
+const colors=["yellow","blue","pink","green","orange","purple","red","grey"];
 const statusLabel=(value:string)=>statuses.find(([id])=>id===value)?.[1]||value;
 const bytes=(value:number)=>value<1024?value+" B":value<1024*1024?Math.max(1,Math.round(value/1024))+" KB":(value/1024/1024).toFixed(1)+" MB";
 const snap=(idea:Idea)=>JSON.stringify({title:idea.title,body:idea.body,category:idea.category,tags:idea.tags,status:idea.status,chapterId:idea.chapterId,anchorId:idea.anchorId,anchorQuote:idea.anchorQuote});
 
 export default function IdeasWorkspace({username,novel,initialBoards,initialIdeas,initialPlacements,chapters,characters,locations,worldNotes,initialIdeaId}:{username:string;novel:{id:string;title:string};initialBoards:Board[];initialIdeas:Idea[];initialPlacements:Placement[];chapters:Chapter[];characters:Character[];locations:Location[];worldNotes:WorldNote[];initialIdeaId?:string}){
   const router=useRouter();
-  const [boards,setBoards]=useState(initialBoards),[ideas,setIdeas]=useState(initialIdeas),[placements,setPlacements]=useState(initialPlacements),[view,setView]=useState<View>("library"),[activeIdeaId,setActiveIdeaId]=useState(initialIdeaId??initialIdeas[0]?.id??""),[activeBoardId,setActiveBoardId]=useState(initialBoards[0]?.id??""),[navOpen,setNavOpen]=useState(false),[search,setSearch]=useState(""),[assetPickerOpen,setAssetPickerOpen]=useState(false),[error,setError]=useState(""),[recording,setRecording]=useState(false),[uploadingAudio,setUploadingAudio]=useState(false);
-  const timers=useRef(new Map<string,ReturnType<typeof setTimeout>>()),saved=useRef(new Map(initialIdeas.map(idea=>[idea.id,snap(idea)]))),drag=useRef<{id:string;dx:number;dy:number}|null>(null),recorderRef=useRef<MediaRecorder|null>(null),streamRef=useRef<MediaStream|null>(null),chunksRef=useRef<Blob[]>([]),recordingStart=useRef(0),audioInputRef=useRef<HTMLInputElement>(null);
+  const [boards,setBoards]=useState(initialBoards),[ideas,setIdeas]=useState(initialIdeas),[placements,setPlacements]=useState(initialPlacements),[view,setView]=useState<View>("library"),[activeIdeaId,setActiveIdeaId]=useState(initialIdeaId??initialIdeas[0]?.id??""),[ideaModalMode,setIdeaModalMode]=useState<"new"|"view"|"edit"|null>(initialIdeaId?"view":null),[newIdeaTitle,setNewIdeaTitle]=useState(""),[newIdeaBody,setNewIdeaBody]=useState(""),[newIdeaTarget,setNewIdeaTarget]=useState<{boardId?:string;positionX:number;positionY:number}|null>(null),[activeBoardId,setActiveBoardId]=useState(initialBoards[0]?.id??""),[navOpen,setNavOpen]=useState(false),[search,setSearch]=useState(""),[assetPickerOpen,setAssetPickerOpen]=useState(false),[error,setError]=useState(""),[recording,setRecording]=useState(false),[uploadingAudio,setUploadingAudio]=useState(false);
+  const timers=useRef(new Map<string,ReturnType<typeof setTimeout>>()),saved=useRef(new Map(initialIdeas.map(idea=>[idea.id,snap(idea)]))),drag=useRef<{id:string;dx:number;dy:number}|null>(null),resize=useRef<{id:string;startX:number;startY:number;startW:number;startH:number}|null>(null),recorderRef=useRef<MediaRecorder|null>(null),streamRef=useRef<MediaStream|null>(null),chunksRef=useRef<Blob[]>([]),recordingStart=useRef(0),audioInputRef=useRef<HTMLInputElement>(null);
   const active=ideas.find(idea=>idea.id===activeIdeaId)??ideas[0]??null;
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();return ideas.filter(idea=>!q||[idea.title,idea.body,idea.category,idea.tags,statusLabel(idea.status)].some(value=>value.toLowerCase().includes(q)))},[ideas,search]);
   const boardPlacements=placements.filter(item=>item.boardId===activeBoardId);
@@ -38,16 +38,20 @@ export default function IdeasWorkspace({username,novel,initialBoards,initialIdea
   function updateIdea(id:string,patch:Partial<Idea>){
     setIdeas(list=>list.map(idea=>{if(idea.id!==id)return idea;const next={...idea,...patch,updatedAt:new Date().toISOString()};const old=timers.current.get(id);if(old)clearTimeout(old);timers.current.set(id,setTimeout(()=>{timers.current.delete(id);void persist(next)},600));return next}))
   }
-  async function createIdea(boardId?:string,positionX=60,positionY=60){
-    setError("");const response=await fetch("/api/ideas",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({novelId:novel.id,title:"",category:"Idea",status:"INBOX",boardId:boardId||null,positionX,positionY})});
+  function openIdea(id:string,mode:"view"|"edit"="view"){if(recording)stopRecording();setActiveIdeaId(id);setIdeaModalMode(mode);setError("")}
+  function beginNewIdea(boardId?:string,positionX=60,positionY=60){if(recording)stopRecording();setNewIdeaTitle("");setNewIdeaBody("");setNewIdeaTarget({boardId,positionX,positionY});setIdeaModalMode("new");setError("")}
+  function closeIdeaModal(){if(recording)stopRecording();setIdeaModalMode(null);setAssetPickerOpen(false)}
+
+  async function createIdea(){
+    const target=newIdeaTarget??{positionX:60,positionY:60};setError("");const response=await fetch("/api/ideas",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({novelId:novel.id,title:newIdeaTitle,body:newIdeaBody,category:"Idea",status:"INBOX",boardId:target.boardId||null,positionX:target.positionX,positionY:target.positionY})});
     const data=await response.json().catch(()=>({error:"Idea could not be created."}));if(!response.ok){setError(data.error||"Idea could not be created.");return}
-    const idea:Idea={id:data.id,title:"",body:"",category:"Idea",tags:"",status:"INBOX",chapterId:null,anchorId:null,anchorQuote:null,createdAt:data.createdAt,updatedAt:data.updatedAt,images:[],audio:[],characterIds:[],locationIds:[],worldNoteIds:[]};
-    setIdeas(list=>[idea,...list]);saved.current.set(idea.id,snap(idea));if(data.placement)setPlacements(list=>[...list,data.placement]);setActiveIdeaId(idea.id);if(!boardId)setView("library");
+    const idea:Idea={id:data.id,title:data.title??newIdeaTitle,body:data.body??newIdeaBody,category:data.category??"Idea",tags:data.tags??"",status:data.status??"INBOX",chapterId:data.chapterId??null,anchorId:data.anchorId??null,anchorQuote:data.anchorQuote??null,createdAt:data.createdAt,updatedAt:data.updatedAt,images:[],audio:[],characterIds:[],locationIds:[],worldNoteIds:[]};
+    setIdeas(list=>[idea,...list]);saved.current.set(idea.id,snap(idea));if(data.placement)setPlacements(list=>[...list,data.placement]);setActiveIdeaId(idea.id);setNewIdeaTitle("");setNewIdeaBody("");setNewIdeaTarget(null);setIdeaModalMode(null);
   }
   async function deleteIdea(idea:Idea){
     if(!confirm(`Delete "${idea.title||"Untitled idea"}"? This removes it from every board and deletes its voice notes.`))return;
     const response=await fetch(`/api/ideas/${idea.id}`,{method:"DELETE"});if(!response.ok){setError("The idea could not be deleted.");return}
-    setIdeas(list=>list.filter(item=>item.id!==idea.id));setPlacements(list=>list.filter(item=>item.ideaId!==idea.id));saved.current.delete(idea.id);if(activeIdeaId===idea.id)setActiveIdeaId(ideas.find(item=>item.id!==idea.id)?.id??"");
+    setIdeas(list=>list.filter(item=>item.id!==idea.id));setPlacements(list=>list.filter(item=>item.ideaId!==idea.id));saved.current.delete(idea.id);if(activeIdeaId===idea.id){setActiveIdeaId(ideas.find(item=>item.id!==idea.id)?.id??"");setIdeaModalMode(null)}
   }
 
   async function attachImage(asset:ProjectAsset){
@@ -86,8 +90,11 @@ export default function IdeasWorkspace({username,novel,initialBoards,initialIdea
   }
   async function removePlacement(placement:Placement){const response=await fetch(`/api/idea-placements/${placement.id}`,{method:"DELETE"});if(response.ok)setPlacements(list=>list.filter(item=>item.id!==placement.id))}
   async function savePlacement(placement:Placement){await fetch(`/api/idea-placements/${placement.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(placement)})}
-  function move(event:PointerEvent<HTMLDivElement>){if(!drag.current)return;const box=event.currentTarget.getBoundingClientRect(),d=drag.current;setPlacements(list=>list.map(item=>item.id===d.id?{...item,positionX:Math.max(0,event.clientX-box.left-d.dx),positionY:Math.max(0,event.clientY-box.top-d.dy)}:item))}
-  function endDrag(){if(!drag.current)return;const placement=placements.find(item=>item.id===drag.current!.id);drag.current=null;if(placement)void savePlacement(placement)}
+  function move(event:PointerEvent<HTMLDivElement>){
+    if(resize.current){const r=resize.current;setPlacements(list=>list.map(item=>item.id===r.id?{...item,width:Math.max(180,r.startW+event.clientX-r.startX),height:Math.max(140,r.startH+event.clientY-r.startY)}:item));return}
+    if(!drag.current)return;const box=event.currentTarget.getBoundingClientRect(),d=drag.current;setPlacements(list=>list.map(item=>item.id===d.id?{...item,positionX:Math.max(0,event.clientX-box.left-d.dx),positionY:Math.max(0,event.clientY-box.top-d.dy)}:item))
+  }
+  function endPlacementInteraction(){const id=resize.current?.id??drag.current?.id;resize.current=null;drag.current=null;if(!id)return;setPlacements(list=>{const placement=list.find(item=>item.id===id);if(placement)void savePlacement(placement);return list})}
   async function setPlacementColor(placement:Placement,color:string){const next={...placement,color};setPlacements(list=>list.map(item=>item.id===placement.id?next:item));await savePlacement(next)}
 
   async function addBoard(){const title=prompt("Board name","New Board")?.trim();if(!title)return;const response=await fetch("/api/cork-boards",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({novelId:novel.id,title})});if(response.ok){const board=await response.json();setBoards(list=>[...list,board]);setActiveBoardId(board.id)}}
@@ -99,6 +106,19 @@ export default function IdeasWorkspace({username,novel,initialBoards,initialIdea
     const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({novelId:novel.id,name})});const data=await response.json().catch(()=>({}));if(!response.ok){setError(data.error||"Story Bible entry could not be created.");return}
     if(kind==="CHARACTER")await saveLinks(active,{characterIds:[...new Set([...active.characterIds,data.id])]});if(kind==="LOCATION")await saveLinks(active,{locationIds:[...new Set([...active.locationIds,data.id])]});if(kind==="WORLD_NOTE")await saveLinks(active,{worldNoteIds:[...new Set([...active.worldNoteIds,data.id])]});
     router.push(kind==="CHARACTER"?`/workspace/${novel.id}/characters?character=${data.id}`:kind==="LOCATION"?`/workspace/${novel.id}/locations?location=${data.id}`:`/workspace/${novel.id}/world-notes?note=${data.id}`);
+  }
+
+  function renderIdeaDetail(){
+    if(!active)return null;
+    const tags=active.tags.split(",").map(tag=>tag.trim()).filter(Boolean),chapter=chapters.find(item=>item.id===active.chapterId),boardCount=placements.filter(item=>item.ideaId===active.id).length,bibleCount=active.characterIds.length+active.locationIds.length+active.worldNoteIds.length;
+    return <article className="idea-detail">
+      <div className="idea-detail-heading"><div><small>{active.category||"Idea"} · {statusLabel(active.status)}</small><h2>{active.title||active.body.trim().split(/\n/)[0]||"Untitled idea"}</h2></div>{(active.images.length>0||active.audio.length>0)&&<span>{active.images.length>0&&<>▧ {active.images.length}</>}{active.audio.length>0&&<> ♪ {active.audio.length}</>}</span>}</div>
+      <div className={active.body?"idea-detail-body":"idea-detail-body empty"}>{active.body||"No notes yet."}</div>
+      {tags.length>0&&<div className="idea-tags idea-detail-tags">{tags.map(tag=><span key={tag}>#{tag}</span>)}</div>}
+      {active.images.length>0&&<section className="idea-detail-section"><strong>Images</strong><div className="idea-detail-images">{active.images.map(image=><figure key={image.id}><img src={image.url} alt=""/>{image.caption&&<figcaption>{image.caption}</figcaption>}</figure>)}</div></section>}
+      {active.audio.length>0&&<section className="idea-detail-section"><strong>Voice notes</strong><div className="idea-detail-audio">{active.audio.map(audio=><article key={audio.id}><div><b>{audio.originalName}</b><small>{bytes(audio.size)}{audio.durationMs?" · "+Math.round(audio.durationMs/1000)+" sec":""}</small></div><audio controls preload="metadata" src={audio.url}/></article>)}</div></section>}
+      {(chapter||boardCount>0||bibleCount>0)&&<section className="idea-detail-links"><strong>Connected</strong><div>{chapter&&<button onClick={()=>router.push("/workspace/"+novel.id+"?chapter="+chapter.id)}>Manuscript · {chapter.title}</button>}{boardCount>0&&<span>Corkboard · {boardCount} board{boardCount===1?"":"s"}</span>}{bibleCount>0&&<span>Story Bible · {bibleCount} link{bibleCount===1?"":"s"}</span>}</div></section>}
+    </article>;
   }
 
   function renderIdeaEditor(){
