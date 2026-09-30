@@ -13,6 +13,18 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.77",
+    date:"30 September 2026",
+    title:"Settings primary button visibility",
+    added:[],
+    changed:[],
+    fixed:[
+      "Primary action buttons inside Settings now keep their blue background and readable white label instead of being overridden by the generic Settings button style."
+    ]
+  },
+
+
+  {
     version:"0.0.76",
     date:"30 September 2026",
     title:"Writing goals and progress",
