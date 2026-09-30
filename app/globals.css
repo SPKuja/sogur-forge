@@ -667,7 +667,7 @@
 .share-item-head button.danger{color:var(--danger)}
 .share-status{display:inline-flex;padding:3px 6px;border-radius:99px;font-size:7px;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
 .share-status.active{background:color-mix(in srgb,#28a36a 14%,transparent);color:#25865d}
-.share-status.revoked,.share-status.expired{background:var(--surface-3);color:var(--muted)}
+.share-status.expired{background:var(--surface-3);color:var(--muted)}
 .share-list dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:11px 0 0;padding-top:9px;border-top:1px solid var(--line)}
 .share-list dl div{min-width:0}.share-list dt{color:var(--muted);font-size:7px;text-transform:uppercase}.share-list dd{overflow:hidden;margin:2px 0 0;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
 .share-empty{display:grid;place-content:center;min-height:240px;color:var(--muted);text-align:center}
