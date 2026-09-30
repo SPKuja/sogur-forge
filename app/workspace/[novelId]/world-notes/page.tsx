@@ -33,6 +33,6 @@ export default async function Page({params,searchParams}:{params:Promise<{novelI
   const entries=notes.rows.map(note=>({...note,images:images.rows.filter(image=>image.worldNoteId===note.id).map(image=>({...image,url:`/api/assets/${image.assetId}`}))}));
   const cast=characters.rows.map(character=>({...character,portraitUrl:portraitByCharacter.get(character.id)?`/api/assets/${portraitByCharacter.get(character.id)}`:null}));
   const places=locations.rows.map(location=>({...location,imageUrl:imageByLocation.get(location.id)?`/api/assets/${imageByLocation.get(location.id)}`:null}));
-  const initialActiveId=notes.rows.some(note=>note.id===requestedNote)?requestedNote:notes.rows[0]?.id;
+  const initialActiveId=requestedNote&&notes.rows.some(note=>note.id===requestedNote)?requestedNote:undefined;
   return <WorldNotesBible username={user.username} novel={novel.rows[0]} initialNotes={entries} characters={cast} locations={places} initialCharacterLinks={characterLinks.rows} initialLocationLinks={locationLinks.rows} initialRelations={relations.rows} initialActiveId={initialActiveId}/>;
 }
