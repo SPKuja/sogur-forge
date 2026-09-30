@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.71",
+    date:"30 September 2026",
+    title:"Ideas opens to the library",
+    added:[],
+    changed:[],
+    fixed:[
+      "Opening Ideas normally now lands on the idea library instead of automatically opening the most recently edited idea. Explicit idea deep-links still open the requested idea."
+    ]
+  },
+
+  {
     version:"0.0.70",
     date:"30 September 2026",
     title:"Ideas library and flexible Corkboard",
