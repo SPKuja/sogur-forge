@@ -13,6 +13,17 @@ export const CURRENT_VERSION=packageInfo.version;
 
 export const RELEASES:ReleaseNote[]=[
   {
+    version:"0.0.69",
+    date:"30 September 2026",
+    title:"Keep typing in Ideas",
+    added:[],
+    changed:[],
+    fixed:[
+      "Ideas no longer remounts the active editor whenever autosave/state updates run, so typing remains focused and uninterrupted."
+    ]
+  },
+
+  {
     version:"0.0.68",
     date:"29 September 2026",
     title:"Simplify Ideas",
