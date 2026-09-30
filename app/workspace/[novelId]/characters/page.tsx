@@ -29,7 +29,7 @@ export default async function Page({params,searchParams}:{params:Promise<{novelI
       WHERE w."novelId"=$1 ORDER BY link."createdAt"`,[novelId])
   ]);
   const cast=characters.rows.map(character=>({...character,images:images.rows.filter(image=>image.characterId===character.id).map(image=>({...image,url:`/api/assets/${image.assetId}`}))}));
-  const initialActiveId=characters.rows.some(character=>character.id===requestedCharacter)?requestedCharacter:characters.rows[0]?.id;
+  const initialActiveId=requestedCharacter&&characters.rows.some(character=>character.id===requestedCharacter)?requestedCharacter:undefined;
   return <CharacterBible
     username={user.username}
     novel={novel.rows[0]}
